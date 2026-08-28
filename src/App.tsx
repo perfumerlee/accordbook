@@ -1,46 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FormulaEditor } from './components/FormulaEditor'
 import type { Formula } from './models/formula'
-import { generateFormulaId } from './services/formulaIdGenerator'
+import { archiveFormula, createFormula, deleteArchivedFormula, duplicateFormula, resetMaterials, restoreFormula } from './services/formulaLifecycle'
 import { createStorage, type AccordbookStorage, type AutosaveStatus } from './storage/storageService'
 import './styles/notebook.css'
 
-const now = () => new Date().toISOString()
-const createFormula = async (storage: AccordbookStorage): Promise<Formula> => {
-  const date = new Date()
-  return { id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix: 'ACC', date }, storage.meta), date: date.toISOString().slice(0, 10), name: '', notes: '', rows: [{ id: crypto.randomUUID(), parts: '', material: '' }], createdAt: now(), updatedAt: now() }
-}
-
 function App() {
-  const [storage, setStorage] = useState<AccordbookStorage>()
-  const [formula, setFormula] = useState<Formula>()
-  const [status, setStatus] = useState<AutosaveStatus>('saving')
-
-  useEffect(() => { createStorage().then(async (value) => { setStorage(value); const formulas = await value.formulas.list(); setFormula(formulas[0] ?? await createFormula(value)); setStatus('saved-locally') }) }, [])
-  useEffect(() => { if (!storage || !formula) return; setStatus('saving'); const timer = window.setTimeout(() => { storage.saveFormula(formula).then(setStatus) }, 350); return () => window.clearTimeout(timer) }, [storage, formula])
-
+  const [storage, setStorage] = useState<AccordbookStorage>(); const [active, setActive] = useState<Formula[]>([]); const [archive, setArchive] = useState<Formula[]>([]); const [selectedId, setSelectedId] = useState<string>(); const [status, setStatus] = useState<AutosaveStatus>('saving'); const [resetting, setResetting] = useState(false); const [archiveOpen, setArchiveOpen] = useState(false); const saveTimer = useRef<number | undefined>(undefined); const formula = active.find((item) => item.id === selectedId)
+  const reload = async (value: AccordbookStorage, nextId?: string) => { const formulas = await value.formulas.list(); const archived = await value.archive.list(); setActive(formulas); setArchive(archived); setSelectedId(nextId ?? formulas[0]?.id); setArchiveOpen(archived.length > 0 && Boolean(nextId)) }
+  const saveImmediately = async (value: Formula) => { if (saveTimer.current) window.clearTimeout(saveTimer.current); setStatus('saving'); setStatus(await storage!.saveFormula(value)) }
+  useEffect(() => { createStorage().then(async (value) => { setStorage(value); const formulas = await value.formulas.list(); const first = formulas[0] ?? await createFormula(value); if (!formulas.length) await value.formulas.save(first); await reload(value, first.id) }) }, [])
+  useEffect(() => () => { if (saveTimer.current) window.clearTimeout(saveTimer.current) }, [])
+  const onChange = (next: Formula) => { setActive((items) => items.map((item) => item.id === next.id ? next : item)); setStatus('saving'); if (saveTimer.current) window.clearTimeout(saveTimer.current); saveTimer.current = window.setTimeout(() => { storage?.saveFormula(next).then(setStatus) }, 350) }
+  const selectFormula = async (id: string) => { if (formula) await saveImmediately(formula); setSelectedId(id) }
+  const newFormula = async () => { if (!storage) return; if (formula) await saveImmediately(formula); const next = await createFormula(storage); await storage.formulas.save(next); await reload(storage, next.id) }
+  const duplicate = async () => { if (!storage || !formula) return; await saveImmediately(formula); const next = await duplicateFormula(storage, formula); await reload(storage, next.id) }
+  const moveArchive = async () => { if (!storage || !formula) return; await saveImmediately(formula); await archiveFormula(storage, formula); const remaining = active.filter((item) => item.id !== formula.id); if (!remaining.length) { const next = await createFormula(storage); await storage.formulas.save(next); await reload(storage, next.id) } else await reload(storage, remaining[0].id); setArchiveOpen(true) }
   if (!storage || !formula) return <main className="loading-shell">Opening notebook…</main>
-  return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <p className="eyebrow">Accordbook</p>
-        <h1>A formula notebook for perfumers</h1>
-        <div className="sidebar-section">
-          <span className="section-label">Notebook</span>
-          <span className="formula-link">{formula.formulaId}</span>
-        </div>
-        <div className="sidebar-footer">
-          <strong>Private by default</strong>
-          <span>Your formulas stay on your device.</span>
-          <span>Everything starts with the fundamentals.</span>
-        </div>
-      </aside>
-      <section className="notebook-page" aria-label="Formula notebook">
-        <FormulaEditor formula={formula} autosaveStatus={status} onChange={setFormula} />
-        <footer>Everything starts with the fundamentals.</footer>
-      </section>
-    </main>
-  )
+  return <main className="app-shell"><aside className="sidebar"><p className="eyebrow">Accordbook</p><h1>A formula notebook for perfumers</h1><button className="new-formula" type="button" onClick={newFormula}>+ New formula</button><div className="sidebar-section"><span className="section-label">Notebook</span><nav className="formula-list">{active.map((item) => <button className={item.id === formula.id ? 'formula-link selected' : 'formula-link'} key={item.id} type="button" onClick={() => selectFormula(item.id)}><strong>{item.formulaId}</strong><span>{item.name || 'Untitled formula'}</span></button>)}</nav></div><div className="sidebar-section archive-section"><button className="section-toggle" type="button" onClick={() => setArchiveOpen(!archiveOpen)}>Archive <span>{archiveOpen ? '−' : '+'}</span></button>{archiveOpen && <div className="archive-list">{archive.length ? archive.map((item) => <ArchiveItem key={item.id} item={item} onRestore={async (value) => { if (storage) { await restoreFormula(storage, value); await reload(storage, value.id) } }} onDelete={async (id) => { if (storage) { await deleteArchivedFormula(storage, id); await reload(storage) } }} />) : <span className="empty-archive">No archived formulas.</span>}</div>}</div><div className="sidebar-footer"><strong>Private by default</strong><span>Your formulas stay on your device.</span><span>Everything starts with the fundamentals.</span></div></aside><section className="notebook-page" aria-label="Formula notebook"><div className="lifecycle-actions"><button type="button" onClick={duplicate}>Duplicate as new formula</button><button type="button" onClick={() => setResetting(true)}>Reset materials</button><button type="button" onClick={moveArchive}>Move to Archive</button></div><FormulaEditor formula={formula} autosaveStatus={status} onChange={onChange} /><footer>Everything starts with the fundamentals.</footer></section>{resetting && <div className="confirmation-backdrop"><div className="confirmation"><h2>Reset all material rows?</h2><p>Formula ID, formula name, and Notes will be kept.</p><button type="button" onClick={() => { onChange(resetMaterials(formula)); setResetting(false) }}>Reset</button><button type="button" onClick={() => setResetting(false)}>Cancel</button></div></div>}</main>
 }
+
+function ArchiveItem({ item, onRestore, onDelete }: { item: Formula; onRestore: (item: Formula) => void; onDelete: (id: string) => void }) { const [state, setState] = useState<'idle' | 'confirming' | 'ready'>('idle'); const timer = useRef<number | undefined>(undefined); useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, []); const click = () => { if (state === 'idle') { setState('confirming'); timer.current = window.setTimeout(() => setState('ready'), 3500) } else if (state === 'ready') { onDelete(item.id); setState('idle') } }; return <div className="archive-item"><strong>{item.formulaId}</strong><span>{item.name || 'Untitled formula'}</span><button type="button" onClick={() => onRestore(item)}>Restore</button><button className={`delete-action ${state}`} type="button" aria-disabled={state === 'confirming'} onClick={click}>{state === 'idle' ? 'Delete permanently' : state === 'confirming' ? 'Confirm delete' : 'Delete now'}</button></div> }
 
 export default App
