@@ -1,0 +1,21 @@
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr; }
+.sidebar { padding: 42px 28px 30px; background: #5d5548; color: #f3ead9; display: flex; flex-direction: column; }
+.eyebrow { margin: 0 0 12px; text-transform: uppercase; letter-spacing: .16em; font: 600 12px ui-monospace, monospace; }
+.sidebar h1 { margin: 0; font-size: 25px; line-height: 1.15; font-weight: 500; }
+.sidebar-section { margin-top: 64px; }
+.section-label { display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .12em; font: 11px ui-monospace, monospace; opacity: .72; }
+.formula-link { border: 1px solid #d9c9ae; padding: 9px 12px; background: transparent; color: inherit; cursor: pointer; }
+.sidebar-footer { margin-top: auto; display: grid; gap: 7px; font-size: 13px; line-height: 1.4; }
+.sidebar-footer span:last-child { margin-top: 24px; font-style: italic; }
+.notebook-page { margin: 28px; padding: 54px clamp(28px, 7vw, 100px) 35px; min-height: calc(100vh - 56px); background: #fbf5e8; box-shadow: 0 4px 18px #6859432b; position: relative; overflow: hidden; }
+.notebook-page::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, #b9a98b38 36px); }
+.formula-header, .placeholder-sheet, .notebook-page footer { position: relative; }
+.formula-header { display: flex; justify-content: space-between; align-items: end; border-bottom: 1px solid #8f8069; padding-bottom: 16px; }
+.formula-header h2 { margin: 0; font-size: clamp(28px, 4vw, 42px); font-weight: 400; }
+.formula-header dl { margin: 0; font: 12px ui-monospace, monospace; }
+.formula-header dl div { display: grid; grid-template-columns: 100px auto; gap: 14px; margin-top: 8px; }
+.formula-header dt { color: #776a56; }.formula-header dd { margin: 0; }
+.placeholder-sheet { min-height: 390px; padding-top: 100px; color: #746854; text-align: center; }
+.placeholder-sheet p { margin: 0 0 8px; font-size: 22px; }.placeholder-sheet span { font-size: 14px; font-style: italic; }
+.notebook-page footer { border-top: 1px solid #8f8069; padding-top: 14px; font-style: italic; font-size: 14px; }
+@media (max-width: 640px) { .app-shell { display: block; }.sidebar { min-height: auto; padding: 25px 22px; }.sidebar-section { margin-top: 28px; }.sidebar-footer { margin-top: 35px; }.notebook-page { margin: 0; min-height: calc(100vh - 260px); padding: 35px 22px 25px; }.formula-header { display: block; }.formula-header dl { margin-top: 25px; }.formula-header dl div { grid-template-columns: 100px 1fr; } }
