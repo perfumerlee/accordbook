@@ -1,0 +1,58 @@
+/* Responsive polish: desktop remains the primary notebook experience. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .app-shell { grid-template-columns: 210px minmax(0, 1fr); }
+  .sidebar { padding: 30px 20px 24px; }
+  .sidebar h1 { font-size: 21px; }
+  .notebook-page { margin: 18px; padding: 38px clamp(24px, 4vw, 52px) 28px; }
+  .formula-table-header, .formula-row { grid-template-columns: 72px minmax(145px, 1.6fr) minmax(100px, 1fr) 72px minmax(132px, .9fr); gap: 8px; }
+  .lifecycle-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 640px) {
+  html, body, #root { max-width: 100%; overflow-x: hidden; }
+  .app-shell { width: 100%; }
+  .sidebar { padding: 22px max(16px, env(safe-area-inset-left)) 20px; }
+  .sidebar h1 { max-width: 28rem; font-size: 22px; }
+  .new-formula, .formula-link, .data-section button, .section-toggle { min-height: 36px; }
+  .sidebar-section { margin-top: 22px; }
+  .formula-list { max-height: 180px; overflow-y: auto; }
+  .data-section button { white-space: normal; overflow-wrap: anywhere; }
+  .notebook-page { width: 100%; padding: 28px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); }
+  .lifecycle-actions { justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
+  .lifecycle-actions button { min-height: 34px; }
+  .formula-name { display: block; width: 100%; font-size: 30px; }
+  .header-meta { width: 100%; }
+  .header-meta div { grid-template-columns: 86px minmax(0, 1fr); }
+  .autosave-status { overflow-wrap: anywhere; }
+  .formula-table { margin-top: 30px; }
+  .formula-table-header, .formula-row { grid-template-columns: 52px minmax(0, 1fr) 55px minmax(92px, auto); gap: 6px; }
+  .formula-row { min-height: 48px; padding-left: 2px; padding-right: 2px; }
+  .formula-row input[type=number] { width: 52px; min-height: 36px; font-size: 16px; }
+  .formula-row input, .dilution-editor input, .notes-section textarea { font-size: 16px; }
+  .formula-table-header { padding-left: 2px; padding-right: 2px; font-size: 9px; }
+  .material-line { min-width: 0; gap: 4px; }
+  .material-line input { min-width: 0; }
+  .solvent-badge { font-size: 9px; }
+  .dilution-notation { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-actions { min-width: 0; gap: 3px; }
+  .action { min-width: 28px; min-height: 32px; padding: 5px 3px; }
+  .action.remove { min-width: 25px; }
+  .dilution-editor { width: auto; margin-right: 2px; padding: 10px 8px; align-items: stretch; flex-direction: column; gap: 10px; }
+  .dilution-editor label { grid-template-columns: minmax(0, 1fr) minmax(72px, 35%); align-items: center; }
+  .dilution-editor input { width: 100%; }
+  .dilution-editor button { align-self: flex-start; min-height: 34px; }
+  .total-panel { max-width: none; margin-top: 34px; }
+  .total-grid { grid-template-columns: minmax(0, 1fr) minmax(0, auto); gap: 9px 12px; }
+  .total-grid strong { text-align: right; white-space: nowrap; }
+  .notes-section textarea { min-height: 150px; line-height: 34px; }
+  .notebook-page footer { line-height: 1.5; overflow-wrap: anywhere; }
+  .archive-item button { min-height: 32px; }
+  .language-toggle { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+@media (max-width: 370px) {
+  .formula-table-header, .formula-row { grid-template-columns: 48px minmax(0, 1fr) 48px minmax(82px, auto); gap: 4px; }
+  .formula-table-header { letter-spacing: 0; }
+  .action { font-size: 11px; min-width: 25px; padding-left: 2px; padding-right: 2px; }
+  .formula-name { font-size: 27px; }
+}
