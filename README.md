@@ -4,6 +4,8 @@ An open-source formula notebook for perfumers.
 
 Built by a perfumer, for perfumers.
 
+![Accordbook preview](docs/images/accordbook-preview.png)
+
 > **Private by default**  
 > Your formulas stay on your device.
 
