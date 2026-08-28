@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Accordbook Notebook MVP v0.01</title>
+<style>
+:root{
+  --paper:#f7f0df;
+  --paper-2:#fffaf0;
+  --ink:#2b2924;
+  --muted:#847b6c;
+  --line:#e3b98f;
+  --line-soft:rgba(207,139,82,.20);
+  --accent:#c9773c;
+  --mint:rgba(116,196,178,.33);
+  --yellow:rgba(244,201,85,.28);
+  --border:#d9c9b4;
+  --shadow:0 16px 45px rgba(76,58,37,.12);
+  --danger:#a74c3d;
+  --ok:#4b745b;
+  font-family: Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  color:var(--ink);
+  background:#e8e1d5;
+}
+
+/* Korean UI: readable serif tone to balance the English notebook typography */
+html[lang="ko"] body,
+html[lang="ko"] button,
+html[lang="ko"] input,
+html[lang="ko"] textarea{
+  font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","Times New Roman",serif;
+  letter-spacing:-0.018em;
+  font-weight:500;
+}
+html[lang="ko"] .brand,
+html[lang="ko"] .formula-name,
+html[lang="ko"] .row .material,
+html[lang="ko"] .notes-title,
+html[lang="ko"] .summary-title,
+html[lang="ko"] .simple-total .main-line strong{
+  font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","Times New Roman",serif;
+  font-style:normal;
+  letter-spacing:-0.035em;
+  font-weight:600;
+}
+html[lang="ko"] .side-title,
+html[lang="ko"] .page-key,
+html[lang="ko"] .table-head{
+  font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","Times New Roman",serif;
+  letter-spacing:.015em;
+  font-weight:700;
+}
+/* Keep technical values visually stable */
+html[lang="ko"] .page-value,
+html[lang="ko"] .parts,
+html[lang="ko"] .percent,
+html[lang="ko"] .dilution-suffix,
+html[lang="ko"] .metric strong,
+html[lang="ko"] .simple-total .sub-line strong{
+  font-family:"Courier New",monospace;
+  letter-spacing:0;
+}
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:250px minmax(0,1fr);
+}
+.sidebar{
+  border-right:1px solid #cfc4b3;
+  background:#efe9dd;
+  padding:24px 18px;
+}
+.brand{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size:26px;
+  font-style:italic;
+  margin-bottom:4px;
+}
+.brand-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:28px;
+}
+.side-title{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--muted);
+  margin:18px 0 8px;
+}
+.prefix-row{
+  display:flex;
+  gap:7px;
+}
+.prefix-save-btn{
+  width:64px;
+  min-width:64px;
+  flex:0 0 64px;
+  text-align:center;
+}
+input, textarea, button{font:inherit}
+input, textarea{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.66);
+  color:var(--ink);
+  border-radius:7px;
+  outline:none;
+}
+input:focus, textarea:focus{
+  border-color:#b99069;
+  box-shadow:0 0 0 3px rgba(185,144,105,.12);
+}
+.prefix-row input{
+  width:100%;
+  min-width:0;
+  text-transform:uppercase;
+  padding:9px 10px;
+}
+.btn{
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#fffaf0;
+  color:var(--ink);
+  cursor:pointer;
+  padding:9px 11px;
+  font-weight:650;
+  font-size:12px;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{
+  background:var(--ink);
+  color:#fffaf0;
+  border-color:var(--ink);
+}
+.new-btn{
+  width:100%;
+  margin-top:10px;
+}
+.formula-list{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  max-height:58vh;
+  overflow:auto;
+}
+.formula-item{
+  padding:10px 11px;
+  border:1px solid transparent;
+  border-radius:9px;
+  cursor:pointer;
+  background:rgba(255,255,255,.26);
+}
+.formula-item:hover{background:rgba(255,255,255,.48)}
+.formula-item.active{
+  background:#fff9ed;
+  border-color:var(--border);
+}
+.formula-code{
+  font-size:10px;
+  color:var(--accent);
+  font-weight:750;
+  letter-spacing:.04em;
+}
+.formula-label{
+  font-size:13px;
+  margin-top:3px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.data-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.data-actions .btn{
+  width:100%;
+}
+.export-wrap{
+  position:relative;
+}
+.export-menu{
+  display:none;
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 6px);
+  z-index:30;
+  padding:6px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#fffaf0;
+  box-shadow:0 12px 28px rgba(76,58,37,.14);
+}
+.export-menu.open{
+  display:grid;
+  gap:5px;
+}
+.export-menu .btn{
+  text-align:left;
+  background:transparent;
+  border-color:transparent;
+}
+.export-menu .btn:hover{
+  background:rgba(201,119,60,.08);
+}
+.archive-toggle{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:7px;
+}
+.archive-count{
+  min-width:20px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:rgba(43,41,36,.08);
+  font-size:10px;
+}
+.archive-panel{
+  display:none;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid #d4cab9;
+}
+.archive-panel.open{
+  display:block;
+}
+.archive-item{
+  padding:9px 9px 8px;
+  margin-bottom:6px;
+  border:1px solid rgba(217,201,180,.8);
+  border-radius:8px;
+  background:rgba(255,255,255,.30);
+}
+.archive-item .formula-code{
+  margin-bottom:3px;
+}
+.archive-item-actions{
+  display:flex;
+  gap:5px;
+  margin-top:7px;
+}
+.archive-item-actions .btn{
+  padding:6px 7px;
+  font-size:10px;
+}
+.archive-item-actions .danger{
+  position:relative;
+  overflow:hidden;
+  color:#8f3e36;
+  isolation:isolate;
+}
+.archive-item-actions .danger > span{
+  position:relative;
+  z-index:2;
+}
+.archive-item-actions .danger.confirming{
+  color:#8f3e36;
+  border-color:#8f3e36;
+  background:rgba(143,62,54,.06);
+}
+.archive-item-actions .danger.confirming::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  width:0%;
+  background:rgba(143,62,54,.18);
+  z-index:1;
+  animation:deleteProgress 3.5s linear forwards;
+}
+.archive-item-actions .danger.ready{
+  color:#fffaf0;
+  background:#8f3e36;
+  border-color:#8f3e36;
+}
+.archive-item-actions .danger.ready::before{
+  width:100%;
+  background:#8f3e36;
+}
+@keyframes deleteProgress{
+  from{width:0%}
+  to{width:100%}
+}
+.autosave-status{
+  height:34px;
+  min-width:124px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  margin-top:0;
+  padding:0 11px;
+  border:1px solid rgba(82,104,90,.28);
+  border-radius:999px;
+  background:rgba(116,196,178,.11);
+  color:#56665a;
+  font-size:10px;
+  font-weight:750;
+  line-height:1;
+  letter-spacing:.02em;
+  transition:all .18s ease;
+}
+.autosave-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#64806d;
+  box-shadow:0 0 0 3px rgba(100,128,109,.08);
+}
+.autosave-status.saving{
+  color:#8a653f;
+  border-color:rgba(195,138,78,.34);
+  background:rgba(244,201,85,.12);
+}
+.autosave-status.saving .autosave-dot{
+  background:#c38a4e;
+  box-shadow:0 0 0 3px rgba(195,138,78,.10);
+}
+
+.privacy{
+  position:fixed;
+  left:18px;
+  bottom:18px;
+  width:214px;
+  padding-top:12px;
+  border-top:1px solid #d4cab9;
+  font-size:10px;
+  line-height:1.55;
+  color:var(--muted);
+}
+.main{
+  padding:28px;
+  overflow:auto;
+}
+.notebook{
+  width:min(1040px,100%);
+  margin:0 auto;
+  background:var(--paper);
+  min-height:calc(100vh - 56px);
+  border:1px solid #d1c2aa;
+  border-radius:18px 28px 28px 18px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+}
+.notebook:before{
+  content:"";
+  position:absolute;
+  left:72px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(199,119,60,.28);
+  pointer-events:none;
+}
+.note-header{
+  min-height:136px;
+  padding:24px 28px 20px 95px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 285px;
+  gap:28px;
+  align-items:start;
+  border-bottom:2px solid rgba(201,119,60,.55);
+  background:rgba(255,250,240,.34);
+}
+.title-area{
+  min-width:0;
+}
+.title-primary{
+  height:62px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+}
+.title-area label{
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  margin:0 0 4px;
+}
+.formula-name{
+  width:100%;
+  height:40px;
+  border:none;
+  border-bottom:1px solid #bcae98;
+  border-radius:0;
+  background:transparent;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:30px;
+  font-style:italic;
+  line-height:36px;
+  padding:0 0 3px;
+  box-shadow:none!important;
+}
+.title-hint{
+  height:34px;
+  display:flex;
+  align-items:center;
+  margin-top:10px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.header-tools{
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+}
+.language-toggle{
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:3px;
+  border:1px solid rgba(185,168,144,.75);
+  border-radius:999px;
+  background:rgba(255,250,240,.60);
+}
+.lang-btn{
+  width:34px;
+  height:27px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  padding:0;
+  line-height:1;
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.flag-svg{
+  display:block;
+  width:23px;
+  height:15px;
+  border:1px solid rgba(43,41,36,.18);
+  border-radius:2px;
+  box-shadow:0 1px 2px rgba(43,41,36,.08);
+}
+.lang-btn.active{
+  color:var(--ink);
+  background:#fffaf0;
+  box-shadow:0 1px 4px rgba(76,58,37,.12);
+}
+
+.page-box{
+  height:62px;
+  display:grid;
+  grid-template-columns:82px 1fr;
+  grid-template-rows:30px 30px;
+  font-size:11px;
+  align-self:start;
+  border-top:1px solid #bda890;
+  border-bottom:1px solid #bda890;
+}
+.page-box > div{
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  padding:0 7px;
+  border-bottom:1px solid #dfd1bc;
+}
+.page-box > div:nth-last-child(-n+2){border-bottom:0}
+.page-key{
+  color:var(--accent);
+  font-size:9px;
+  letter-spacing:.08em;
+  font-weight:750;
+}
+.page-value{
+  justify-content:flex-end;
+  text-align:right;
+  font-family:"Courier New", monospace;
+  font-weight:700;
+  letter-spacing:.03em;
+}
+.content{
+  padding:18px 28px 28px 95px;
+}
+.table-head,.row{
+  display:grid;
+  grid-template-columns:92px minmax(260px,1fr) 150px 92px 78px;
+  align-items:center;
+  gap:10px;
+}
+.table-head{
+  height:38px;
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  border-bottom:1px solid rgba(201,119,60,.38);
+}
+.rows{
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 41px,
+      rgba(201,119,60,.22) 41px,
+      rgba(201,119,60,.22) 42px
+    );
+}
+.rows .row{
+  height:42px;
+  min-height:42px;
+  border-bottom:0;
+}
+.row input{
+  width:100%;
+  height:42px;
+  border:0;
+  background:transparent;
+  border-radius:0;
+  padding:8px 4px 4px;
+  line-height:28px;
+  box-shadow:none!important;
+}
+.row .parts{
+  text-align:right;
+  font-family:"Courier New", monospace;
+  font-weight:700;
+  font-size:15px;
+}
+.row .material{
+  font-family:Georgia, "Times New Roman", serif;
+  font-style:italic;
+  font-size:17px;
+}
+.material-wrap{
+  min-width:0;
+  height:42px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  overflow:hidden;
+}
+.material-wrap .material{
+  flex:1 1 auto;
+  width:auto;
+  min-width:90px;
+  padding-right:4px;
+}
+.material-meta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+.material-meta:empty{
+  display:none;
+}
+.dilution-suffix{
+  display:inline-block;
+  max-width:140px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  color:#9a5f32;
+  font-size:10.5px;
+  line-height:1;
+  font-family:"Courier New", monospace;
+  font-weight:700;
+  letter-spacing:.01em;
+  pointer-events:none;
+}
+.solvent-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 52px;
+  width:52px;
+  min-width:52px;
+  max-width:52px;
+  white-space:nowrap;
+  overflow:hidden;
+  box-sizing:border-box;
+  color:#354a3d;
+  border:1px solid rgba(63,91,75,.58);
+  background:rgba(116,196,178,.20);
+  border-radius:999px;
+  padding:0 5px;
+  margin:0 1px;
+  font-size:8.5px;
+  line-height:2;
+  font-family:Inter,Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
+  font-weight:800;
+  letter-spacing:.025em;
+  box-shadow:none;
+  vertical-align:middle;
+}
+
+.row .cas{
+  font-family:"Courier New", monospace;
+  font-size:12px;
+  color:#5e5a52;
+}
+.percent{
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-top:3px;
+  text-align:right;
+  font-family:"Courier New", monospace;
+  font-size:13px;
+  font-weight:700;
+}
+.row.marked{
+  background:linear-gradient(90deg, transparent 0, var(--mint) 7%, var(--mint) 74%, transparent 92%);
+}
+.mark-btn,.remove-btn,.dilution-btn{
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:4px;
+  color:#9b8f7f;
+  font-size:15px;
+}
+.mark-btn.active{color:#3b876d}
+.dilution-btn{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.02em;
+  border:1px solid rgba(185,144,105,.35);
+  border-radius:5px;
+  min-width:25px;
+  padding:3px 5px;
+  background:rgba(255,250,240,.45);
+}
+.dilution-btn.active{
+  color:#7f5634;
+  border-color:#b99069;
+  background:rgba(244,201,85,.22);
+}
+.remove-btn:hover{color:var(--danger)}
+.row-actions{
+  height:42px;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:1px;
+}
+.dilution-panel{
+  margin:0 0 8px 138px;
+  padding:10px 12px 11px;
+  border-left:2px solid rgba(201,119,60,.32);
+  background:rgba(255,250,240,.48);
+  display:grid;
+  grid-template-columns:110px 150px minmax(180px,1fr);
+  gap:12px;
+  align-items:end;
+  font-size:11px;
+}
+.dilution-panel label{
+  display:block;
+  margin-bottom:4px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.dilution-panel input{
+  width:100%;
+  height:32px;
+  padding:5px 7px;
+  background:rgba(255,255,255,.58);
+}
+.dilution-result{
+  min-height:32px;
+  display:flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:6px;
+  background:rgba(116,196,178,.10);
+  color:#4e594f;
+  line-height:1.4;
+}
+.dilution-result strong{
+  color:var(--ink);
+  font-family:"Courier New", monospace;
+}
+.editor-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:14px 0 18px;
+}
+.summary-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:26px;
+  border-top:2px solid rgba(201,119,60,.45);
+  padding-top:20px;
+}
+.notes-title,.summary-title{
+  font-family:Georgia, "Times New Roman", serif;
+  font-style:italic;
+  font-size:16px;
+  margin-bottom:8px;
+}
+.notes{
+  width:100%;
+  min-height:192px;
+  resize:vertical;
+  padding:5px 12px 0;
+  line-height:32px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.24) 0,
+      rgba(255,255,255,.24) 31px,
+      rgba(201,119,60,.20) 31px,
+      rgba(201,119,60,.20) 32px
+    );
+  background-position:0 0;
+}
+.metrics{
+  border-left:1px solid rgba(201,119,60,.32);
+  padding-left:22px;
+}
+.metric{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  padding:7px 0;
+  font-size:12px;
+}
+.metric span{color:var(--muted)}
+.metric strong{
+  font-family:"Courier New", monospace;
+  font-size:15px;
+}
+.total-box{
+  margin-top:8px;
+  padding:12px 14px;
+  border:1px solid #bca687;
+  border-radius:8px;
+  background:rgba(255,250,240,.7);
+}
+.total-box .big{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:22px;
+  font-style:italic;
+}
+.simple-total{
+  margin-top:8px;
+  padding:16px 16px 14px;
+  border:1px solid #bca687;
+  border-radius:10px;
+  background:rgba(255,250,240,.72);
+}
+.simple-total .main-line{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+}
+.simple-total .main-line span{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.simple-total .main-line strong{
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:28px;
+  font-style:italic;
+  font-weight:700;
+}
+.simple-total .sub-line{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 14px;
+  font-size:11px;
+  color:var(--muted);
+}
+.simple-total .sub-line strong{
+  color:var(--ink);
+  font-family:"Courier New", monospace;
+}
+.status{
+  margin-top:9px;
+  font-size:11px;
+  line-height:1.5;
+}
+.status.ok{color:var(--ok)}
+.status.bad{color:var(--danger)}
+.note-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 28px 14px 95px;
+  font-size:9px;
+  color:var(--muted);
+  border-top:1px solid rgba(201,119,60,.22);
+  background:rgba(255,250,240,.3);
+}
+.empty{
+  color:var(--muted);
+  font-size:12px;
+  padding:8px 3px;
+}
+@media(max-width:850px){
+  .app{grid-template-columns:1fr}
+  .sidebar{border-right:0;border-bottom:1px solid #cfc4b3}
+  .privacy{position:static;width:auto;margin-top:20px}
+  .main{padding:12px}
+  .notebook:before{left:24px}
+  .note-header,.content,.note-footer{padding-left:42px}
+  .note-header{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:1fr}
+  .metrics{border-left:0;padding-left:0}
+  .table-head,.row{grid-template-columns:74px minmax(160px,1fr) 100px 64px 70px;gap:5px}
+  .dilution-panel{margin-left:0;grid-template-columns:90px 120px 1fr;gap:8px}
+  .material-wrap{gap:4px}.material-wrap .material{min-width:72px;padding-right:2px}.material-meta{gap:3px}.dilution-suffix{max-width:72px;font-size:8.5px}.solvent-badge{flex-basis:46px;width:46px;min-width:46px;max-width:46px;font-size:7.8px;padding:0 5px;margin:0 1px;line-height:2}
+  .cas{font-size:10px!important}
+}
+
+
+@media(max-width:640px){
+  .sidebar{
+    padding:16px 14px;
+  }
+  .formula-list{
+    max-height:180px;
+  }
+  .main{
+    padding:8px;
+  }
+  .notebook{
+    border-radius:12px;
+  }
+  .notebook:before{
+    left:14px;
+  }
+  .note-header,
+  .content,
+  .note-footer{
+    padding-left:26px;
+    padding-right:14px;
+  }
+  .note-header{
+    gap:14px;
+    padding-top:16px;
+    padding-bottom:14px;
+  }
+  .formula-name{
+    font-size:24px;
+  }
+  .page-box{
+    width:100%;
+  }
+  .header-tools{
+    gap:8px;
+  }
+  .autosave-status{
+    min-width:112px;
+  }
+
+  /* Mobile keeps only the essential formula columns. */
+  .table-head,
+  .row{
+    grid-template-columns:62px minmax(0,1fr) 54px 64px;
+    gap:4px;
+  }
+  .table-head > :nth-child(3),
+  .row > .cas{
+    display:none;
+  }
+  .table-head{
+    font-size:9px;
+  }
+  .row input{
+    font-size:16px;
+  }
+  .row .material{
+    font-size:15px;
+  }
+  .material-wrap{
+    gap:4px;
+  }
+  .material-wrap .material{
+    min-width:60px;
+  }
+  .dilution-suffix{
+    max-width:92px;
+    font-size:8.5px;
+  }
+  .solvent-badge{
+    flex-basis:48px;
+    width:48px;
+    min-width:48px;
+    max-width:48px;
+    font-size:7.8px;
+    padding:0 4px;
+  }
+  .row-actions{
+    gap:0;
+  }
+  .dilution-btn,
+  .mark-btn,
+  .remove-btn{
+    min-width:22px;
+    min-height:32px;
+  }
+
+  .dilution-panel{
+    margin-left:0;
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:10px;
+  }
+  .dilution-panel input{
+    font-size:16px;
+  }
+
+  .editor-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .editor-actions .btn{
+    min-height:40px;
+  }
+  .editor-actions .primary{
+    grid-column:1 / -1;
+  }
+
+  .summary-grid{
+    gap:18px;
+  }
+  .simple-total .main-line strong{
+    font-size:25px;
+  }
+  .simple-total .sub-line{
+    gap:6px 10px;
+  }
+  .notes{
+    min-height:160px;
+    font-size:16px;
+  }
+  .note-footer{
+    flex-direction:column;
+    gap:5px;
+  }
+}
+
+@media print{
+  @page{
+    size:A4 portrait;
+    margin:10mm;
+  }
+  body{
+    background:#fff;
+  }
+  .app{
+    display:block;
+  }
+  .sidebar,
+  .editor-actions,
+  .row-actions,
+  .dilution-panel,
+  .privacy,
+  .autosave-status{
+    display:none !important;
+  }
+  .main{
+    padding:0;
+    overflow:visible;
+  }
+  .notebook{
+    width:100%;
+    min-height:auto;
+    margin:0;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    break-inside:avoid;
+  }
+  .note-header{
+    padding-top:10px;
+  }
+  .formula-name,
+  .row input,
+  .notes{
+    color:#000;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .notes{
+    resize:none;
+    overflow:visible;
+  }
+}
+
+
+html[lang="ko"] .notes{
+  line-height:32px;
+}
+html[lang="ko"] .formula-name{
+  line-height:36px;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Accordbook</div>
+    <div class="brand-sub" data-i18n="brandSub">A formula notebook for perfumers</div>
+
+    <div class="side-title" data-i18n="formulaIdPrefix">Formula ID prefix</div>
+    <div class="prefix-row">
+      <input id="prefixInput" maxlength="12" value="ACC" aria-label="Formula ID prefix" data-i18n-aria="formulaIdPrefix" />
+      <button class="btn prefix-save-btn" id="savePrefix" data-i18n="save">Save</button>
+    </div>
+    <button class="btn primary new-btn" id="newFormula" data-i18n="newFormula">+ New formula</button>
+
+    <div class="side-title" data-i18n="notebook">Notebook</div>
+    <div id="formulaList" class="formula-list"></div>
+
+    <div class="side-title" data-i18n="data">Data</div>
+    <div class="data-actions">
+      <div class="export-wrap">
+        <button class="btn" id="exportButton"><span data-i18n="export">Export</span> ▾</button>
+        <div class="export-menu" id="exportMenu">
+          <button class="btn" id="exportJson" data-i18n="jsonBackup">JSON backup</button>
+          <button class="btn" id="exportPdf" data-i18n="pdfExport">Print / Save current formula as PDF</button>
+        </div>
+      </div>
+      <button class="btn" id="importJson" data-i18n="importJson">Import JSON</button>
+    </div>
+    <input id="importFile" type="file" accept=".json,application/json" hidden />
+
+    <button class="btn archive-toggle" id="archiveToggle">
+      <span data-i18n="archive">Archive</span>
+      <span class="archive-count" id="archiveCount">0</span>
+    </button>
+    <div class="archive-panel" id="archivePanel"></div>
+
+    <div class="privacy">
+      <strong data-i18n="privateDefault">Private by default</strong><br />
+      <span data-i18n="privateDetail">Your formulas stay on your device.</span><br />
+      MVP v0.01
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="notebook">
+      <header class="note-header">
+        <div class="title-area">
+          <div class="title-primary">
+            <label data-i18n="formulaTitle">Formula / Accord title</label>
+            <input id="formulaName" class="formula-name" type="text" value="" placeholder="Untitled formula" data-i18n-placeholder="untitledFormula" />
+          </div>
+          <div class="title-hint">1,000 parts = 10.00 g · 1 part = 0.01 g</div>
+        </div>
+        <div>
+          <div class="page-box">
+            <div class="page-key" data-i18n="formulaId">FORMULA ID</div>
+            <div class="page-value" id="pageCode">—</div>
+            <div class="page-key" data-i18n="date">DATE</div>
+            <div class="page-value" id="pageDate">—</div>
+          </div>
+          <div class="header-tools">
+            <div class="autosave-status" id="autosaveStatus">
+              <span class="autosave-dot"></span>
+              <span id="autosaveText">Saved locally</span>
+            </div>
+            <div class="language-toggle" aria-label="Language">
+              <button class="lang-btn active" id="langEn" type="button" aria-label="English" title="English"><svg class="flag-svg" viewBox="0 0 7410 3900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M0 0h7410v3900H0" fill="#b31942"/>
+  <path d="M0 450h7410m0 600H0m0 600h7410m0 600H0m0 600h7410m0 600H0" stroke="#fff" stroke-width="300"/>
+  <path d="M0 0h2964v2100H0" fill="#0a3161"/>
+  <defs>
+    <path id="us-star" d="M247 90 317.534 307.082 132.873 172.918H361.127L176.466 307.082z"/>
+  </defs>
+  <g fill="#fff">
+    <g id="rowA">
+      <use href="#us-star" x="0" y="0"/><use href="#us-star" x="494" y="0"/><use href="#us-star" x="988" y="0"/>
+      <use href="#us-star" x="1482" y="0"/><use href="#us-star" x="1976" y="0"/><use href="#us-star" x="2470" y="0"/>
+    </g>
+    <g id="rowB">
+      <use href="#us-star" x="247" y="210"/><use href="#us-star" x="741" y="210"/><use href="#us-star" x="1235" y="210"/>
+      <use href="#us-star" x="1729" y="210"/><use href="#us-star" x="2223" y="210"/>
+    </g>
+    <use href="#rowA" y="420"/><use href="#rowB" y="420"/>
+    <use href="#rowA" y="840"/><use href="#rowB" y="840"/>
+    <use href="#rowA" y="1260"/><use href="#rowB" y="1260"/>
+    <use href="#rowA" y="1680"/>
+  </g>
+</svg></button>
+              <button class="lang-btn" id="langKo" type="button" aria-label="한국어" title="한국어"><svg class="flag-svg" viewBox="-72 -48 144 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path fill="#fff" d="M-72-48v96H72v-96z"/>
+  <g stroke="#000" stroke-width="4">
+    <path transform="rotate(33.69006752598)" d="M-50-12v24m6 0v-24m6 0v24m76 0V1m0-2v-11m6 0v11m0 2v11m6 0V1m0-2v-11"/>
+    <path transform="rotate(-33.69006752598)" d="M-50-12v24m6 0V1m0-2v-11m6 0v24m76 0V1m0-2v-11m6 0v24m6 0V1m0-2v-11"/>
+  </g>
+  <g transform="rotate(33.69006752598)">
+    <path fill="#cd2e3a" d="M12 0a18 18 0 11-36 0 24 24 0 1148 0"/>
+    <path fill="#0047a0" d="M0 0a12 12 0 1124 0 24 24 0 11-48 0 12 12 0 1024 0"/>
+  </g>
+</svg></button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="table-head">
+          <div style="text-align:center" data-i18n="parts">Parts</div>
+          <div data-i18n="material">Material</div>
+          <div data-i18n="casRef">CAS / Ref.</div>
+          <div style="text-align:right" data-i18n="percent">Percent</div>
+          <div></div>
+        </div>
+        <div id="rows" class="rows"></div>
+
+        <div class="editor-actions">
+          <button class="btn primary" id="addMaterial" data-i18n="addMaterial">+ Add material</button>
+          <button class="btn" id="duplicateFormula" data-i18n="duplicatePage">Duplicate as new page</button>
+          <button class="btn" id="clearFormula" data-i18n="resetMaterials">Reset materials</button>
+          <button class="btn" id="archiveFormula" data-i18n="moveArchive">Move to Archive</button>
+        </div>
+
+        <div class="summary-grid">
+          <div>
+            <div class="notes-title" data-i18n="notes">Notes</div>
+            <textarea id="notes" class="notes" placeholder="Experiment notes, substitutions, observations…" data-i18n-placeholder="notesPlaceholder"></textarea>
+          </div>
+          <div class="metrics">
+            <div class="summary-title" data-i18n="total">Total</div>
+
+            <div class="simple-total">
+              <div class="main-line">
+                <span data-i18n="formula">Formula</span>
+                <strong id="totalBadge">0 / 1,000</strong>
+              </div>
+              <div class="sub-line">
+                <span><span data-i18n="batch">Batch</span> <strong id="totalGrams">0.00 g</strong></span>
+                <span><span data-i18n="concentrate">Concentrate</span> <strong id="formulaStrength">0.00%</strong></span>
+                <span><span data-i18n="solvent">Solvent</span> <strong id="solventPercent">0.00%</strong> · <strong id="solventGramsVisible">0.00 g</strong></span>
+              </div>
+              <div id="status" class="status bad">Build the formula to a total of 1,000 parts.</div>
+            </div>
+
+            <div style="display:none">
+              <strong id="currentParts">0</strong>
+              <strong id="difference">+1,000</strong>
+              <strong id="activeMaterialGrams">0.00 g</strong>
+              <strong id="solventGrams">0.00 g</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="note-footer">
+        <span data-i18n="footerTagline">Everything starts with the fundamentals.</span>
+        <span id="footerCode">PAGE —</span>
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'accordbook-notebook-mvp-v001-rev30';
+const LANGUAGE_KEY = 'accordbook-ui-language';
+const TARGET_PARTS = 1000;
+const STANDARD_GRAMS = 10;
+const GRAMS_PER_PART = STANDARD_GRAMS / TARGET_PARTS;
+
+const $ = id => document.getElementById(id);
+
+const I18N = {
+  en: {
+    brandSub:'A formula notebook for perfumers',
+    formulaIdPrefix:'Formula ID prefix',
+    save:'Save',
+    newFormula:'+ New formula',
+    notebook:'Notebook',
+    data:'Data',
+    export:'Export',
+    jsonBackup:'JSON backup',
+    pdfExport:'Print / Save current formula as PDF',
+    importJson:'Import JSON',
+    archive:'Archive',
+    privateDefault:'Private by default',
+    privateDetail:'Your formulas stay on your device.',
+    formulaTitle:'Formula / Accord title',
+    untitledFormula:'Untitled formula',
+    formulaId:'FORMULA ID',
+    page:'PAGE',
+    date:'DATE',
+    parts:'Parts',
+    material:'Material',
+    casRef:'CAS / Ref.',
+    percent:'Percent',
+    addMaterial:'+ Add material',
+    duplicatePage:'Duplicate as new page',
+    resetMaterials:'Reset materials',
+    moveArchive:'Move to Archive',
+    notes:'Notes',
+    notesPlaceholder:'Experiment notes, substitutions, observations…',
+    total:'Total',
+    formula:'Formula',
+    batch:'Batch',
+    concentrate:'Concentrate',
+    solvent:'Solvent',
+    noFormulas:'No formulas yet.',
+    archiveEmpty:'Archive is empty.',
+    restore:'Restore',
+    deletePermanent:'Delete permanently',
+    confirmDelete:'Confirm delete',
+    deleteNow:'Delete now',
+    saving:'Saving…',
+    savedLocally:'Saved locally',
+    sessionOnly:'Session only',
+    sessionOnlyTitle:'Browser storage is unavailable in this preview. Changes will work during this session but may not persist after closing it.',
+    savedTitle:'Saved in this browser.',
+    editDilution:'Edit dilution',
+    addDilution:'Add dilution',
+    highlight:'Highlight',
+    remove:'Remove',
+    dilutionPercent:'Dilution %',
+    interpretation:'Interpretation',
+    removeDilution:'Remove dilution',
+    solventBadge:'SOLVENT',
+    solution:'Solution',
+    complete:'Complete',
+    addParts:'Add {n} more parts.',
+    reduceParts:'Reduce by {n} parts.',
+    initialStatus:'Build the formula to a total of 1,000 parts.',
+    prefixSaved:'Prefix "{prefix}" saved.\nIt will apply to newly created formulas.',
+    resetConfirm:'Reset all material rows in this formula? The PAGE code, formula name, and Notes will be kept.',
+    jsonReadError:'Could not read this JSON file.',
+    invalidBackup:'This does not look like an Accordbook backup.',
+    noFormulasBackup:'No formulas were found in this backup.',
+    importConfirm:'Import this backup and replace the current notebook?',
+    printUnavailable:'Printing is not available in this preview. Open Accordbook in a regular browser tab to save as PDF.',
+    footerTagline:'Everything starts with the fundamentals.',
+    copySuffix:'copy'
+  },
+  ko: {
+    brandSub:'조향사를 위한 포뮬러 노트',
+    formulaIdPrefix:'포뮬러 ID 접두사',
+    save:'저장',
+    newFormula:'+ 새 포뮬러',
+    notebook:'노트북',
+    data:'데이터',
+    export:'내보내기',
+    jsonBackup:'JSON 백업',
+    pdfExport:'현재 포뮬러 인쇄 / PDF 저장',
+    importJson:'JSON 가져오기',
+    archive:'보관함',
+    privateDefault:'기본적으로 비공개',
+    privateDetail:'포뮬러는 사용자의 기기에만 저장됩니다.',
+    formulaTitle:'포뮬러 / 어코드 제목',
+    untitledFormula:'제목 없는 포뮬러',
+    formulaId:'포뮬러 ID',
+    page:'페이지',
+    date:'날짜',
+    parts:'파트',
+    material:'원료',
+    casRef:'CAS / 참조',
+    percent:'비율',
+    addMaterial:'+ 원료 추가',
+    duplicatePage:'새 페이지로 복제',
+    resetMaterials:'원료 초기화',
+    moveArchive:'보관함으로 이동',
+    notes:'노트',
+    notesPlaceholder:'실험 메모, 대체 원료, 관찰 내용…',
+    total:'합계',
+    formula:'포뮬러',
+    batch:'배치',
+    concentrate:'원액',
+    solvent:'용매',
+    noFormulas:'포뮬러가 없습니다.',
+    archiveEmpty:'보관함이 비어 있습니다.',
+    restore:'복원',
+    deletePermanent:'영구 삭제',
+    confirmDelete:'삭제 확인',
+    deleteNow:'지금 삭제',
+    saving:'저장 중…',
+    savedLocally:'로컬 저장 완료',
+    sessionOnly:'현재 세션만',
+    sessionOnlyTitle:'이 미리보기에서는 브라우저 저장소를 사용할 수 없습니다. 현재 세션에서는 작동하지만 닫은 뒤에는 유지되지 않을 수 있습니다.',
+    savedTitle:'이 브라우저에 저장되었습니다.',
+    editDilution:'희석 정보 수정',
+    addDilution:'희석 정보 추가',
+    highlight:'강조',
+    remove:'삭제',
+    dilutionPercent:'희석 비율',
+    interpretation:'계산',
+    removeDilution:'희석 정보 제거',
+    solventBadge:'SOLVENT',
+    solution:'희석액',
+    complete:'완료',
+    addParts:'{n} parts를 더 추가하세요.',
+    reduceParts:'{n} parts를 줄이세요.',
+    initialStatus:'총합이 1,000 parts가 되도록 작성하세요.',
+    prefixSaved:'접두사 "{prefix}"가 저장되었습니다.\n새로 생성하는 포뮬러부터 적용됩니다.',
+    resetConfirm:'현재 포뮬러의 모든 원료 행을 초기화할까요? PAGE 코드, 포뮬러명, Notes는 유지됩니다.',
+    jsonReadError:'JSON 파일을 읽을 수 없습니다.',
+    invalidBackup:'Accordbook 백업 파일로 보이지 않습니다.',
+    noFormulasBackup:'백업에서 포뮬러를 찾을 수 없습니다.',
+    importConfirm:'현재 노트북을 이 백업으로 교체할까요?',
+    printUnavailable:'이 미리보기에서는 인쇄 기능을 사용할 수 없습니다. 일반 브라우저 탭에서 Accordbook을 열어 PDF로 저장하세요.',
+    footerTagline:'모든 것은 기본기에서 시작된다.',
+    copySuffix:'복사본'
+  }
+};
+
+let uiLanguage='en';
+let currentSaveStatus='saved';
+
+function t(key, vars={}){
+  let text=(I18N[uiLanguage] && I18N[uiLanguage][key]) ?? I18N.en[key] ?? key;
+  for(const [name,value] of Object.entries(vars)){
+    text=text.replaceAll(`{${name}}`, String(value));
+  }
+  return text;
+}
+
+function applyLanguage(){
+  document.documentElement.lang=uiLanguage;
+
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent=t(el.dataset.i18n);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    el.placeholder=t(el.dataset.i18nPlaceholder);
+  });
+
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{
+    el.setAttribute('aria-label',t(el.dataset.i18nAria));
+  });
+
+  $('langEn')?.classList.toggle('active',uiLanguage==='en');
+  $('langKo')?.classList.toggle('active',uiLanguage==='ko');
+
+  renderList();
+  renderArchive();
+  renderFormula();
+
+  const f=activeFormula();
+  if(f){
+    updateSummary();
+  }else if($('status')){
+    $('status').textContent=t('initialStatus');
+  }
+
+  showAutosave(currentSaveStatus);
+}
+
+function setLanguage(lang){
+  uiLanguage=(lang==='ko') ? 'ko' : 'en';
+  try{
+    localStorage.setItem(LANGUAGE_KEY,uiLanguage);
+  }catch(e){}
+  applyLanguage();
+}
+
+function loadLanguage(){
+  try{
+    const saved=localStorage.getItem(LANGUAGE_KEY);
+    if(saved==='ko' || saved==='en') uiLanguage=saved;
+  }catch(e){}
+}
+
+const rowsEl = $('rows');
+let state = {
+  prefix: 'ACC',
+  formulas: [],
+  archive: [],
+  activeId: null
+};
+
+const openDilutionPanels = new Set();
+let autosaveTimer=null;
+let savedIndicatorTimer=null;
+let storageAvailable=true;
+
+function nowISODate(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function yymm(dateStr){
+  const d = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
+  return String(d.getFullYear()).slice(-2) + String(d.getMonth()+1).padStart(2,'0');
+}
+function cleanPrefix(value){
+  return (value || 'ACC')
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g,'')
+    .replace(/-+$/,'')
+    .slice(0,12) || 'ACC';
+}
+function nextPageCode(prefix, dateStr){
+  const ym = yymm(dateStr);
+  const base = `${prefix}-${ym}-`;
+  let max = 0; // 000 is reserved for the sample page; real formulas start at 001
+  for(const f of [...state.formulas, ...(state.archive||[])]){
+    if(f.pageCode && f.pageCode.startsWith(base)){
+      const serial = Number(f.pageCode.slice(base.length));
+      if(Number.isFinite(serial)) max = Math.max(max, serial);
+    }
+  }
+  return `${base}${String(max+1).padStart(3,'0')}`;
+}
+function uuid(){
+  return crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+}
+function defaultRows(){
+  return [
+    {id:uuid(), parts:400, material:'Benzyl acetate', cas:'140-11-4', marked:true, dilutionEnabled:true, dilutionPercent:10, solvent:'DPG'},
+    {id:uuid(), parts:150, material:'Linalool', cas:'78-70-6', marked:true, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:150, material:'Abiethyl alcohol', cas:'', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:50, material:'Methyl dihydrojasmonate', cas:'24851-98-7', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:40, material:'Benzyl alcohol', cas:'100-51-6', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:40, material:'Methyl linoleate', cas:'112-63-0', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:30, material:'cis-3-hexenyl benzoate', cas:'25152-85-6', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:30, material:'Neralidol', cas:'7212-44-4', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:20, material:'Acetyl methyl anthranilate', cas:'2719-08-6', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:20, material:'Eugenol', cas:'97-53-0', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:20, material:'Jasmin oil', cas:'', marked:true, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:20, material:'DPG', cas:'25265-71-8', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:15, material:'Indole', cas:'120-72-9', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:10, material:'Methyl jasmonate', cas:'39924-52-2', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:4, material:'Farnesol', cas:'4602-84-0', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'},
+    {id:uuid(), parts:1, material:'para-cresol', cas:'106-44-5', marked:true, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'}
+  ];
+}
+function newFormula(useSample=false, copyFrom=null){
+  const date = nowISODate();
+  const prefix = cleanPrefix(state.prefix);
+  const formula = {
+    id: uuid(),
+    pageCode: useSample ? `${prefix}-${yymm(date)}-000` : nextPageCode(prefix, date),
+    date,
+    name: copyFrom ? `${copyFrom.name} ${t('copySuffix')}` : (useSample ? 'Jasmine 10' : t('untitledFormula')),
+    notes: copyFrom ? copyFrom.notes : (useSample ? 'Methyl dihydrojasmonate = Hedione\nJasmine oil 2%' : ''),
+    rows: copyFrom
+      ? copyFrom.rows.map(r=>({...r,id:uuid()}))
+      : (useSample ? defaultRows() : [{id:uuid(), parts:'', material:'', cas:'', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'}])
+  };
+  state.formulas.push(formula);
+  state.activeId = formula.id;
+  persist();
+  renderAll();
+}
+function activeFormula(){
+  return state.formulas.find(f=>f.id===state.activeId) || null;
+}
+function showAutosave(status){
+  currentSaveStatus=status;
+  const box=$('autosaveStatus');
+  const text=$('autosaveText');
+  if(!box || !text) return;
+
+  if(status==='saving'){
+    box.classList.add('saving');
+    text.textContent=t('saving');
+    return;
+  }
+
+  box.classList.remove('saving');
+
+  if(status==='session'){
+    text.textContent=t('sessionOnly');
+    box.title=t('sessionOnlyTitle');
+  } else {
+    text.textContent=t('savedLocally');
+    box.title=t('savedTitle');
+  }
+}
+
+function persist(){
+  showAutosave('saving');
+
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storageAvailable=true;
+
+    clearTimeout(savedIndicatorTimer);
+    savedIndicatorTimer=setTimeout(()=>{
+      showAutosave('saved');
+    },320);
+  }catch(error){
+    // Some embedded previews sandbox localStorage.
+    // Keep the app fully usable in memory for the current session.
+    storageAvailable=false;
+
+    clearTimeout(savedIndicatorTimer);
+    savedIndicatorTimer=setTimeout(()=>{
+      showAutosave('session');
+    },180);
+  }
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    const saved=raw ? JSON.parse(raw) : null;
+    storageAvailable=true;
+
+    if(saved && Array.isArray(saved.formulas)){
+      state = saved;
+      state.prefix = cleanPrefix(state.prefix);
+      if(!Array.isArray(state.archive)) state.archive=[];
+    }
+  }catch(e){
+    storageAvailable=false;
+  }
+
+  if(!state.formulas.length){
+    state.prefix='ACC';
+    newFormula(true);
+  } else {
+    if(!state.activeId || !activeFormula()) state.activeId = state.formulas[0].id;
+    renderAll();
+  }
+
+  setTimeout(()=>{
+    showAutosave(storageAvailable ? 'saved' : 'session');
+  },0);
+}
+function renderAll(){
+  $('prefixInput').value = state.prefix;
+  renderList();
+  renderArchive();
+  renderFormula();
+}
+function renderList(){
+  const list = $('formulaList');
+  list.innerHTML='';
+  if(!state.formulas.length){
+    list.innerHTML=`<div class="empty">${escapeHtml(t('noFormulas'))}</div>`;
+    return;
+  }
+  [...state.formulas].reverse().forEach(f=>{
+    const item=document.createElement('div');
+    item.className='formula-item'+(f.id===state.activeId?' active':'');
+    item.innerHTML=`<div class="formula-code">${escapeHtml(f.pageCode)}</div><div class="formula-label">${escapeHtml(f.name||t('untitledFormula'))}</div>`;
+    item.addEventListener('click',()=>{
+      saveCurrentFields();
+      state.activeId=f.id;
+      persist();
+      renderAll();
+    });
+    list.appendChild(item);
+  });
+}
+
+function renderArchive(){
+  const panel=$('archivePanel');
+  const count=$('archiveCount');
+  if(!panel || !count) return;
+
+  const archived=state.archive||[];
+  count.textContent=String(archived.length);
+  panel.innerHTML='';
+
+  if(!archived.length){
+    panel.innerHTML=`<div class="empty">${escapeHtml(t('archiveEmpty'))}</div>`;
+    return;
+  }
+
+  [...archived].reverse().forEach(f=>{
+    const item=document.createElement('div');
+    item.className='archive-item';
+
+    const code=document.createElement('div');
+    code.className='formula-code';
+    code.textContent=f.pageCode||'—';
+
+    const label=document.createElement('div');
+    label.className='formula-label';
+    label.textContent=f.name||t('untitledFormula');
+
+    const actions=document.createElement('div');
+    actions.className='archive-item-actions';
+
+    const restore=document.createElement('button');
+    restore.className='btn';
+    restore.textContent=t('restore');
+    restore.addEventListener('click',()=>{
+      const index=state.archive.findIndex(x=>x.id===f.id);
+      if(index<0) return;
+      const restored=state.archive.splice(index,1)[0];
+      delete restored.archivedAt;
+      state.formulas.push(restored);
+      state.activeId=restored.id;
+      persist();
+      renderAll();
+    });
+
+    const remove=document.createElement('button');
+    remove.className='btn danger';
+
+    const removeLabel=document.createElement('span');
+    removeLabel.textContent=t('deletePermanent');
+    remove.appendChild(removeLabel);
+
+    let deleteReady=false;
+    let deleteTimer=null;
+
+    remove.addEventListener('click',()=>{
+      if(!remove.classList.contains('confirming') && !deleteReady){
+        remove.classList.add('confirming');
+        removeLabel.textContent=t('confirmDelete');
+
+        clearTimeout(deleteTimer);
+        deleteTimer=setTimeout(()=>{
+          remove.classList.remove('confirming');
+          remove.classList.add('ready');
+          removeLabel.textContent=t('deleteNow');
+          deleteReady=true;
+        },3500);
+
+        return;
+      }
+
+      if(!deleteReady){
+        return;
+      }
+
+      clearTimeout(deleteTimer);
+      state.archive=state.archive.filter(x=>x.id!==f.id);
+      persist();
+      renderArchive();
+      $('archivePanel')?.classList.add('open');
+    });
+
+    actions.append(restore,remove);
+    item.append(code,label,actions);
+    panel.appendChild(item);
+  });
+}
+
+function archiveCurrentFormula(){
+  saveCurrentFields();
+  const f=activeFormula();
+  if(!f) return;
+
+  state.formulas=state.formulas.filter(x=>x.id!==f.id);
+  state.archive=state.archive||[];
+  state.archive.push({...f, archivedAt:new Date().toISOString()});
+  openDilutionPanels.clear();
+
+  if(state.formulas.length){
+    state.activeId=state.formulas[state.formulas.length-1].id;
+    persist();
+    renderAll();
+  } else {
+    state.activeId=null;
+    persist();
+    newFormula(false);
+  }
+
+  // Make the result immediately visible.
+  const archivePanel=$('archivePanel');
+  if(archivePanel){
+    archivePanel.classList.add('open');
+    renderArchive();
+  }
+}
+
+function renderFormula(){
+  const f=activeFormula();
+  if(!f) return;
+  $('formulaName').value=f.name||'';
+  $('notes').value=f.notes||'';
+  $('pageCode').textContent=f.pageCode;
+  $('pageDate').textContent=f.date.replaceAll('-',' / ');
+  $('footerCode').textContent=t('formulaId')+' '+f.pageCode;
+  rowsEl.innerHTML='';
+  f.rows.forEach((row,index)=>renderRow(row,index));
+  updateSummary();
+}
+
+const SOLVENT_MATERIALS = new Set(['ALC','DPG','IPM','TEC']);
+
+function normalizeMaterialToken(name){
+  return String(name||'')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g,' ');
+}
+
+function isSolventMaterial(name){
+  return SOLVENT_MATERIALS.has(normalizeMaterialToken(name));
+}
+
+function renderRow(row,index){
+  const f=activeFormula();
+
+  if(typeof row.dilutionEnabled!=='boolean') row.dilutionEnabled=false;
+  if(!Number.isFinite(Number(row.dilutionPercent))) row.dilutionPercent=100;
+  if(typeof row.solvent!=='string' || !row.solvent.trim()) row.solvent='ALC';
+
+  const panelOpen=openDilutionPanels.has(row.id);
+
+  const el=document.createElement('div');
+  el.className='row'+(row.marked?' marked':'');
+
+  const parts=document.createElement('input');
+  parts.type='number';
+  parts.step='1';
+  parts.min='0';
+  parts.className='parts';
+  parts.value=row.parts;
+  parts.placeholder='0';
+
+  const materialWrap=document.createElement('div');
+  materialWrap.className='material-wrap';
+
+  const material=document.createElement('input');
+  material.type='text';
+  material.className='material';
+  material.value=row.material||'';
+  material.placeholder=t('material');
+
+  const materialMeta=document.createElement('div');
+  materialMeta.className='material-meta';
+
+  const suffix=document.createElement('span');
+  suffix.className='dilution-suffix';
+
+  const solventBadge=document.createElement('span');
+  solventBadge.className='solvent-badge';
+  solventBadge.textContent='SOLVENT';
+
+  materialMeta.append(suffix,solventBadge);
+
+  function getDilutionPercent(){
+    return Math.min(100, Math.max(0, Number(row.dilutionPercent)||0));
+  }
+
+  function getSolventName(){
+    return (row.solvent||t('solvent')).trim() || t('solvent');
+  }
+
+  function updateSuffix(){
+    if(row.dilutionEnabled){
+      const pct=getDilutionPercent();
+      const solventName=getSolventName();
+      suffix.textContent=`@${pct}% in ${solventName}`;
+      suffix.title=suffix.textContent;
+    } else {
+      suffix.textContent='';
+      suffix.removeAttribute('title');
+    }
+
+    solventBadge.style.display = isSolventMaterial(row.material) ? 'inline-block' : 'none';
+  }
+
+  material.addEventListener('input',e=>{
+    row.material=e.target.value;
+    updateDilutionResult();
+    updateSummary();
+    persist();
+  });
+
+  materialWrap.append(material,materialMeta);
+  updateSuffix();
+
+  const cas=document.createElement('input');
+  cas.type='text';
+  cas.className='cas';
+  cas.value=row.cas||'';
+  cas.placeholder='CAS / Ref.';
+  cas.addEventListener('input',e=>{
+    row.cas=e.target.value;
+    persist();
+  });
+
+  const percent=document.createElement('div');
+  percent.className='percent';
+  percent.textContent=((Number(row.parts)||0)/10).toFixed(1)+'%';
+
+  let dilutionResult=null;
+
+  function updateDilutionResult(){
+    updateSuffix();
+
+    if(dilutionResult){
+      const partsValue=Number(row.parts)||0;
+      const solutionGrams=partsValue*GRAMS_PER_PART;
+      const pct=getDilutionPercent();
+      const activeGrams=solutionGrams*(pct/100);
+      const solventGrams=solutionGrams-activeGrams;
+      const materialName=(row.material||t('material')).trim()||t('material');
+      const solventName=getSolventName();
+
+      dilutionResult.innerHTML =
+        `<span>`+
+        `${escapeHtml(t('solution'))} <strong>${solutionGrams.toFixed(2)} g</strong> · `+
+        `${escapeHtml(materialName)} <strong>${activeGrams.toFixed(3)} g</strong> · `+
+        `${escapeHtml(solventName)} <strong>${solventGrams.toFixed(3)} g</strong>`+
+        `</span>`;
+    }
+
+    updateSummary();
+  }
+
+  parts.addEventListener('input',e=>{
+    if(e.target.value===''){
+      row.parts='';
+    } else {
+      row.parts=Math.max(0,Math.round(Number(e.target.value)||0));
+      e.target.value=row.parts;
+    }
+    percent.textContent=((Number(row.parts)||0)/10).toFixed(1)+'%';
+    updateDilutionResult();
+    persist();
+  });
+
+  const actions=document.createElement('div');
+  actions.className='row-actions';
+
+  const dilution=document.createElement('button');
+  dilution.className='dilution-btn'+(row.dilutionEnabled?' active':'');
+  dilution.title=row.dilutionEnabled ? t('editDilution') : t('addDilution');
+  dilution.textContent='DIL';
+  dilution.addEventListener('click',()=>{
+    // Important: DIL only opens/closes the editor.
+    // It does NOT remove an already configured dilution.
+    if(!row.dilutionEnabled){
+      row.dilutionEnabled=true;
+      row.dilutionPercent=10;
+      row.solvent='ALC';
+      openDilutionPanels.add(row.id);
+    } else {
+      if(openDilutionPanels.has(row.id)){
+        openDilutionPanels.delete(row.id);
+      } else {
+        openDilutionPanels.add(row.id);
+      }
+    }
+    persist();
+    renderFormula();
+  });
+
+  const mark=document.createElement('button');
+  mark.className='mark-btn'+(row.marked?' active':'');
+  mark.title=t('highlight');
+  mark.textContent='▰';
+  mark.addEventListener('click',()=>{
+    row.marked=!row.marked;
+    persist();
+    renderFormula();
+  });
+
+  const remove=document.createElement('button');
+  remove.className='remove-btn';
+  remove.title=t('remove');
+  remove.textContent='×';
+  remove.addEventListener('click',()=>{
+    openDilutionPanels.delete(row.id);
+    f.rows.splice(index,1);
+    if(!f.rows.length){
+      f.rows.push({
+        id:uuid(),
+        parts:'',
+        material:'',
+        cas:'',
+        marked:false,
+        dilutionEnabled:false,
+        dilutionPercent:100,
+        solvent:'ALC'
+      });
+    }
+    persist();
+    renderFormula();
+  });
+
+  actions.append(dilution,mark,remove);
+  el.append(parts,materialWrap,cas,percent,actions);
+  rowsEl.appendChild(el);
+
+  if(row.dilutionEnabled && panelOpen){
+    const panel=document.createElement('div');
+    panel.className='dilution-panel';
+
+    const pctWrap=document.createElement('div');
+    const pctLabel=document.createElement('label');
+    pctLabel.textContent=t('dilutionPercent');
+
+    const pctInput=document.createElement('input');
+    pctInput.type='number';
+    pctInput.min='0';
+    pctInput.max='100';
+    pctInput.step='1';
+    pctInput.value=row.dilutionPercent ?? 10;
+    pctInput.addEventListener('input',e=>{
+      const v=Math.min(100,Math.max(0,Math.round(Number(e.target.value)||0)));
+      row.dilutionPercent=v;
+      e.target.value=v;
+      updateDilutionResult();
+      persist();
+    });
+    pctWrap.append(pctLabel,pctInput);
+
+    const solventWrap=document.createElement('div');
+    const solventLabel=document.createElement('label');
+    solventLabel.textContent=t('solvent');
+
+    const solventInput=document.createElement('input');
+    solventInput.type='text';
+    solventInput.value=row.solvent||'ALC';
+    solventInput.placeholder='ALC / DPG / IPM / TEC';
+    solventInput.addEventListener('input',e=>{
+      row.solvent=e.target.value;
+      updateDilutionResult();
+      persist();
+    });
+    solventWrap.append(solventLabel,solventInput);
+
+    const resultWrap=document.createElement('div');
+    const resultLabel=document.createElement('label');
+    resultLabel.textContent=t('interpretation');
+
+    dilutionResult=document.createElement('div');
+    dilutionResult.className='dilution-result';
+
+    const removeDilution=document.createElement('button');
+    removeDilution.type='button';
+    removeDilution.className='btn';
+    removeDilution.textContent=t('removeDilution');
+    removeDilution.style.marginTop='7px';
+    removeDilution.addEventListener('click',()=>{
+      row.dilutionEnabled=false;
+      row.dilutionPercent=100;
+      row.solvent='ALC';
+      openDilutionPanels.delete(row.id);
+      persist();
+      renderFormula();
+    });
+
+    resultWrap.append(resultLabel,dilutionResult,removeDilution);
+
+    panel.append(pctWrap,solventWrap,resultWrap);
+    rowsEl.appendChild(panel);
+    updateDilutionResult();
+  }
+}
+function saveCurrentFields(){
+  const f=activeFormula();
+  if(!f) return;
+  f.name=$('formulaName').value.trim() || t('untitledFormula');
+  f.notes=$('notes').value;
+  persist();
+}
+function updateSummary(){
+  const f=activeFormula();
+
+  const total=f.rows.reduce((sum,row)=>{
+    return sum + (Number(row.parts)||0);
+  },0);
+
+  const diff=TARGET_PARTS-total;
+  const batchGrams=total*GRAMS_PER_PART;
+
+  let effectiveParts=0;
+  let solventParts=0;
+
+  for(const row of f.rows){
+    const parts=Number(row.parts)||0;
+
+    // Direct solvent materials such as ALC, DPG, IPM and TEC
+    // count entirely as solvent/carrier.
+    if(isSolventMaterial(row.material)){
+      solventParts += parts;
+      continue;
+    }
+
+    // Diluted aromatic materials contribute partly active material
+    // and partly solvent/carrier.
+    if(row.dilutionEnabled){
+      const strength=Math.min(100,Math.max(0,Number(row.dilutionPercent)||0))/100;
+      const active=parts*strength;
+      const solvent=parts-active;
+
+      effectiveParts += active;
+      solventParts += solvent;
+    } else {
+      effectiveParts += parts;
+    }
+  }
+
+  const formulaStrength=total>0 ? (effectiveParts/total)*100 : 0;
+  const solventShare=total>0 ? (solventParts/total)*100 : 0;
+
+  const activeMaterialGrams=effectiveParts*GRAMS_PER_PART;
+  const solventGrams=solventParts*GRAMS_PER_PART;
+
+  $('currentParts').textContent=fmt(total);
+  $('difference').textContent=(diff>0?'+':'')+fmt(diff);
+  $('totalGrams').textContent=batchGrams.toFixed(2)+' g';
+  $('formulaStrength').textContent=formulaStrength.toFixed(2)+'%';
+  $('activeMaterialGrams').textContent=activeMaterialGrams.toFixed(2)+' g';
+  $('solventGrams').textContent=solventGrams.toFixed(2)+' g';
+  $('solventGramsVisible').textContent=solventGrams.toFixed(2)+' g';
+  $('solventPercent').textContent=solventShare.toFixed(2)+'%';
+  $('totalBadge').textContent=`${fmt(total)} / 1,000`;
+
+  const status=$('status');
+
+  if(Math.abs(diff)<1e-9){
+    status.className='status ok';
+    status.textContent=t('complete');
+  } else if(diff>0){
+    status.className='status bad';
+    status.textContent=t('addParts',{n:fmt(diff)});
+  } else {
+    status.className='status bad';
+    status.textContent=t('reduceParts',{n:fmt(Math.abs(diff))});
+  }
+}
+
+function safeFilename(value){
+  return String(value||'accordbook')
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g,'-')
+    .replace(/\s+/g,'-')
+    .replace(/-+/g,'-')
+    .slice(0,80) || 'accordbook';
+}
+
+function downloadBlob(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),500);
+}
+
+function exportNotebookJson(){
+  saveCurrentFields();
+
+  const payload={
+    app:'Accordbook',
+    formatVersion:1,
+    exportedAt:new Date().toISOString(),
+    data:{
+      prefix:state.prefix,
+      formulas:state.formulas,
+      archive:state.archive||[],
+      activeId:state.activeId
+    }
+  };
+
+  const blob=new Blob(
+    [JSON.stringify(payload,null,2)],
+    {type:'application/json'}
+  );
+
+  const stamp=nowISODate().replaceAll('-','');
+  downloadBlob(blob,`accordbook-backup-${stamp}.json`);
+}
+
+function normalizeImportedFormula(f){
+  if(!f || typeof f!=='object') return null;
+  if(!Array.isArray(f.rows)) return null;
+
+  return {
+    ...f,
+    id:f.id||uuid(),
+    pageCode:String(f.pageCode||'').trim(),
+    date:f.date||nowISODate(),
+    name:String(f.name||t('untitledFormula')),
+    notes:String(f.notes||''),
+    rows:f.rows.map(r=>({
+      id:r.id||uuid(),
+      parts:r.parts==='' ? '' : Math.max(0,Number(r.parts)||0),
+      material:String(r.material||''),
+      cas:String(r.cas||''),
+      marked:Boolean(r.marked),
+      dilutionEnabled:Boolean(r.dilutionEnabled),
+      dilutionPercent:Number.isFinite(Number(r.dilutionPercent))
+        ? Math.min(100,Math.max(0,Number(r.dilutionPercent)))
+        : 100,
+      solvent:String(r.solvent||'ALC')
+    }))
+  };
+}
+
+async function importNotebookJson(file){
+  let parsed;
+  try{
+    parsed=JSON.parse(await file.text());
+  }catch(e){
+    alert(t('jsonReadError'));
+    return;
+  }
+
+  const source=parsed?.data || parsed;
+  if(!source || !Array.isArray(source.formulas)){
+    alert(t('invalidBackup'));
+    return;
+  }
+
+  const formulas=source.formulas.map(normalizeImportedFormula).filter(Boolean);
+  const archive=Array.isArray(source.archive)
+    ? source.archive.map(normalizeImportedFormula).filter(Boolean)
+    : [];
+
+  if(!formulas.length && !archive.length){
+    alert(t('noFormulasBackup'));
+    return;
+  }
+
+  if(!confirm(t('importConfirm'))) return;
+
+  state={
+    prefix:cleanPrefix(source.prefix||'ACC'),
+    formulas,
+    archive,
+    activeId:source.activeId||formulas[0]?.id||null
+  };
+
+  if(state.activeId && !state.formulas.some(f=>f.id===state.activeId)){
+    state.activeId=state.formulas[0]?.id||null;
+  }
+
+  if(!state.formulas.length){
+    state.activeId=null;
+    persist();
+    newFormula(false);
+    return;
+  }
+
+  openDilutionPanels.clear();
+  persist();
+  renderAll();
+}
+
+function exportCurrentFormulaPdf(){
+  saveCurrentFields();
+  const f=activeFormula();
+  if(!f) return;
+
+  if(typeof window.print!=='function'){
+    alert(t('printUnavailable'));
+    return;
+  }
+
+  const oldTitle=document.title;
+  const oldHeight=$('notes').style.height;
+
+  document.title=`Accordbook_${safeFilename(f.pageCode)}_${safeFilename(f.name)}`;
+  $('notes').style.height=Math.max($('notes').scrollHeight,192)+'px';
+
+  const restore=()=>{
+    document.title=oldTitle;
+    $('notes').style.height=oldHeight;
+    window.removeEventListener('afterprint',restore);
+  };
+
+  window.addEventListener('afterprint',restore);
+  window.print();
+
+  // Fallback for browsers that do not fire afterprint reliably.
+  setTimeout(()=>{
+    if(document.title!==oldTitle) restore();
+  },1500);
+}
+
+function fmt(n){
+  return Number(n).toLocaleString('en-US',{maximumFractionDigits:3});
+}
+function escapeHtml(str){
+  return String(str??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+$('langEn').addEventListener('click',()=>setLanguage('en'));
+$('langKo').addEventListener('click',()=>setLanguage('ko'));
+
+$('savePrefix').addEventListener('click',()=>{
+  state.prefix=cleanPrefix($('prefixInput').value);
+  $('prefixInput').value=state.prefix;
+  persist();
+  alert(`Prefix "${state.prefix}" saved.\nIt will apply to newly created formulas.`);
+});
+$('prefixInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter') $('savePrefix').click();
+});
+$('newFormula').addEventListener('click',()=>{
+  saveCurrentFields();
+  newFormula(false);
+});
+$('addMaterial').addEventListener('click',()=>{
+  const f=activeFormula();
+  f.rows.push({id:uuid(), parts:'', material:'', cas:'', marked:false, dilutionEnabled:false, dilutionPercent:100, solvent:'ALC'});
+  persist(); renderFormula();
+  const inputs=rowsEl.querySelectorAll('.material');
+  inputs[inputs.length-1]?.focus();
+});
+$('duplicateFormula').addEventListener('click',()=>{
+  saveCurrentFields();
+  const f=activeFormula();
+  newFormula(false,f);
+});
+$('clearFormula').addEventListener('click',()=>{
+  if(!confirm(t('resetConfirm'))) return;
+  const f=activeFormula();
+  f.rows=[{id:uuid(),parts:'',material:'',cas:'',marked:false,dilutionEnabled:false,dilutionPercent:100,solvent:'ALC'}];
+  persist(); renderFormula();
+});
+$('archiveFormula').addEventListener('click',archiveCurrentFormula);
+
+$('archiveToggle').addEventListener('click',()=>{
+  $('archivePanel').classList.toggle('open');
+});
+
+$('exportButton').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('exportMenu').classList.toggle('open');
+});
+
+$('exportJson').addEventListener('click',()=>{
+  $('exportMenu').classList.remove('open');
+  exportNotebookJson();
+});
+
+$('exportPdf').addEventListener('click',()=>{
+  $('exportMenu').classList.remove('open');
+  exportCurrentFormulaPdf();
+});
+
+$('importJson').addEventListener('click',()=>{
+  $('importFile').value='';
+  $('importFile').click();
+});
+
+$('importFile').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];
+  if(file) await importNotebookJson(file);
+});
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.export-wrap')){
+    $('exportMenu').classList.remove('open');
+  }
+});
+
+$('formulaName').addEventListener('input',()=>{
+  const f=activeFormula(); f.name=$('formulaName').value; persist(); renderList();
+});
+$('notes').addEventListener('input',()=>{
+  const f=activeFormula(); f.notes=$('notes').value; persist();
+});
+
+loadLanguage();
+load();
+applyLanguage();
+</script>
+</body>
+</html>

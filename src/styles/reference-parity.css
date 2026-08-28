@@ -1,0 +1,61 @@
+:root { --ref-paper: #f7f0df; --ref-paper-2: #fffaf0; --ref-ink: #2b2924; --ref-muted: #847b6c; --ref-line: #e3b98f; --ref-border: #d9c9b4; --ref-accent: #c9773c; }
+body { color: var(--ref-ink); background: #e8e1d5; }
+.app-shell { grid-template-columns: 250px minmax(0, 1fr); }
+.sidebar { border-right: 1px solid #cfc4b3; background: #efe9dd; padding: 24px 18px; color: var(--ref-ink); }
+.eyebrow { font-family: Georgia, 'Times New Roman', serif; font-size: 26px; font-style: italic; letter-spacing: 0; text-transform: none; margin: 0 0 4px; }
+.sidebar h1 { font-family: Inter, Pretendard, system-ui, sans-serif; font-size: 11px; line-height: 1.4; color: var(--ref-muted); font-weight: 400; margin-bottom: 28px; }
+.sidebar .section-label { color: var(--ref-muted); font-size: 10px; letter-spacing: .12em; margin: 18px 0 8px; }
+.new-formula { width: 100%; margin-top: 10px; border: 1px solid var(--ref-border); border-radius: 8px; background: var(--ref-paper-2); color: var(--ref-ink); padding: 9px 11px; font-size: 12px; font-weight: 650; }
+.formula-list { gap: 7px; max-height: 58vh; overflow: auto; }
+.formula-link { padding: 10px 11px; border: 1px solid transparent; border-radius: 9px; background: rgba(255,255,255,.26); color: var(--ref-ink); }
+.formula-link.selected { background: #fff9ed; border-color: var(--ref-border); }
+.formula-link strong { color: var(--ref-accent); font-size: 10px; font-weight: 750; letter-spacing: .04em; }
+.formula-link span { font-size: 13px; margin-top: 3px; }
+.data-section button, .section-toggle { color: var(--ref-ink); font-size: 12px; }
+.section-toggle { border: 1px solid var(--ref-border); border-radius: 8px; background: var(--ref-paper-2); }
+.sidebar-footer { color: var(--ref-muted); font-size: 10px; }
+.language-toggle { margin-top: 20px; height: 34px; display: inline-flex; align-items: center; gap: 3px; padding: 3px; border: 1px solid rgba(185,168,144,.75); border-radius: 999px; background: rgba(255,250,240,.6); }
+.language-toggle button { width: 34px; height: 27px; border: 0; border-radius: 999px; background: transparent; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.language-toggle button.active { background: var(--ref-paper-2); box-shadow: 0 1px 4px rgba(76,58,37,.12); }
+.language-toggle svg { width: 23px; height: 15px; border: 1px solid rgba(43,41,36,.18); border-radius: 2px; }
+.notebook-page { width: min(1040px, 100%); margin: 0 auto; min-height: calc(100vh - 56px); border: 1px solid #d1c2aa; border-radius: 18px 28px 28px 18px; background: var(--ref-paper); box-shadow: 0 16px 45px rgba(76,58,37,.12); padding: 0 28px 0 95px; overflow: hidden; }
+.notebook-page::before { left: 72px; background: rgba(199,119,60,.28); width: 1px; background-image: none; }
+.lifecycle-actions { justify-content: flex-start; margin: 0 -67px 0 0; padding: 14px 0 0; }
+.lifecycle-actions button, .add-row, .action { border: 1px solid var(--ref-border); border-radius: 8px; background: var(--ref-paper-2); color: var(--ref-ink); }
+.editor-content { position: relative; }
+.formula-header { min-height: 136px; margin: 0 -28px 0 0; padding: 24px 0 20px; display: grid; grid-template-columns: minmax(0,1fr) 285px; gap: 28px; align-items: start; border-bottom: 2px solid rgba(201,119,60,.55); background: rgba(255,250,240,.34); }
+.title-block { min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+.title-block .section-label { font-size: 10px; color: var(--ref-muted); margin: 0 0 4px; }
+.formula-name { height: 40px; border: 0; border-bottom: 1px solid #bcae98; border-radius: 0; background: transparent; font-size: 30px; font-style: italic; line-height: 36px; padding: 0 0 3px; }
+.header-meta { height: 62px; display: grid; gap: 0; min-width: 245px; border-top: 1px solid #bda890; border-bottom: 1px solid #bda890; font-size: 11px; }
+.header-meta div { min-height: 30px; display: grid; grid-template-columns: 82px 1fr; gap: 0; align-items: center; padding: 0 7px; border-bottom: 1px solid #dfd1bc; }
+.header-meta div span { color: var(--ref-accent); font-size: 9px; letter-spacing: .08em; font-weight: 750; }
+.header-meta div strong { justify-content: flex-end; text-align: right; font-family: 'Courier New', monospace; font-weight: 700; }
+.autosave-status { height: 34px; min-width: 124px; border: 1px solid rgba(82,104,90,.28); border-radius: 999px; background: rgba(116,196,178,.11); font-size: 10px; font-weight: 750; }
+.formula-table { margin-top: 18px; }
+.formula-table-header, .formula-row { grid-template-columns: 92px minmax(260px,1fr) 150px 92px 78px; gap: 10px; }
+.formula-table-header { height: 38px; padding: 0; border-bottom: 1px solid rgba(201,119,60,.38); font-size: 10px; }
+.formula-row-wrap { border: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 41px, rgba(201,119,60,.22) 41px, rgba(201,119,60,.22) 42px); }
+.formula-row { height: 42px; min-height: 42px; padding: 0; }
+.formula-row input { height: 42px; border: 0; border-radius: 0; background: transparent; padding: 8px 4px 4px; line-height: 28px; }
+.formula-row input[type=number] { text-align: right; font-family: 'Courier New', monospace; font-weight: 700; font-size: 15px; }
+.material-cell { height: 42px; display: flex; align-items: center; gap: 8px; overflow: hidden; }
+.material-line { flex: 1; min-width: 0; }
+.material-line input { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 17px; }
+.dilution-notation { max-width: 140px; color: #9a5f32; font-family: 'Courier New', monospace; font-size: 10.5px; font-weight: 700; }
+.solvent-badge { flex: 0 0 52px; width: 52px; min-width: 52px; max-width: 52px; border: 1px solid rgba(63,91,75,.58); border-radius: 999px; background: rgba(116,196,178,.2); color: #354a3d; padding: 0 5px; font: 800 8.5px/2 Inter, Pretendard, sans-serif; }
+.formula-row output { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; text-align: right; }
+.row-actions { height: 42px; gap: 1px; justify-content: flex-end; }
+.action { border: 0; border-radius: 5px; background: rgba(255,250,240,.45); color: #9b8f7f; padding: 3px 5px; font-size: 10px; font-weight: 800; }
+.action.active { color: #7f5634; border-color: #b99069; background: rgba(244,201,85,.22); }
+.action.remove { border: 0; background: transparent; }
+.dilution-editor { margin: 0 0 8px 138px; padding: 10px 12px 11px; border-left: 2px solid rgba(201,119,60,.32); background: rgba(255,250,240,.48); display: grid; grid-template-columns: 110px 150px minmax(180px,1fr); gap: 12px; align-items: end; }
+.total-panel { max-width: none; margin: 0; border-top: 2px solid rgba(201,119,60,.45); border-bottom: 0; padding: 20px 0 0; }
+.total-panel h3 { font-style: italic; font-size: 16px; margin-bottom: 8px; }
+.total-grid { max-width: 430px; border: 1px solid #bca687; border-radius: 10px; background: rgba(255,250,240,.72); padding: 16px; gap: 8px 20px; }
+.notes-section { margin: 26px 0 28px; }
+.notes-section .section-label { font-style: italic; font-family: Georgia, serif; font-size: 16px; text-transform: none; letter-spacing: 0; color: var(--ref-ink); }
+.notes-section textarea { min-height: 192px; padding: 5px 12px 0; line-height: 32px; border: 1px solid var(--ref-border); border-radius: 7px; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.24) 0, rgba(255,255,255,.24) 31px, rgba(201,119,60,.20) 31px, rgba(201,119,60,.20) 32px); }
+.notebook-page > footer { position: relative; margin: 0 -28px 0 -95px; padding: 12px 28px 14px 95px; border-top: 1px solid rgba(201,119,60,.22); background: rgba(255,250,240,.3); color: var(--ref-muted); font-size: 9px; }
+@media (max-width: 1024px) { .notebook-page { padding-left: 42px; padding-right: 28px; }.notebook-page::before { left: 24px; }.formula-header { grid-template-columns: 1fr; height: auto; }.header-meta { width: 100%; }.notebook-page > footer { margin-left: -42px; padding-left: 42px; } }
+@media (max-width: 640px) { .notebook-page { padding-left: 26px; padding-right: 14px; border-radius: 12px; }.notebook-page::before { left: 14px; }.formula-header { margin-right: 0; padding-top: 16px; }.formula-table-header, .formula-row { grid-template-columns: 62px minmax(0,1fr) 54px 64px; gap: 4px; }.formula-table-header span:nth-child(3), .cas-input { display: none; }.dilution-editor { margin-left: 0; grid-template-columns: 1fr; }.notebook-page > footer { margin-left: -26px; padding-left: 26px; } }
