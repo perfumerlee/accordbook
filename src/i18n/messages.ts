@@ -8,4 +8,4 @@ export type MessageSet = {
   [Key in keyof typeof messages.en]: typeof messages.en[Key] extends (...args: infer Args) => infer Result
     ? (...args: Args) => Result
     : string
-}
+} & { interpretation?: string }

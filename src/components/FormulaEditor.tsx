@@ -1,80 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Formula, FormulaMaterial } from '../models/formula'
+import { calculateDilution } from '../services/dilutionCalculator'
 import { calculateFormulaTotals, calculatePercent } from '../services/formulaCalculator'
 import { isSolventMaterial } from '../services/solventClassifier'
-import type { AutosaveStatus } from '../storage/storageService'
 import type { MessageSet } from '../i18n/messages'
+import type { AutosaveStatus } from '../storage/storageService'
 
-interface FormulaEditorProps {
-  formula: Formula
-  autosaveStatus: AutosaveStatus
-  onChange: (formula: Formula) => void
-  messages: MessageSet
-}
+interface Props { formula: Formula; autosaveStatus: AutosaveStatus; messages: MessageSet; language?: 'en' | 'ko'; onLanguageChange?: (language: 'en' | 'ko') => void; onChange: (formula: Formula) => void }
+const newRow = (): FormulaMaterial => ({ id: crypto.randomUUID(), parts: '', material: '' })
+const fixed = (value: number, digits = 2) => value.toFixed(digits)
 
-const emptyRow = (): FormulaMaterial => ({ id: crypto.randomUUID(), parts: '', material: '' })
-const displayNumber = (value: number, digits = 2) => value.toFixed(digits)
-
-export function FormulaEditor({ formula, autosaveStatus, onChange, messages: t }: FormulaEditorProps) {
+export function FormulaEditor({ formula, autosaveStatus, messages: t, language = 'en', onLanguageChange = () => undefined, onChange }: Props) {
   const totals = calculateFormulaTotals(formula.rows)
   const update = (changes: Partial<Formula>) => onChange({ ...formula, ...changes, updatedAt: new Date().toISOString() })
-  const updateRow = (id: string, changes: Partial<FormulaMaterial>) =>
-    update({ rows: formula.rows.map((row) => row.id === id ? { ...row, ...changes } : row) })
-  const removeRow = (id: string) => update({ rows: formula.rows.filter((row) => row.id !== id) })
-
-  return (
-    <section className="editor-content">
-      <header className="formula-header">
-        <div className="title-block">
-          <label className="section-label" htmlFor="formula-name">{t.formula}</label>
-          <input id="formula-name" className="formula-name" data-user-content="formula-name" value={formula.name} placeholder={t.untitled} onChange={(event) => update({ name: event.target.value })} />
-        </div>
-        <div className="header-meta">
-          <div><span>{t.formulaId}</span><strong>{formula.formulaId}</strong></div>
-          <div><span>{t.date}</span><strong>{formula.date.replace(/-/g, ' / ')}</strong></div>
-          <span className={`autosave-status ${autosaveStatus}`}>{autosaveStatus === 'saving' ? t.saving : autosaveStatus === 'saved-locally' ? t.savedLocally : t.sessionOnly}</span>
-        </div>
-      </header>
-
-      <div className="formula-table" role="table" aria-label="Formula materials">
-        <div className="formula-table-header" role="row"><span>{t.parts}</span><span>{t.material}</span><span>{t.cas}</span><span>{t.percent}</span><span>{t.actions}</span></div>
-        {formula.rows.map((row) => <FormulaRow key={row.id} row={row} onChange={updateRow} onRemove={removeRow} messages={t} />)}
-      </div>
-      <button className="add-row" type="button" onClick={() => update({ rows: [...formula.rows, emptyRow()] })}>{t.addMaterial}</button>
-
-      <section className="total-panel">
-        <h3>{t.total}</h3>
-        <div className="total-grid">
-          <span>{t.formula}</span><strong>{totals.totalParts.toLocaleString()} / 1,000</strong>
-          <span>{t.batch}</span><strong>{displayNumber(totals.batchWeightGrams)} g</strong>
-          <span>{t.concentrate}</span><strong>{displayNumber(totals.concentratePercent)}%</strong>
-          <span>{t.solvent}</span><strong>{displayNumber(totals.solventPercent)}% · {displayNumber(totals.batchWeightGrams * totals.solventPercent / 100)} g</strong>
-        </div>
-        <p className={totals.complete ? 'complete' : 'incomplete'}>{totals.complete ? t.complete : totals.differenceParts > 0 ? t.addParts(totals.differenceParts) : t.reduceParts(Math.abs(totals.differenceParts))}</p>
-      </section>
-
-      <section className="notes-section">
-        <label className="section-label" htmlFor="formula-notes">{t.notes}</label>
-        <textarea id="formula-notes" value={formula.notes} placeholder={t.labNotes} onChange={(event) => update({ notes: event.target.value })} />
-      </section>
-    </section>
-  )
+  const updateRow = (id: string, changes: Partial<FormulaMaterial>) => update({ rows: formula.rows.map((row) => row.id === id ? { ...row, ...changes } : row) })
+  return <>
+    <header className="note-header"><div className="title-area"><div className="title-primary"><label>{t.formula}</label><input id="formula-name" className="formula-name" value={formula.name} placeholder={t.untitled} onChange={(event) => update({ name: event.target.value })} /></div><div className="title-hint">1,000 parts = 10.00 g · 1 part = 0.01 g</div></div><div><div className="page-box"><div className="page-key">{t.formulaId}</div><div className="page-value">{formula.formulaId}</div><div className="page-key">{t.date}</div><div className="page-value">{formula.date.replace(/-/g, ' / ')}</div></div><div className="header-tools"><div className={`autosave-status ${autosaveStatus}`}><span className="autosave-dot" /><span>{autosaveStatus === 'saving' ? t.saving : autosaveStatus === 'saved-locally' ? t.savedLocally : t.sessionOnly}</span></div><LanguageToggle language={language} onChange={onLanguageChange} messages={t} /></div></div></header>
+    <div className="content"><div className="table-head"><div>{t.parts}</div><div>{t.material}</div><div>{t.cas}</div><div>{t.percent}</div><div>{t.actions}</div></div><div className="rows">{formula.rows.map((row) => <FormulaRow key={row.id} row={row} messages={t} onChange={updateRow} onRemove={(id) => update({ rows: formula.rows.filter((item) => item.id !== id) })} />)}</div><div className="editor-actions"><button className="btn" type="button" onClick={() => update({ rows: [...formula.rows, newRow()] })}>{t.addMaterial}</button></div><div className="summary-grid"><div><div className="notes-title">{t.notes}</div><textarea className="notes" value={formula.notes} placeholder={t.labNotes} onChange={(event) => update({ notes: event.target.value })} /></div><div className="metrics"><div className="summary-title">{t.total}</div><div className="simple-total"><div className="main-line"><span>{t.formula}</span><strong>{totals.totalParts.toLocaleString()} / 1,000</strong></div><div className="sub-line"><span>{t.batch} <strong>{fixed(totals.batchWeightGrams)} g</strong></span><span>{t.concentrate} <strong>{fixed(totals.concentratePercent)}%</strong></span><span>{t.solvent} <strong>{fixed(totals.solventPercent)}% · {fixed(totals.batchWeightGrams * totals.solventPercent / 100)} g</strong></span></div></div><div className={totals.complete ? 'status ok' : 'status bad'}>{totals.complete ? t.complete : totals.differenceParts > 0 ? t.addParts(totals.differenceParts) : t.reduceParts(Math.abs(totals.differenceParts))}</div></div></div></div>
+  </>
 }
 
-function FormulaRow({ row, onChange, onRemove, messages: t }: { row: FormulaMaterial; onChange: (id: string, changes: Partial<FormulaMaterial>) => void; onRemove: (id: string) => void; messages: MessageSet }) {
-  const [dilutionOpen, setDilutionOpen] = useState(false)
-  const dilution = row.dilution
-  const notation = dilution?.enabled ? `@${dilution.percent}% in ${dilution.solvent || 'ALC'}` : ''
-  const setDilution = (changes: Partial<NonNullable<FormulaMaterial['dilution']>>) => onChange(row.id, { dilution: { enabled: true, percent: 10, solvent: 'ALC', ...dilution, ...changes } })
+function LanguageToggle({ language, onChange, messages: t }: { language: 'en' | 'ko'; onChange: (language: 'en' | 'ko') => void; messages: MessageSet }) { return <div className="language-toggle" aria-label="Language"><button className={`lang-btn ${language === 'en' ? 'active' : ''}`} aria-label={t.english} title={t.english} aria-pressed={language === 'en'} type="button" onClick={() => onChange('en')}><svg className="flag-svg" viewBox="0 0 7410 3900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 0h7410v3900H0" fill="#b31942"/><path d="M0 450h7410m0 600H0m0 600h7410m0 600H0m0 600h7410m0 600H0" stroke="#fff" strokeWidth="300"/><path d="M0 0h2964v2100H0" fill="#0a3161"/><defs><path id="us-star" d="M247 90 317.534 307.082 132.873 172.918H361.127L176.466 307.082z" /></defs><g fill="#fff"><g id="rowA"><use href="#us-star" x="0" y="0"/><use href="#us-star" x="494" y="0"/><use href="#us-star" x="988" y="0"/><use href="#us-star" x="1482" y="0"/><use href="#us-star" x="1976" y="0"/><use href="#us-star" x="2470" y="0"/></g><g id="rowB"><use href="#us-star" x="247" y="210"/><use href="#us-star" x="741" y="210"/><use href="#us-star" x="1235" y="210"/><use href="#us-star" x="1729" y="210"/><use href="#us-star" x="2223" y="210"/></g><use href="#rowA" y="420"/><use href="#rowB" y="420"/><use href="#rowA" y="840"/><use href="#rowB" y="840"/><use href="#rowA" y="1260"/><use href="#rowB" y="1260"/><use href="#rowA" y="1680"/></g></svg></button><button className={`lang-btn ${language === 'ko' ? 'active' : ''}`} aria-label={t.korean} title={t.korean} aria-pressed={language === 'ko'} type="button" onClick={() => onChange('ko')}><svg className="flag-svg" viewBox="-72 -48 144 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M-72-48v96H72v-96z"/><g stroke="#000" strokeWidth="4"><path transform="rotate(33.69006752598)" d="M-50-12v24m6 0v-24m6 0v24m76 0V1m0-2v-11m6 0v11m0 2v11m6 0V1m0-2v-11"/><path transform="rotate(-33.69006752598)" d="M-50-12v24m6 0V1m0-2v-11m6 0v24m76 0V1m0-2v-11m6 0v24m6 0V1m0-2v-11"/></g><g transform="rotate(33.69006752598)"><path fill="#cd2e3a" d="M12 0a18 18 0 11-36 0 24 24 0 1148 0"/><path fill="#0047a0" d="M0 0a12 12 0 1124 0 24 24 0 11-48 0 12 12 0 1024 0"/></g></svg></button></div> }
 
-  return <div className="formula-row-wrap">
-    <div className={`formula-row ${row.marked ? 'marked' : ''}`} role="row">
-      <input aria-label={t.parts} type="number" min="0" step="1" value={row.parts} onChange={(event) => onChange(row.id, { parts: event.target.value === '' ? '' : Math.max(0, Math.trunc(Number(event.target.value))) })} />
-      <div className="material-cell"><div className="material-line"><input aria-label={t.material} value={row.material} placeholder={t.material} onChange={(event) => onChange(row.id, { material: event.target.value })} />{isSolventMaterial(row.material) && <span className="solvent-badge">SOLVENT</span>}</div>{notation && <span className="dilution-notation">{notation}</span>}</div>
-      <input className="cas-input" aria-label={t.cas} value={row.cas ?? ''} placeholder={t.cas} onChange={(event) => onChange(row.id, { cas: event.target.value })} />
-      <output>{calculatePercent(row.parts).toFixed(1)}%</output>
-      <div className="row-actions"><button type="button" className={dilution ? 'action active' : 'action'} onClick={() => setDilutionOpen(!dilutionOpen)}>DIL</button><button type="button" className={row.marked ? 'action active' : 'action'} aria-label={t.mark} onClick={() => onChange(row.id, { marked: !row.marked })}>{t.mark}</button><button type="button" className="action remove" aria-label="Remove row" onClick={() => onRemove(row.id)}>×</button></div>
-    </div>
-    {dilutionOpen && <div className="dilution-editor"><label>{t.strength} <input type="number" min="0" max="100" step="1" value={dilution?.percent ?? 10} onChange={(event) => setDilution({ percent: Math.max(0, Math.min(100, Number(event.target.value))) })} />%</label><label>{t.solventCarrier} <input value={dilution?.solvent ?? 'ALC'} onChange={(event) => setDilution({ solvent: event.target.value })} /></label><button type="button" onClick={() => { onChange(row.id, { dilution: undefined }); setDilutionOpen(false) }}>{t.removeDilution}</button></div>}
-  </div>
-}
+function FormulaRow({ row, onChange, onRemove, messages: t }: { row: FormulaMaterial; onChange: (id: string, changes: Partial<FormulaMaterial>) => void; onRemove: (id: string) => void; messages: MessageSet }) { const [open, setOpen] = useState(false); const dilution = row.dilution; const notation = dilution?.enabled ? `@${dilution.percent}% in ${dilution.solvent || 'ALC'}` : ''; const setDilution = (changes: Partial<NonNullable<FormulaMaterial['dilution']>>) => onChange(row.id, { dilution: { enabled: true, percent: 10, solvent: 'ALC', ...dilution, ...changes } }); return <div className="row-wrap"><div className={`row ${row.marked ? 'marked' : ''}`}><input className="parts" aria-label={t.parts} type="number" min="0" step="1" value={row.parts} placeholder="0" onChange={(event) => onChange(row.id, { parts: event.target.value === '' ? '' : Math.max(0, Math.trunc(Number(event.target.value))) })} /><div className="material-wrap"><input className="material" aria-label={t.material} value={row.material} placeholder={t.material} onChange={(event) => onChange(row.id, { material: event.target.value })} /><div className="material-meta">{notation && <span className="dilution-suffix">{notation}</span>}{isSolventMaterial(row.material) && <span className="solvent-badge">SOLVENT</span>}</div></div><input className="cas" aria-label={t.cas} value={row.cas ?? ''} placeholder={t.cas} onChange={(event) => onChange(row.id, { cas: event.target.value })} /><div className="percent">{calculatePercent(row.parts).toFixed(1)}%</div><div className="row-actions"><button className={`dilution-btn ${dilution ? 'active' : ''}`} type="button" onClick={() => { if (!dilution) setDilution({}); setOpen(!open) }}>DIL</button><button className={`mark-btn ${row.marked ? 'active' : ''}`} type="button" aria-label={t.mark} onClick={() => onChange(row.id, { marked: !row.marked })}>▰</button><button className="remove-btn" type="button" aria-label="Remove" onClick={() => onRemove(row.id)}>×</button></div></div>{open && <div className="dilution-panel"><div><label>{t.strength}</label><input type="number" min="0" max="100" step="1" value={dilution?.percent ?? 10} onChange={(event) => setDilution({ percent: Number(event.target.value) })} /></div><div><label>{t.solventCarrier}</label><input value={dilution?.solvent ?? 'ALC'} onChange={(event) => setDilution({ solvent: event.target.value })} /></div><div><label>{t.total}</label><div className="dilution-result">{dilution && <><strong>{fixed(calculateDilution(row).solutionGrams)} g</strong> · {t.solvent} {fixed(calculateDilution(row).solventGrams)} g</>}</div><button className="btn" type="button" onClick={() => { onChange(row.id, { dilution: undefined }); setOpen(false) }}>{t.removeDilution}</button></div></div>}</div> }

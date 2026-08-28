@@ -1,10 +1,10 @@
 @media print {
   @page { margin: 16mm; }
   body { background: #fff; }
-  .sidebar, .lifecycle-actions, .autosave-status, .row-actions, .add-row, .dilution-editor, .data-section, .archive-section, .new-formula, .confirmation-backdrop, .feedback { display: none !important; }
-  .app-shell { display: block; min-height: auto; }
-  .notebook-page { margin: 0; padding: 0; min-height: auto; box-shadow: none; background: #fff; }
-  .notebook-page::before { opacity: .55; }
+  .sidebar, .lifecycle-actions, .editor-actions, .autosave-status, .row-actions, .add-row, .dilution-editor, .data-section, .archive-section, .new-formula, .confirmation-backdrop, .feedback { display: none !important; }
+  .app-shell, .app { display: block; min-height: auto; }
+  .notebook-page, .main, .notebook { margin: 0; padding: 0; min-height: auto; box-shadow: none; background: #fff; }
+  .notebook-page::before, .notebook::before { opacity: .55; }
   .formula-row-wrap, .total-panel, .notes-section { break-inside: avoid; }
   .formula-name { color: #000; }
   .formula-row input { border-color: transparent; }

@@ -1,5 +1,7 @@
 /* Responsive polish: desktop remains the primary notebook experience. */
 @media (min-width: 641px) and (max-width: 1024px) {
+  .app { grid-template-columns: 210px minmax(0, 1fr); }
+  .main { padding: 12px; }
   .app-shell { grid-template-columns: 210px minmax(0, 1fr); }
   .sidebar { padding: 30px 20px 24px; }
   .sidebar h1 { font-size: 21px; }
@@ -9,6 +11,8 @@
 }
 
 @media (max-width: 640px) {
+  .app { display: block; }
+  .main { padding: 8px; }
   html, body, #root { max-width: 100%; overflow-x: hidden; }
   .app-shell { width: 100%; }
   .sidebar { padding: 22px max(16px, env(safe-area-inset-left)) 20px; }
@@ -55,4 +59,36 @@
   .formula-table-header { letter-spacing: 0; }
   .action { font-size: 11px; min-width: 25px; padding-left: 2px; padding-right: 2px; }
   .formula-name { font-size: 27px; }
+}
+@media (max-width: 850px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { border-right: 0; border-bottom: 1px solid #cfc4b3; }
+  .main { padding: 12px; }
+  .notebook::before { left: 24px; }
+  .note-header, .content { padding-left: 42px; }
+  .note-footer { padding-left: 42px; }
+  .note-header { grid-template-columns: 1fr; gap: 14px; }
+  .metrics { border-left: 0; padding-left: 0; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .table-head, .row { grid-template-columns: 74px minmax(160px,1fr) 100px 64px 70px; }
+  .dilution-panel { margin-left: 0; grid-template-columns: 90px 120px minmax(0,1fr); }
+}
+
+@media (max-width: 640px) {
+  .sidebar { padding: 16px 14px; }
+  .main { padding: 8px; min-width: 0; }
+  .notebook { border-radius: 12px; }
+  .notebook::before { left: 14px; }
+  .note-header, .content, .note-footer { padding-left: 26px; padding-right: 14px; }
+  .note-header { padding-top: 16px; padding-bottom: 14px; }
+  .formula-name { font-size: 24px; }
+  .page-box { width: 100%; }
+  .header-tools { justify-content: space-between; gap: 8px; }
+  .autosave-status { min-width: 112px; }
+  .table-head, .row { grid-template-columns: 62px minmax(0,1fr) 54px 64px; gap: 4px; }
+  .table-head > :nth-child(3), .cas { display: none; }
+  .row input, .notes { font-size: 16px; }
+  .dilution-panel { grid-template-columns: 1fr; }
+  .archive-panel { max-height: 42vh; overflow: auto; }
+  .privacy { position: static; width: auto; margin-top: 18px; }
 }
