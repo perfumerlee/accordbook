@@ -15,9 +15,11 @@ export interface StorageDatabase {
   readonly mode: StorageMode
   get<T extends StoreValue>(store: StoreName, key: string): Promise<T | undefined>
   getAll<T extends StoreValue>(store: StoreName): Promise<T[]>
+  entries(store: StoreName): Promise<Array<[string, StoreValue]>>
   put(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
   clear(): Promise<void>
+  replaceAll(data: { formulas: Formula[]; archive: Formula[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
 }
 
 function createMemoryDatabase(): StorageDatabase {
@@ -26,9 +28,11 @@ function createMemoryDatabase(): StorageDatabase {
     mode: 'memory',
     async get<T extends StoreValue>(store: StoreName, key: string) { return stores.get(store)!.get(key) as T | undefined },
     async getAll<T extends StoreValue>(store: StoreName) { return [...stores.get(store)!.values()] as T[] },
+    async entries(store: StoreName) { return [...stores.get(store)!.entries()] },
     async put(store: StoreName, key: string, value: StoreValue) { stores.get(store)!.set(key, value) },
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
     async clear() { stores.forEach((store) => store.clear()) },
+    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
   }
 }
 
@@ -48,9 +52,21 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
     mode: 'indexeddb',
     async get<T extends StoreValue>(store: StoreName, key: string) { return run(store, (objectStore) => objectStore.get(key)) as Promise<T | undefined> },
     async getAll<T extends StoreValue>(store: StoreName) { return run(store, (objectStore) => objectStore.getAll()) as Promise<T[]> },
+    async entries(store: StoreName) { return run(store, (objectStore) => objectStore.getAllKeys()).then((keys) => Promise.all(keys.map(async (key) => [String(key), await run(store, (objectStore) => objectStore.get(key))] as [string, StoreValue]))) },
     async put(store: StoreName, key: string, value: StoreValue) { await run(store, (objectStore) => objectStore.put(value, key)) },
     async delete(store: StoreName, key: string) { await run(store, (objectStore) => objectStore.delete(key)) },
     async clear() { for (const store of STORE_NAMES) await run(store, (objectStore) => objectStore.clear()) },
+    async replaceAll(data) {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(STORE_NAMES, 'readwrite')
+        transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB replacement failed'))
+        for (const name of STORE_NAMES) transaction.objectStore(name).clear()
+        for (const item of data.formulas) transaction.objectStore('formulas').put(item, item.id)
+        for (const item of data.archive) transaction.objectStore('archive').put(item, item.id)
+        if (data.settings) transaction.objectStore('settings').put(data.settings, 'current')
+        for (const [key, value] of Object.entries(data.meta)) transaction.objectStore('meta').put(value, key)
+      })
+    },
   }
 }
 
