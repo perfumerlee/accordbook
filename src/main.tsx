@@ -1,13 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App'
-import './styles/global.css'
-import './styles/reference-parity.css'
-import './styles/responsive.css'
-import './styles/print.css'
+import AccordbookNotebook from './components/AccordbookNotebook'
+import Rev30Preview from './rev30-preview/Rev30Preview'
+
+const isRev30Preview = new URLSearchParams(window.location.search).get('rev30preview') === '1'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {isRev30Preview ? <Rev30Preview /> : <AccordbookNotebook />}
   </StrictMode>,
 )
