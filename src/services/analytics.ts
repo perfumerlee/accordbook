@@ -29,7 +29,7 @@ export function trackEvent(name: ProductAnalyticsEvent, params?: AnalyticsParams
   }
 }
 
-export function trackFormulaCreated(method: 'new' | 'duplicate'): void {
+export function trackFormulaCreated(method: 'new' | 'duplicate' | 'import'): void {
   trackEvent('formula_created', { creation_method: method })
 }
 

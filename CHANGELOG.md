@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.01 - 2026-08-29
+
+### Added
+
+- Export current Formula as a shareable Formula File
+- Import Formula without replacing the existing Notebook
+- Clear Formula File and Notebook Backup separation
+- `formula_created` analytics for imported formulas
+- Public v1.01 versioning
+
 ## v1.0.0 - 2026-08-28
 
 ### Added
