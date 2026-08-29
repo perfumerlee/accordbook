@@ -20,6 +20,8 @@ export interface Formula {
   name: string
   notes: string
   rows: FormulaMaterial[]
+  intendedUsagePercent?: number
+  intendedProductType?: 'leave-on' | 'rinse-off'
   createdAt: string
   updatedAt: string
   archivedAt?: string

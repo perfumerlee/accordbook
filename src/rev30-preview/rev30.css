@@ -581,9 +581,9 @@ input:focus, textarea:focus{
   overflow:hidden;
 }
 .material-wrap .material{
-  flex:0 1 auto;
-  width:auto;
-  field-sizing:content;
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
   padding-right:4px;
 }
 .material-meta{
@@ -868,6 +868,7 @@ input:focus, textarea:focus{
   .note-header,.content,.note-footer{padding-left:42px}
   .note-header{grid-template-columns:1fr}
   .summary-grid{grid-template-columns:1fr}
+  .ifra-screening-grid{grid-template-columns:1fr}
   .metrics{border-left:0;padding-left:0}
   .table-head,.row{grid-template-columns:74px minmax(160px,1fr) 100px 64px 70px;gap:5px}
   .dilution-panel{margin-left:0;grid-template-columns:90px 120px 1fr;gap:8px}
@@ -1123,6 +1124,186 @@ html[lang="ko"] .notes{
 }
 html[lang="ko"] .formula-name{
   line-height:36px;
+}
+
+.ifra-panel{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:14px;
+}
+.ifra-status{
+  font-size:11px;
+  color:var(--ink);
+}
+.ifra-status.muted{
+  color:var(--muted);
+}
+.ifra-category-select{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.ifra-help-toggle{
+  align-self:flex-start;
+  font-size:10px;
+  padding:3px 8px;
+}
+.ifra-category-help{
+  line-height:1.5;
+}
+.ifra-category-list{
+  margin:8px 0 0;
+  padding:0 0 0 16px;
+  max-height:260px;
+  overflow-y:auto;
+  font-size:10.5px;
+  line-height:1.5;
+}
+.ifra-category-list li{
+  margin-bottom:5px;
+}
+.ifra-category-list strong{
+  font-family:"Courier New", monospace;
+  margin-right:4px;
+}
+.ifra-slot{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px 10px 4px;
+  border:1px solid rgba(201,119,60,.28);
+  border-radius:8px;
+}
+.ifra-slot-title{
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--ink);
+}
+.ifra-category-select label{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.ifra-category-select select{
+  font-size:12px;
+  padding:5px 6px;
+}
+.ifra-badge{
+  display:inline-flex;
+  align-items:center;
+  white-space:nowrap;
+  font-size:9px;
+  font-family:"Courier New", monospace;
+  font-weight:700;
+  padding:0 5px;
+  border-radius:999px;
+  line-height:2;
+}
+.ifra-badge.matched{
+  color:#3f5b4b;
+  border:1px solid rgba(63,91,75,.4);
+  background:rgba(116,196,178,.16);
+}
+.ifra-badge.unmatched{
+  color:#8a5a2a;
+  border:1px solid rgba(185,144,105,.5);
+  background:rgba(244,201,85,.18);
+}
+.ifra-screening{
+  margin:22px 0 0;
+  padding:18px 20px;
+  border:1px solid #bca687;
+  border-radius:10px;
+  background:rgba(244,201,85,.08);
+}
+.ifra-screening-title{
+  font-family:Georgia, "Times New Roman", serif;
+  font-style:italic;
+  font-size:16px;
+  margin-bottom:12px;
+}
+.ifra-intended-usage{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  column-gap:24px;
+  row-gap:8px;
+  margin-bottom:16px;
+  padding-bottom:14px;
+  border-bottom:1px dashed rgba(201,119,60,.4);
+}
+.ifra-intended-usage label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  color:var(--muted);
+  flex:0 0 auto;
+}
+.ifra-intended-usage .ifra-summary-note{
+  flex-basis:100%;
+  margin-top:0;
+}
+.ifra-intended-usage input{
+  width:90px;
+  height:32px;
+  padding:5px 8px;
+  border:1px solid #bca687;
+  border-radius:6px;
+  background:rgba(255,255,255,.6);
+  font-family:"Courier New", monospace;
+  font-size:13px;
+  color:var(--ink);
+}
+.ifra-intended-usage select{
+  height:32px;
+  padding:5px 6px;
+  font-size:12px;
+  border:1px solid #bca687;
+  border-radius:6px;
+  background:rgba(255,255,255,.6);
+}
+.ifra-screening-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px 28px;
+}
+.ifra-screening-block{
+  padding-bottom:6px;
+}
+.ifra-summary-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:12px;
+  padding:4px 0;
+}
+.ifra-summary-row span{color:var(--muted)}
+.ifra-summary-row strong{
+  font-family:"Courier New", monospace;
+  font-size:13px;
+}
+.ifra-summary-note{
+  font-size:10.5px;
+  color:var(--muted);
+  margin:2px 0 4px;
+}
+.ifra-summary-note.warn{
+  color:var(--danger);
+}
+.ifra-disclaimer{
+  margin-top:10px;
+  font-size:10px;
+  font-style:italic;
+  color:var(--muted);
+  line-height:1.5;
 }
 
 

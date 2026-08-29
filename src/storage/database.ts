@@ -1,15 +1,17 @@
 import type { Formula } from '../models/formula'
 import type { AccordbookSettings } from '../models/settings'
+import type { IfraDataset } from '../models/ifra'
+import type { NaturalContributionDataset } from '../models/naturalContribution'
 
-export type StoreName = 'formulas' | 'archive' | 'settings' | 'meta'
+export type StoreName = 'formulas' | 'archive' | 'settings' | 'meta' | 'ifraMaterials' | 'naturalContributions'
 export type StorageMode = 'indexeddb' | 'memory'
 
-type StoreValue = Formula | AccordbookSettings | number
+type StoreValue = Formula | AccordbookSettings | IfraDataset | NaturalContributionDataset | number
 type StoreMap = Map<string, StoreValue>
 
 const DB_NAME = 'accordbook'
-const DB_VERSION = 1
-const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'settings', 'meta']
+const DB_VERSION = 3
+const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'settings', 'meta', 'ifraMaterials', 'naturalContributions']
 
 export interface StorageDatabase {
   readonly mode: StorageMode
@@ -19,7 +21,7 @@ export interface StorageDatabase {
   put(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
   clear(): Promise<void>
-  replaceAll(data: { formulas: Formula[]; archive: Formula[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
+  replaceAll(data: { formulas: Formula[]; archive: Formula[]; settings?: AccordbookSettings; meta: Record<string, number>; ifraMaterials?: IfraDataset; naturalContributions?: NaturalContributionDataset }): Promise<void>
 }
 
 function createMemoryDatabase(): StorageDatabase {
@@ -32,7 +34,7 @@ function createMemoryDatabase(): StorageDatabase {
     async put(store: StoreName, key: string, value: StoreValue) { stores.get(store)!.set(key, value) },
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
     async clear() { stores.forEach((store) => store.clear()) },
-    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
+    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value); if (data.ifraMaterials) await this.put('ifraMaterials', 'current', data.ifraMaterials); if (data.naturalContributions) await this.put('naturalContributions', 'current', data.naturalContributions) },
   }
 }
 
@@ -65,6 +67,8 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
         for (const item of data.archive) transaction.objectStore('archive').put(item, item.id)
         if (data.settings) transaction.objectStore('settings').put(data.settings, 'current')
         for (const [key, value] of Object.entries(data.meta)) transaction.objectStore('meta').put(value, key)
+        if (data.ifraMaterials) transaction.objectStore('ifraMaterials').put(data.ifraMaterials, 'current')
+        if (data.naturalContributions) transaction.objectStore('naturalContributions').put(data.naturalContributions, 'current')
       })
     },
   }
