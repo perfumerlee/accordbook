@@ -23,4 +23,11 @@ export interface Formula {
   createdAt: string
   updatedAt: string
   archivedAt?: string
+  provenance?: FormulaProvenance
 }
+
+export type ProvenanceOriginType = 'original' | 'imported' | 'duplicated' | 'reference' | 'unknown'
+export interface ClaimedSource { originType: ProvenanceOriginType; author?: string; sourceTitle?: string; sourceUrl?: string; reference?: string }
+export type RevisionEventType = 'created' | 'imported' | 'duplicated' | 'modified' | 'source_updated' | 'archived' | 'restored' | 'exported' | 'provenance_initialized'
+export interface FormulaRevision { revisionId: string; sequence: number; eventType: RevisionEventType; recordedAt: string; contentFingerprint: string; previousRevisionHash: string | null; revisionHash: string }
+export interface FormulaProvenance { schemaVersion: 1; recordId: string; rootRecordId: string; parentRecordId: string | null; parentFingerprint: string | null; claimedSource: ClaimedSource; revisions: FormulaRevision[]; currentFingerprint: string; currentRevisionHash: string }

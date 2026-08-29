@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.02 - 2026-08-29
+
+### Added
+
+- Formula provenance foundation with claimed source and lineage metadata
+- Deterministic SHA-256 content fingerprints
+- Local revision records and tamper-evident hash chain verification
+- Provenance preservation for new and duplicated formulas
+
 ## v1.01 - 2026-08-29
 
 ### Added
