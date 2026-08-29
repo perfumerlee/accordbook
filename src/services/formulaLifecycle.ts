@@ -5,15 +5,16 @@ import { createProvenance } from './provenance'
 
 const emptyRow = () => ({ id: crypto.randomUUID(), rowId: crypto.randomUUID(), parts: '' as const, material: '' })
 const timestamp = () => new Date().toISOString()
+const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
 export async function createFormula(storage: AccordbookStorage, prefix = 'ACC'): Promise<Formula> {
   const date = new Date(); const stamp = timestamp()
-  const formula: Formula = { id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: stamp.slice(0, 10), name: '', notes: '', rows: [emptyRow()], createdAt: stamp, updatedAt: stamp }
+  const formula: Formula = { id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: localDate(date), name: '', notes: '', rows: [emptyRow()], createdAt: stamp, updatedAt: stamp }
   return { ...formula, provenance: await createProvenance(formula, 'created', { originType: 'not_specified' }) }
 }
 export async function duplicateFormula(storage: AccordbookStorage, source: Formula, prefix = 'ACC'): Promise<Formula> {
   const date = new Date(); const stamp = timestamp()
-  const copy: Formula = { ...source, id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: stamp.slice(0, 10), createdAt: stamp, updatedAt: stamp, archivedAt: undefined, rows: source.rows.map((row) => ({ ...row, id: crypto.randomUUID(), rowId: crypto.randomUUID(), dilution: row.dilution ? { ...row.dilution } : undefined })) }
+  const copy: Formula = { ...source, id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: localDate(date), createdAt: stamp, updatedAt: stamp, archivedAt: undefined, rows: source.rows.map((row) => ({ ...row, id: crypto.randomUUID(), rowId: crypto.randomUUID(), dilution: row.dilution ? { ...row.dilution } : undefined })) }
   copy.provenance = await createProvenance(copy, 'duplicated', source.provenance?.claimedSource ?? { originType: 'duplicated' }, source.provenance ? { rootRecordId: source.provenance.rootRecordId, parentRecordId: source.provenance.recordId, parentFingerprint: source.provenance.currentFingerprint } : undefined)
   await storage.formulas.save(copy); return copy
 }
