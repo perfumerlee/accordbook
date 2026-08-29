@@ -61,7 +61,7 @@ Provenance is designed to preserve evidence of how a formula has changed without
 
 ## Formula Time Machine
 
-Accordbook v1.03 adds reconstruction support for formula revisions.
+Accordbook v1.03 preserves local provenance and revision evidence for formula revisions.
 
 When sufficient reconstruction data is available, a past formula state can be rebuilt from checkpoints and recorded revision changes.
 

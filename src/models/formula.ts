@@ -30,8 +30,8 @@ export interface Formula {
 export type ProvenanceOriginType = 'original' | 'imported' | 'duplicated' | 'reference' | 'unknown'
 export interface ClaimedSource { originType: ProvenanceOriginType; author?: string; sourceTitle?: string; sourceUrl?: string; reference?: string }
 export type RevisionEventType = 'created' | 'imported' | 'duplicated' | 'modified' | 'source_updated' | 'archived' | 'restored' | 'exported' | 'provenance_initialized'
-export interface FormulaRevision { revisionId: string; sequence: number; eventType: RevisionEventType; recordedAt: string; contentFingerprint: string; previousRevisionHash: string | null; revisionHash: string }
-export interface FormulaProvenance { schemaVersion: 1; recordId: string; rootRecordId: string; parentRecordId: string | null; parentFingerprint: string | null; claimedSource: ClaimedSource; revisions: FormulaRevision[]; currentFingerprint: string; currentRevisionHash: string; checkpoint?: ProvenanceCheckpoint }
+export interface FormulaRevision { revisionId: string; sequence: number; eventType: RevisionEventType; recordedAt: string; contentFingerprint: string; previousRevisionHash: string | null; revisionHash: string; revisionHashPayloadVersion?: 1 }
+export interface FormulaProvenance { schemaVersion: 1; recordId: string; rootRecordId: string; parentRecordId: string | null; parentFingerprint: string | null; claimedSource: ClaimedSource; revisions: FormulaRevision[]; currentFingerprint: string; currentRevisionHash: string; revisionHashPayloadVersion?: 1; checkpoint?: ProvenanceCheckpoint }
 export interface FormulaSnapshotRow { rowId: string; material: string; cas?: string; parts: number | ''; dilution?: FormulaDilution }
 export interface ReconstructionDelta { type: 'row_added' | 'row_removed' | 'row_updated'; rowId: string; index?: number; before?: FormulaSnapshotRow; after?: FormulaSnapshotRow }
 export interface ReconstructionCheckpoint { revisionId: string; sequence: number; recordedAt: string; fingerprint: string; snapshot: FormulaSnapshotRow[] }

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Frozen Canonicalization v1 and official evidence test vectors; added explicit revision hash payload version metadata without changing existing hashes
+
 - Stable material row identity and reconstruction delta foundation
 - Formula Time Machine snapshot reconstruction support
 - Revision checkpoint interval policy

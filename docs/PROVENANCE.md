@@ -5,3 +5,6 @@ Accordbook v1.02 keeps provenance locally with each formula. Claimed Source is u
 The content fingerprint canonicalizes material rows using trimmed text, uppercase solvent tokens, numeric parts, and deterministic row ordering. Formula name, notes, IDs, dates, highlight state, and provenance metadata are excluded.
 
 New formulas begin a local lineage. Duplicates retain the parent record and fingerprint while receiving a new Formula ID and record ID. This is tamper-evident, not tamper-proof: there is no digital signature, trusted timestamp, external registry, or legal authorship certification.
+## Frozen verification specifications
+
+Canonicalization v1 is frozen in [CANONICALIZATION-V1.md](CANONICALIZATION-V1.md) with official vectors. Revision hashes use the existing SHA-256 payload as revisionHashPayloadVersion 1; older revisions without this metadata default to version 1, while unsupported versions are unavailable rather than verified. The payload excludes the version metadata so existing hashes remain unchanged. These local timestamps and hashes are tamper-evident, not tamper-proof, and are not trusted timestamps.
