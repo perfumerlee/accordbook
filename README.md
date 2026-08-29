@@ -28,6 +28,10 @@ Built by a perfumer, for perfumers.
 - Comparison between past revisions and the current formula
 - Restoration of past formula states as new revisions without rewriting history
 - Current-formula browser printing
+- Header Quick Print with a compact printer action
+- Formula Origins with Original, Inspired by, Adapted from, and Unknown states
+- Origin details with optional creator, note, and validated HTTP/HTTPS link fields
+- Formula Actions help popover for Dilution, Highlight, and Remove controls
 - English / Korean interface
 - Desktop, tablet, and mobile-safe layouts
 
@@ -62,6 +66,8 @@ Provenance is designed to preserve evidence of how a formula has changed without
 ## Formula Time Machine
 
 Accordbook v1.04 preserves local provenance and revision evidence for formula revisions, including optional Formula Origins.
+
+Origin records are local claims. `Not specified` means no origin has been recorded, while `Unknown` means the user intentionally recorded that the starting point is uncertain. Origin metadata does not affect the formula content fingerprint.
 
 When sufficient reconstruction data is available, a past formula state can be rebuilt from checkpoints and recorded revision changes.
 
@@ -115,9 +121,9 @@ npm run dev
 
 Public Accordbook versions use:
 
-`v1.01` → `v1.02` → `v1.03` → ...
+`v1.01` → `v1.02` → `v1.03` → `v1.04` → ...
 
-The package version for Accordbook v1.03 is `1.0.3`.
+The package version for Accordbook v1.04 is `1.0.4`.
 
 ## Try Accordbook
 
