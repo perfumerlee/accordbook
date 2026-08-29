@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.04 - 2026-08-30
+
+### Added
+
+- Optional Formula Origins with Original, Inspired by, and Adapted from relationships
+- Editable source/reference details with append-only `source_updated` provenance history
+- Origin preservation across Formula export/import and local provenance claims
+
 ## v1.03 - 2026-08-29
 
 ### Added

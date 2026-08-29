@@ -9,7 +9,7 @@ Built by a perfumer, for perfumers.
 > **Private by default**  
 > Your formulas stay on your device.
 
-## v1.03 features
+## v1.04 features
 
 - 1,000-part formula notebook with a 10.00 g reference batch
 - Formula ID and prefix management
@@ -61,7 +61,7 @@ Provenance is designed to preserve evidence of how a formula has changed without
 
 ## Formula Time Machine
 
-Accordbook v1.03 preserves local provenance and revision evidence for formula revisions.
+Accordbook v1.04 preserves local provenance and revision evidence for formula revisions, including optional Formula Origins.
 
 When sufficient reconstruction data is available, a past formula state can be rebuilt from checkpoints and recorded revision changes.
 

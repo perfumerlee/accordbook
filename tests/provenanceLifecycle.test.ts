@@ -28,4 +28,23 @@ describe('provenance revision lifecycle', () => {
     expect(exported.provenance?.checkpoint?.fingerprint.value).not.toBe(exported.provenance?.currentFingerprint)
     expect(await verifyIntegrity(exported)).toBe('verified')
   })
+
+  it('records origin changes separately without changing composition fingerprint', async () => {
+    const initial = formula(490)
+    const created = { ...initial, provenance: await createProvenance(initial, 'created', { originType: 'not_specified' }) }
+    const before = await contentFingerprint(created)
+    const updated = await appendRevision({ ...created, provenance: { ...created.provenance!, claimedSource: { originType: 'inspired_by', title: 'Jasmine Accord', creator: 'Jean Carles' } } }, 'source_updated', { originType: 'inspired_by', title: 'Jasmine Accord', creator: 'Jean Carles' })
+    expect(updated.provenance?.revisions.map((revision) => revision.eventType)).toEqual(['created', 'source_updated'])
+    expect(updated.provenance?.currentFingerprint).toBe(before)
+    expect(await verifyIntegrity(updated)).toBe('verified')
+  })
+
+  it('clears source details when an origin is changed to original', async () => {
+    const initial = formula(490)
+    const created = { ...initial, provenance: await createProvenance(initial, 'created', { originType: 'inspired_by', title: 'Jasmine Accord', creator: 'Jean Carles', url: 'https://example.com', note: 'study' }) }
+    const updated = await appendRevision({ ...created, provenance: { ...created.provenance!, claimedSource: { originType: 'original' } } }, 'source_updated', { originType: 'original' })
+    expect(updated.provenance?.claimedSource).toEqual({ originType: 'original' })
+    expect(updated.provenance?.revisions).toHaveLength(2)
+    expect(await verifyIntegrity(updated)).toBe('verified')
+  })
 })

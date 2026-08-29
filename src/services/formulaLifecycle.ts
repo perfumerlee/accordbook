@@ -9,7 +9,7 @@ const timestamp = () => new Date().toISOString()
 export async function createFormula(storage: AccordbookStorage, prefix = 'ACC'): Promise<Formula> {
   const date = new Date(); const stamp = timestamp()
   const formula: Formula = { id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: stamp.slice(0, 10), name: '', notes: '', rows: [emptyRow()], createdAt: stamp, updatedAt: stamp }
-  return { ...formula, provenance: await createProvenance(formula) }
+  return { ...formula, provenance: await createProvenance(formula, 'created', { originType: 'not_specified' }) }
 }
 export async function duplicateFormula(storage: AccordbookStorage, source: Formula, prefix = 'ACC'): Promise<Formula> {
   const date = new Date(); const stamp = timestamp()
