@@ -1076,6 +1076,7 @@ input:focus, textarea:focus{
   .row > .percent{
     text-align:left !important;
   }
+  .table-head > div:nth-child(5){display:none}
   .rows{
     background:repeating-linear-gradient(
       to bottom,
