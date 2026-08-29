@@ -9,7 +9,7 @@ Built by a perfumer, for perfumers.
 > **Private by default**  
 > Your formulas stay on your device.
 
-## v1.02 features
+## v1.03 features
 
 - 1,000-part formula notebook with a 10.00 g reference batch
 - Formula ID and prefix management
@@ -21,6 +21,7 @@ Built by a perfumer, for perfumers.
 - Formula File export/import for sharing; imported formulas are added without replacing the Notebook
 - Notebook Backup and Restore backup for full Notebook recovery
 - Local Formula provenance with lineage, content fingerprints, and integrity history
+- Formula revision reconstruction, comparison, and restore-as-new-revision
 - Current-formula browser printing
 - English / Korean interface
 - Desktop, tablet, and mobile-safe layouts

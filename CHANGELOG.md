@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.03 - 2026-08-29
+
+### Added
+
+- Stable material row identity and reconstruction delta foundation
+- Formula Time Machine snapshot reconstruction support
+- Revision checkpoint interval policy
+
 ## v1.02 - 2026-08-29
 
 ### Added
