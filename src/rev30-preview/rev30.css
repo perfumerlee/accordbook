@@ -558,17 +558,17 @@ input:focus, textarea:focus{
   line-height:28px;
   box-shadow:none!important;
 }
-.row input:placeholder-shown{
-  background-image:linear-gradient(to right, rgba(126,108,82,.24), rgba(126,108,82,.24));
-  background-repeat:no-repeat;
-  background-position:left calc(100% - 5px);
-  background-size:70% 1px;
+.row input::placeholder{
+  color:rgba(117,105,88,.48);
+  opacity:1;
+  font-style:italic;
 }
-.row .parts:placeholder-shown{background-size:45% 1px;background-position:right calc(100% - 5px)}
-.row .material:placeholder-shown{background-size:88% 1px}
-.row .cas:placeholder-shown{background-size:65% 1px}
-.row input:placeholder-shown:hover{background-image:linear-gradient(to right, rgba(126,108,82,.42), rgba(126,108,82,.42))}
-.row input:placeholder-shown:focus{background-image:linear-gradient(to right, rgba(126,108,82,.68), rgba(126,108,82,.68))}
+.row .parts::placeholder{
+  font-style:normal;
+}
+.row input:placeholder-shown{
+  background-image:none;
+}
 .row .parts{
   text-align:right;
   font-family:"Courier New", monospace;
@@ -927,7 +927,7 @@ input:focus, textarea:focus{
 
   /* Mobile keeps only the essential formula columns. */
   .table-head,
-  .row{
+.row{
     grid-template-columns:62px minmax(0,1fr) 54px 64px;
     gap:4px;
   }
@@ -1011,8 +1011,12 @@ input:focus, textarea:focus{
     gap:5px;
   }
 }
+.rows .row{position:relative}
+.input-example-badge{position:absolute;left:3px;top:1px;padding:1px 4px;border:1px solid rgba(201,119,60,.58);border-radius:4px;background:rgba(255,248,226,.9);color:#8f542f;font-size:8px;line-height:12px;letter-spacing:.04em;font-weight:700;pointer-events:none;box-shadow:0 1px 0 rgba(126,108,82,.08)}
+.rows .row:first-child:has(.input-example-badge) .parts{padding-left:34px}
 
 @media print{
+  .input-example-badge{display:none !important}
   @page{
     size:A4 portrait;
     margin:10mm;
@@ -1100,6 +1104,8 @@ input:focus, textarea:focus{
   .notes{
     color:#000;
     background-image:none !important;
+    background-color:transparent !important;
+    box-shadow:none !important;
   }
   .notes{
     resize:none;
