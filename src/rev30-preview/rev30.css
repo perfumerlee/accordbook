@@ -70,7 +70,9 @@ html[lang="ko"] .simple-total .sub-line strong{
   padding:24px 18px;
   box-sizing:border-box;
   max-height:100vh;
-  overflow-y:auto;
+  overflow:visible;
+  position:relative;
+  z-index:10;
 }
 .brand{
   font-family: Georgia, "Times New Roman", serif;
@@ -184,10 +186,10 @@ input:focus, textarea:focus{
 .export-menu{
   display:none;
   position:absolute;
-  left:auto;
-  right:0;
+  left:0;
+  right:auto;
   top:calc(100% + 2px);
-  z-index:30;
+  z-index:1000;
   padding:6px;
   border:1px solid var(--border);
   border-radius:9px;
