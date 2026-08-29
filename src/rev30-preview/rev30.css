@@ -184,7 +184,7 @@ input:focus, textarea:focus{
 .export-menu{
   display:none;
   position:absolute;
-  left:0;
+  left:auto;
   right:0;
   top:calc(100% + 2px);
   z-index:30;
