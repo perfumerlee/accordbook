@@ -1,4 +1,14 @@
-const SOLVENTS = new Set(['ALC', 'DPG', 'IPM', 'TEC'])
+const SOLVENTS = new Set([
+  'ALC',
+  'ALCOHOL',
+  'DPG',
+  'IPM',
+  'TEC',
+  'TRIETHYL CITRATE',
+  'ETHANOL',
+  'PG',
+  'PROPYLENE GLYCOL',
+])
 
 export function normalizeMaterialName(name: string): string {
   return name.trim().toUpperCase()
