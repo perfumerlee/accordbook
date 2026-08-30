@@ -1,0 +1,8 @@
+.app > .sidebar{position:sticky;top:0;height:100vh;max-height:100vh;overflow-y:visible;align-self:start}
+.app > .sidebar{display:flex;flex-direction:column;min-height:100vh}
+.app > .sidebar .formula-list{min-height:0;max-height:64vh;overflow-y:auto}
+.app > .sidebar .archive-panel.open{max-height:24vh;overflow-y:auto}
+.app > .main .table-head > div:nth-child(2) span:last-child{color:rgba(80, 70, 55, 0.86) !important;font-size:10px !important;font-weight:500 !important}
+.app > .main .table-head > div:nth-child(2) span:last-child::before{content:'['}
+.app > .main .table-head > div:nth-child(2) span:last-child::after{content:']'}
+@media (max-width:850px){.app > .sidebar{min-height:auto}.app > .sidebar .formula-list,.app > .sidebar .archive-panel.open{max-height:none;overflow:visible}}
