@@ -531,6 +531,19 @@ input:focus, textarea:focus{
   letter-spacing:.09em;
   border-bottom:1px solid rgba(201,119,60,.38);
 }
+.material-header{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+}
+.material-count{
+  color:color-mix(in srgb, var(--muted) 75%, transparent);
+  font-family:"Courier New", monospace;
+  font-size:9px;
+  letter-spacing:.03em;
+  line-height:1;
+}
 .table-head > div:nth-child(3),
 .table-head > div:nth-child(4){text-align:left !important}
 .rows{
@@ -1157,7 +1170,7 @@ html[lang="ko"] .formula-name{
 .origin-trigger{border:0;background:transparent;color:var(--muted);font:inherit;font-size:10px;letter-spacing:.08em;padding:2px 0;cursor:pointer;text-transform:uppercase}
 .origin-trigger:hover,.origin-trigger:focus-visible{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .origin-trigger:focus-visible{outline:1px dotted var(--accent);outline-offset:4px}
-.origin-popover{position:fixed;z-index:30;width:min(360px,calc(100vw - 28px));padding:18px 16px 16px;background:rgba(255,250,240,.98);border:1px solid #d8c4aa;border-radius:12px;box-shadow:0 14px 34px rgba(76,58,37,.16);color:var(--ink)}
+.origin-popover{position:fixed;z-index:30;width:min(360px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow-y:auto;padding:18px 16px 16px;background:rgba(255,250,240,.98);border:1px solid #d8c4aa;border-radius:12px;box-shadow:0 14px 34px rgba(76,58,37,.16);color:var(--ink)}
 .origin-popover:before{content:"";position:absolute;top:-6px;right:18px;width:10px;height:10px;background:var(--paper-2);border-left:1px solid var(--border);border-top:1px solid var(--border);transform:rotate(45deg)}
 .origin-heading{font-size:9px;letter-spacing:.14em;color:var(--muted);margin-bottom:10px;font-weight:700}
 .origin-question{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:17px;line-height:1.45;margin-bottom:14px;color:#4d463d}

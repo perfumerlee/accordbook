@@ -165,7 +165,7 @@ export default function Rev30Preview() {
           <div className="content">
             <div className="table-head">
               <div style={{ textAlign: 'center' }}>Parts</div>
-              <div>Material</div>
+              <div className="material-header"><span>Material</span><span className="material-count">{rows.filter((row) => row.material.trim() !== '').length}</span></div>
               <div>CAS / Ref.</div>
               <div style={{ textAlign: 'right' }}>Percent</div>
               <div />

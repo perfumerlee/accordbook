@@ -39,7 +39,7 @@ Built by a perfumer, for perfumers.
 
 Accordbook uses a separate Formula File format for sharing individual formulas.
 
-Export the currently open formula as a JSON file and share it with another Accordbook user. When imported, the formula is added as a new entry in the recipient's Notebook without changing existing formulas or archived items.
+Export the currently open formula as an `.accordbook` file and share it with another Accordbook user. Legacy `.json` Formula Files remain supported for import. When imported, the formula is added as a new entry in the recipient's Notebook without changing existing formulas or archived items.
 
 A new local Formula ID is generated automatically when a Formula File is imported.
 
