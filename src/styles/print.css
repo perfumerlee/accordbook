@@ -19,9 +19,9 @@
   .print-vertical-divider { position: absolute !important; top: 0 !important; bottom: 0 !important; left: 72px !important; width: 1px !important; display: block !important; z-index: 3 !important; background: #d6b58f !important; pointer-events: none !important; }
   .notebook-page::before, .notebook::before { opacity: .55; }
   .formula-row-wrap, .total-panel, .notes-section { break-inside: avoid; }
-  .formula-name { color: #000; }
-  .formula-name-long { font-size: 24px !important; }
-  .formula-name-very-long { font-size: 19px !important; }
+  .title-area { container-type: inline-size; }
+  .formula-name { color: #000; font-size: clamp(19px, 5cqw, 24px) !important; line-height: 32px; min-width: 0; }
+  .formula-name-long, .formula-name-very-long { font-size: clamp(19px, 5cqw, 24px) !important; letter-spacing: -.01em; }
   .summary-grid > div:first-child { min-width: 0; }
   .summary-grid .notes { display: none !important; }
   .summary-grid .notes-print { display: block !important; min-height: 192px; padding: 5px 12px 0; color: #000; white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/32px Georgia, serif; background: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, #c8c8c8 31px, #c8c8c8 32px); }
