@@ -1,12 +1,47 @@
+.origin-print-details { display: none; }
+.origin-print-footer { display: none; }
+.notes-print { display: none; }
+.print-vertical-divider { display: none; }
+
 @media print {
   @page { margin: 16mm; }
   body { background: #fff; }
-  .sidebar, .lifecycle-actions, .editor-actions, .autosave-status, .row-actions, .add-row, .dilution-editor, .data-section, .archive-section, .new-formula, .confirmation-backdrop, .feedback { display: none !important; }
+  .sidebar, .lifecycle-actions, .editor-actions, .autosave-status, .row-actions, .add-row, .dilution-editor, .data-section, .archive-section, .new-formula, .confirmation-backdrop, .feedback, .cas-check-btn, .cas-tooltip-wrap, .cas-result { display: none !important; }
   .app-shell, .app { display: block; min-height: auto; }
   .notebook-page, .main, .notebook { margin: 0; padding: 0; min-height: auto; box-shadow: none; background: #fff; }
+  .main, .notebook, .content, .rows, .summary-grid { height: auto !important; max-height: none !important; overflow: visible !important; }
+  .notebook { break-inside: auto !important; }
+  .note-header { min-height: 136px; padding: 24px 28px 0 95px; grid-template-columns: minmax(0, 1fr) 285px; gap: 28px; border-bottom: 2px solid rgba(201,119,60,.55); }
+  .title-primary { height: 62px; }
+  .page-box { margin-top: 0; }
+  .notebook::before, .notebook::after { display: none !important; }
+  .print-vertical-divider { position: absolute !important; top: 0 !important; bottom: 0 !important; left: 72px !important; width: 1px !important; display: block !important; z-index: 3 !important; background: #d6b58f !important; pointer-events: none !important; }
   .notebook-page::before, .notebook::before { opacity: .55; }
   .formula-row-wrap, .total-panel, .notes-section { break-inside: avoid; }
   .formula-name { color: #000; }
+  .formula-name-long { font-size: 24px !important; }
+  .formula-name-very-long { font-size: 19px !important; }
+  .summary-grid > div:first-child { min-width: 0; }
+  .summary-grid .notes { display: none !important; }
+  .summary-grid .notes-print { display: block !important; min-height: 192px; padding: 5px 12px 0; color: #000; white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/32px Georgia, serif; background: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, #c8c8c8 31px, #c8c8c8 32px); }
+  .simple-total .main-line { margin-bottom: 8px; }
+  .simple-total .main-line strong { font-size: 22px; }
+  .simple-total .total-details { display: grid; gap: 5px; margin-top: 10px; }
+  .simple-total .total-details > div { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; }
+  .simple-total .total-details span { color: #6a5945; font-size: 11px; }
+  .simple-total .total-details strong { font: 12px "Courier New", monospace; font-weight: 400; text-align: right; white-space: nowrap; }
+  .simple-total .total-status { margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(201,119,60,.22); display: grid; gap: 5px; }
+  .simple-total .total-status:has(.status.ok) .shortage { display: none; }
+  .simple-total .total-status:has(.status.ok) { margin-top: 8px; padding-top: 0; border-top: 0; }
+  .origin-print-details { display: none !important; }
+  .origin-print-heading { padding-bottom: 4px; border-bottom: 1px solid #d9b88f; font-size: 11px; font-weight: 700; }
+  .origin-print-details > div { display: grid; gap: 1px; }
+  .origin-print-details span { color: #6a5945; font: 8px/1.2 "Courier New", monospace; text-transform: uppercase; letter-spacing: .06em; }
+  .origin-print-details strong { font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .origin-print-footer { position: static; width: 100%; margin: 12px 0 0; display: grid; gap: 6px; padding: 7px 0 6px; border-top: 1px solid #d9b88f; color: #000; font: 11px/1.4 Georgia, serif; }
+  .origin-print-footer > div:not(.origin-print-heading) { display: grid; gap: 1px; }
+  .origin-print-footer span { color: #6a5945; font: 8px/1.2 "Courier New", monospace; text-transform: uppercase; letter-spacing: .06em; }
+  .origin-print-footer strong { font-size: 11px; line-height: 1.4; font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; }
   .formula-row input { border-color: transparent; }
   .notes-section textarea { border: 0; resize: none; }
 }

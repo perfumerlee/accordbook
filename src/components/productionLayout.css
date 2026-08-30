@@ -2,7 +2,39 @@
 .app > .sidebar{display:flex;flex-direction:column;min-height:100vh}
 .app > .sidebar .formula-list{min-height:0;max-height:64vh;overflow-y:auto}
 .app > .sidebar .archive-panel.open{max-height:24vh;overflow-y:auto}
-.app > .main .table-head > div:nth-child(2) span:last-child{color:rgba(80, 70, 55, 0.86) !important;font-size:10px !important;font-weight:500 !important}
-.app > .main .table-head > div:nth-child(2) span:last-child::before{content:'['}
-.app > .main .table-head > div:nth-child(2) span:last-child::after{content:']'}
+.app > .main .table-head > div:nth-child(2) span:last-child{color:rgba(80, 70, 55, 0.9) !important;font-size:11px !important;font-weight:600 !important}
+.app > .main .table-head > div:nth-child(2) span:last-child::before{content:'[';margin-right:2px}
+.app > .main .table-head > div:nth-child(2) span:last-child::after{content:']';margin-left:2px}
+.app > .main .resolver-candidates{max-width:150px;border:0;background:transparent;color:#6a5945;font:10px "Courier New",monospace}
+.app > .main .cas-heading{position:relative;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.app > .main .cas-check-btn{width:16px;height:16px;padding:0;border:1px solid rgba(120,100,75,.45);border-radius:50%;background:transparent;color:#75624d;font:11px/14px "Courier New",monospace;cursor:pointer}
+.app > .main .cas-tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+.app > .main .cas-tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);z-index:30;display:grid;gap:3px;width:170px;padding:7px 9px;border:1px solid rgba(120,100,75,.4);border-radius:4px;background:#fbf5e8;color:#6a5945;box-shadow:0 3px 10px rgba(60,45,30,.14);font:10px/1.35 "Courier New",monospace;text-align:left;white-space:normal;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-50%) translateY(2px);transition:opacity 120ms ease,transform 120ms ease}
+.app > .main .cas-tooltip strong{font:600 11px/1.25 Inter,Pretendard,system-ui,sans-serif;color:#5f4c39}
+.app > .main .cas-tooltip > span{display:block}
+.app > .main .cas-tooltip-wrap:hover .cas-tooltip,.app > .main .cas-check-btn:focus-visible + .cas-tooltip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.app > .main .cas-tooltip-wrap.cas-tooltip-dismissed .cas-tooltip{opacity:0;visibility:hidden}
+.app > .main .table-head{overflow:visible}
+.app > .main .cas-heading{z-index:5}
+.app > .main .cas-result{position:absolute;top:calc(100% + 8px);left:0;right:auto;z-index:29;display:grid;gap:2px;width:max-content;max-width:240px;padding:6px 8px;border:1px solid rgba(120,100,75,.35);background:#fbf5e8;color:#6a5945;box-shadow:0 3px 10px rgba(60,45,30,.12);font:11px/1.35 "Courier New",monospace;text-align:left}
+.app > .main .cas-result-lines{display:grid;gap:2px}
+.app > .main .cas-status{display:inline-block;margin-left:3px;font:11px/1 "Courier New",monospace;font-weight:700}
+.app > .main .cas-status.warning{color:#a85f3e}
+.app > .main .cas-status.ambiguous{color:#75624d}
+.app > .main input.cas.cas-unresolved{background:rgba(216,185,92,.12)}
+.app > .main .cas-check-btn:hover{background:rgba(117,98,77,.10);color:#5f4c39}
+.app > .main .cas-check-btn:active{transform:translateY(1px)}
+.app > .main .editor-actions{justify-content:space-between;align-items:center}
+.app > .main .editor-actions-left,.app > .main .editor-actions-right{display:flex;align-items:center;gap:8px}
+.app > .main .editor-actions-right{gap:12px}
+.app > .main .total-details{display:grid;gap:5px;margin-top:10px}
+.app > .main .simple-total .main-line{margin-bottom:8px}
+.app > .main .total-details > div{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:12px}
+.app > .main .total-details span{color:var(--muted);font-size:11px}
+.app > .main .total-details strong{font:12px "Courier New",monospace;font-weight:400;text-align:right;white-space:nowrap}
+.app > .main .total-status{margin-top:14px;padding-top:10px;border-top:1px solid rgba(201,119,60,.22);display:grid;gap:5px}
+.app > .main .shortage{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px}
+.app > .main .shortage strong{font:12px "Courier New",monospace;font-weight:600;color:#6a5945}
+.app > .main .total-status .status{font-weight:600}
+.app > .main .total-status:has(.status.ok) .shortage{display:none}
 @media (max-width:850px){.app > .sidebar{min-height:auto}.app > .sidebar .formula-list,.app > .sidebar .archive-panel.open{max-height:none;overflow:visible}}
