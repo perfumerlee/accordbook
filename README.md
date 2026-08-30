@@ -4,12 +4,12 @@ An open-source formula notebook for perfumers.
 
 Built by a perfumer, for perfumers.
 
-<img width="1790" height="1316" alt="accordbook-preview" src="https://github.com/user-attachments/assets/70c4f861-d3bb-4255-a610-60b64a2c4438" />
+<img width="1690" height="1311" alt="아비 (222)" src="https://github.com/user-attachments/assets/b0e38b49-21e3-4ce6-b499-183f59d1057f" />
 
 > **Private by default**  
 > Your formulas stay on your device.
 
-## v1.04 features
+## v1.05 features
 
 - 1,000-part formula notebook with a 10.00 g reference batch
 - Formula ID and prefix management
@@ -32,8 +32,44 @@ Built by a perfumer, for perfumers.
 - Formula Origins with Original, Inspired by, Adapted from, and Unknown states
 - Origin details with optional creator, note, and validated HTTP/HTTPS link fields
 - Formula Actions help popover for Dilution, Highlight, and Remove controls
+- CAS Check for reviewing all materials in the current formula at once
+- Safe CAS autofill for exact, single-candidate matches
+- Existing user-entered CAS / Ref. values are never overwritten automatically
+- CAS check results with total, autofilled, verified, review-required, and unresolved counts
+- Visual highlighting for unresolved empty CAS fields after a CAS check
+- Local CAS resolver data with no live external lookup required during normal use
 - English / Korean interface
 - Desktop, tablet, and mobile-safe layouts
+
+## CAS Check
+
+Accordbook v1.05 adds a local CAS checking assistant for reviewing material information in the current formula.
+
+CAS Check scans the materials on the open page and fills an empty CAS / Ref. field only when a match is considered sufficiently certain.
+
+Automatic entry requires:
+
+- an existing material name
+- an empty CAS / Ref. field
+- an exact normalized material-name match
+- exactly one resolver candidate
+- a valid CAS number for that candidate
+
+Accordbook does not automatically apply ambiguous, fuzzy, invalid, or missing matches.
+
+Existing user-entered CAS / Ref. values are preserved and are never overwritten automatically.
+
+After a check, Accordbook summarizes the result using categories such as:
+
+- **Total materials**
+- **Autofilled**
+- **Verified**
+- **Needs review**
+- **Not found**
+
+Unresolved empty CAS fields can also be highlighted after the check so that materials requiring manual review are easier to locate.
+
+The CAS resolver is an assistance tool and should not replace supplier documentation, SDS data, regulatory references, or other authoritative sources.
 
 ## Formula sharing
 
@@ -65,7 +101,7 @@ Provenance is designed to preserve evidence of how a formula has changed without
 
 ## Formula Time Machine
 
-Accordbook v1.04 preserves local provenance and revision evidence for formula revisions, including optional Formula Origins.
+Accordbook preserves local provenance and revision evidence for formula revisions, including optional Formula Origins.
 
 Origin records are local claims. `Not specified` means no origin has been recorded, while `Unknown` means the user intentionally recorded that the starting point is uncertain. Origin metadata does not affect the formula content fingerprint.
 
@@ -93,7 +129,9 @@ Older provenance records that do not contain reconstruction data remain valid ev
 
 No account or backend is required for formula storage.
 
-Formulas, provenance records, revision history, reconstruction data, and fingerprints are kept in the browser/device storage used by Accordbook.
+Formulas, provenance records, revision history, reconstruction data, fingerprints, and CAS check data are kept in the browser/device storage used by Accordbook.
+
+CAS checking uses local resolver data during normal use and does not require a live lookup against an external fragrance database.
 
 Formula sharing and backup files are created locally and downloaded by the user.
 
@@ -117,14 +155,6 @@ npm run build
 npm run dev
 ```
 
-## Versioning
-
-Public Accordbook versions use:
-
-`v1.01` → `v1.02` → `v1.03` → `v1.04` → ...
-
-The package version for Accordbook v1.04 is `1.0.4`.
-
 ## Try Accordbook
 
-[Open Accordbook →](https://perfumerlee.github.io/accordbook/)
+[Open Accordbook →](https://perfumerlee.github.io/accordbook/)<img width="1686" height="1304" alt="아비 (221)" src="https://github.com/user-attachments/assets/aef54e43-8730-4061-91fe-ba1277f91514" />
