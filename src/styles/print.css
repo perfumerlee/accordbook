@@ -10,6 +10,7 @@
   .app-shell, .app { display: block; min-height: auto; }
   .notebook-page, .main, .notebook { margin: 0; padding: 0; min-height: auto; box-shadow: none; background: #fff; }
   .main, .notebook, .content, .rows, .summary-grid { height: auto !important; max-height: none !important; overflow: visible !important; }
+  .summary-grid { border-top: 0; }
   .notebook { break-inside: auto !important; }
   .note-header { min-height: 136px; padding: 24px 28px 0 95px; grid-template-columns: minmax(0, 1fr) 285px; gap: 28px; border-bottom: 2px solid rgba(201,119,60,.55); }
   .title-primary { height: 62px; }
