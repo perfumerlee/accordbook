@@ -157,4 +157,4 @@ npm run dev
 
 ## Try Accordbook
 
-[Open Accordbook →](https://perfumerlee.github.io/accordbook/)<img width="1686" height="1304" alt="아비 (221)" src="https://github.com/user-attachments/assets/aef54e43-8730-4061-91fe-ba1277f91514" />
+[Open Accordbook →](https://perfumerlee.github.io/accordbook/)
