@@ -1,0 +1,112 @@
+/* Responsive foundation. Rules are intentionally scoped below 1200px. */
+.notebook-toggle { display: none; }
+.drawer-scrim { display: none; }
+.mobile-row-actions { display: none; }
+.mobile-app-header, .mobile-formula-actions, .mobile-formula-menu { display: none; }
+.side-title-count { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.section-count { color: rgba(80, 70, 55, 0.78); font: 11px/1 "Courier New", monospace; font-weight: 600; letter-spacing: .03em; }
+.archive-section-heading { width: 100%; margin-top: 18px; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.archive-section-heading:hover, .archive-section-heading:focus-visible { background: transparent; color: inherit; }
+.archive-section-heading.side-title { line-height: normal; }
+.archive-panel { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (min-width: 768px) and (max-width: 1199px) {
+  .app { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+  .sidebar { position: fixed !important; inset: 0 auto 0 0; z-index: 40; width: min(320px, 86vw); transform: translateX(-105%); transition: transform 160ms ease; overflow-y: auto !important; box-shadow: 8px 0 22px rgba(48,41,31,.18); }
+  html.responsive-drawer-open .sidebar { transform: translateX(0); }
+  .notebook-toggle { display: block; position: fixed; top: 14px; left: 14px; z-index: 35; min-height: 44px; padding: 8px 12px; border: 1px solid #b9a98b; background: #fbf5e8; color: #5f503e; font: 12px ui-monospace, monospace; }
+  html.responsive-drawer-open::after { content: ''; position: fixed; inset: 0; z-index: 30; background: rgba(48,41,31,.28); }
+  html.responsive-drawer-open .drawer-scrim { display: block; position: fixed; inset: 0; z-index: 31; border: 0; background: transparent; }
+  .main { min-width: 0; }
+  .table-head, .row { grid-template-columns: 74px minmax(0, 1fr) 92px minmax(96px, auto); }
+  .table-head > :nth-child(3), .row > .cas, .table-head > :nth-child(4), .table-head > :nth-child(5), .row > .percent { display: none; }
+  .parts { min-width: 0; }
+  .material { min-width: 0; }
+  .notes { max-width: 100%; }
+}
+@media (max-width: 767px) {
+  html, body, #root { max-width: 100%; overflow-x: hidden; }
+  .app { display: block; min-width: 0; }
+  .sidebar { position: fixed !important; inset: 0 auto 0 0; z-index: 40; width: min(310px, 88vw); transform: translateX(-105%); transition: transform 160ms ease; overflow-y: auto !important; box-shadow: 8px 0 22px rgba(48,41,31,.18); }
+  .sidebar { height: 100dvh; max-height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden !important; }
+  html.responsive-drawer-open .sidebar { transform: translateX(0); }
+  .notebook-toggle { display: grid; place-items: center; position: absolute; top: -8px; left: 0; z-index: 2; width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; background: transparent; color: #80644d; font-size: 0; }
+  .notebook-toggle::before { content: '≡'; font: 24px/1 Georgia, serif; }
+  html.responsive-drawer-open::after { content: ''; position: fixed; inset: 0; z-index: 30; background: rgba(48,41,31,.28); }
+  html.responsive-drawer-open .drawer-scrim { display: block; position: fixed; inset: 0; z-index: 31; border: 0; background: transparent; }
+  .main { min-width: 0; padding: 8px !important; }
+  .notebook { max-width: 100%; overflow: visible; }
+  .mobile-app-header { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; min-height: 44px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .mobile-app-wordmark { min-width: 0; overflow: hidden; color: #5f503e; text-align: center; text-overflow: ellipsis; white-space: nowrap; font: 17px/1 Georgia, serif; }
+  .mobile-app-header .notebook-toggle, .mobile-app-header .mobile-formula-actions { position: static; display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; background: transparent; color: #80644d; }
+  .mobile-app-header .notebook-toggle { font-size: 0; }
+  .mobile-app-header .notebook-toggle::before { content: '≡'; font: 24px/1 Georgia, serif; }
+  .mobile-app-header .mobile-formula-actions { font: 18px/1 Georgia, serif; letter-spacing: 2px; }
+  .mobile-formula-menu { display: none; position: absolute; top: 44px; right: 0; z-index: 20; width: min(240px, calc(100vw - 32px)); box-sizing: border-box; padding: 6px; border: 1px solid #b9a98b; background: #fbf5e8; box-shadow: 0 4px 16px rgba(48,41,31,.16); }
+  .mobile-formula-menu.open { display: grid; gap: 2px; }
+  .mobile-formula-menu button { min-height: 40px; padding: 8px 10px; border: 0; background: transparent; color: #5f503e; text-align: left; font: 12px Georgia, serif; }
+  .mobile-formula-menu div { border-top: 1px solid #b9a98b; margin: 4px 0; }
+  .quick-print { display: none; }
+  .note-header { grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+  .title-primary { min-width: 0; padding-left: 0; }
+  .title-primary > label { display: none; }
+  .formula-name { max-width: 100%; width: 100%; font-size: clamp(24px, 7vw, 34px); }
+  .header-tools { flex-wrap: wrap; }
+  .table-head, .row { grid-template-columns: 64px minmax(0, 1fr) minmax(92px, auto); gap: 5px; }
+  .table-head > :nth-child(3), .row > .cas, .table-head > :nth-child(4), .table-head > :nth-child(5), .row > .percent { display: none !important; }
+  .row { min-height: 48px; }
+  .row input, .note-header input, .note-header textarea, .note-header select, .mobile-detail-sheet input, .mobile-detail-sheet select { min-width: 0; font-size: 16px; }
+  /* Keep editable controls at iOS Safari's no-auto-zoom threshold. */
+  input:not(.formula-name), textarea, select { font-size: 16px !important; }
+  .parts { width: 64px; min-width: 64px; }
+  .material-wrap { min-width: 0; }
+  .row > .material-wrap { padding-right: 0; }
+  .material-meta { display: flex; align-items: center; min-width: 0; }
+  .material-meta .solvent-badge { margin-left: auto; }
+  .row-wrap { position: relative; }
+  .input-example-badge { top: 2px; left: 2px; z-index: 3; }
+  .row-wrap:has(.input-example-badge) .parts { box-sizing: border-box; padding-left: 0; padding-right: 0; }
+  .row .material { width: 100%; font-size: clamp(10px, 3.2vw, 14px) !important; letter-spacing: -0.025em; }
+  .dilution-suffix { display: block; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .summary-grid > .metrics { order: 1; }
+  .summary-grid > :first-child { order: 2; }
+  .metrics { border-left: 0; padding-left: 0; }
+  .notes { width: 100%; max-width: 100%; }
+  .row-actions { min-width: 0; }
+  .row-wrap { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; gap: 5px; min-width: 0; }
+  .row-wrap > .row { display: contents; }
+  .mobile-row-actions { display: grid; grid-column: 3; grid-row: 1; place-items: center; align-self: start; width: 44px; height: 44px; min-width: 44px; border: 0; background: transparent; color: #80644d; }
+  .mobile-row-actions svg { width: 19px; height: 19px; fill: currentColor; }
+  .row > .row-actions { display: none; }
+  .editor-actions-left .btn { display: none; }
+  .editor-actions-right { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 6px; max-width: 100%; min-width: 0; }
+  .editor-actions-right .btn { flex: 1 1 0; min-height: 38px; min-width: 0; padding: 7px 6px; font-size: 12px; line-height: 1.2; white-space: normal; overflow-wrap: anywhere; text-align: left; }
+  .editor-actions { justify-content: flex-end; max-width: 100%; }
+  .dilution-btn, .mark-btn, .remove-btn { min-width: 32px; min-height: 36px; }
+  .mobile-detail-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; box-sizing: border-box; width: 100%; max-width: 100%; background: rgba(48,41,31,.3); padding: 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .mobile-detail-sheet { position: relative; width: 100%; max-width: 100%; min-width: 0; max-height: calc(100dvh - 24px); overflow-y: auto; padding: 22px 18px 18px; border: 1px solid #b9a98b; background: #fbf5e8; color: #30291f; box-shadow: 0 -4px 20px rgba(48,41,31,.18); }
+  .mobile-detail-sheet h3 { margin: 0 28px 18px 0; font: 20px Georgia, serif; overflow-wrap: anywhere; }
+  .mobile-detail-sheet label { display: grid; gap: 5px; margin-top: 12px; color: #776a56; font: 10px ui-monospace, monospace; letter-spacing: .08em; }
+  .mobile-detail-sheet input { width: 100%; min-height: 40px; border: 0; border-bottom: 1px solid #9d8c70; background: transparent; color: inherit; font: 16px Georgia, serif; outline: none; }
+  .mobile-detail-close { position: absolute; top: 8px; right: 10px; width: 44px; height: 44px; border: 0; background: transparent; color: #6a5945; font-size: 24px; }
+  .mobile-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .mobile-detail-actions button, .mobile-detail-remove { min-height: 40px; padding: 8px 12px; border: 1px solid #ae9c80; background: transparent; color: #5f503e; }
+  .mobile-detail-actions .mobile-detail-remove { margin-top: 0; color: #8b4d35; }
+  .mobile-detail-confirm { width: 100%; min-height: 42px; margin-top: 16px; padding: 9px 12px; border: 1px solid #8f765d; background: #75624d; color: #fffaf0; font: 14px Georgia, serif; }
+  .notebook, .note-header, .title-area, .page-box, .header-tools, .summary-grid, .metrics, .editor-actions, .notes, .footer { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .sidebar .formula-list { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto !important; }
+  .sidebar .archive-panel.open { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto !important; }
+  .sidebar:has(.archive-panel.open) .formula-list, .sidebar:has(.export-menu.open) .formula-list { display: none; }
+  .library-notebook-title, .archive-section-heading { min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; margin-bottom: 0; padding: 0 4px; border: 0; cursor: pointer; }
+  .sidebar:not(:has(.archive-panel.open)):not(:has(.export-menu.open)) .library-notebook-title, .sidebar:has(.archive-panel.open) .archive-section-heading, .sidebar:has(.export-menu.open) .data-section-title { color: #8b5938; }
+  .sidebar:not(:has(.archive-panel.open)):not(:has(.export-menu.open)) .library-notebook-title .section-count, .sidebar:has(.archive-panel.open) .archive-section-heading .section-count, .sidebar:has(.export-menu.open) .data-section-title .section-count { color: #8b5938; }
+  .sidebar .formula-list .formula-label { color: #30291f; }
+  .data-actions { position: relative; z-index: 2; }
+  .data-actions:has(.export-menu.open) { grid-template-columns: 1fr; }
+  .data-actions .export-wrap:has(.export-menu.open) { z-index: 3; }
+  .data-actions .export-menu { position: static; width: 100%; min-width: 0; box-sizing: border-box; margin-top: 6px; padding: 4px 0 0; border: 0; border-top: 1px solid rgba(185,168,144,.55); border-radius: 0; background: transparent; box-shadow: none; }
+  .data-actions .export-menu::before { display: none; }
+  .data-actions .export-menu .btn { box-sizing: border-box; min-width: 0; white-space: normal; }
+  .mobile-detail-sheet, .mobile-detail-sheet * { box-sizing: border-box; max-width: 100%; }
+}
+
