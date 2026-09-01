@@ -93,7 +93,7 @@
 /* Production mobile row highlight: .row is display: contents, so paint the real wrapper. */
 @media (max-width: 767px) {
   .rows { background: none !important; }
-  .row-wrap { border-bottom: 1px solid #dfc5a8; }
+  .row-wrap { border-bottom: .5px solid #dfc5a8; }
   .row-wrap:has(.row.marked), .row-wrap:has(.mark-btn.active) { background: transparent !important; }
   .row-wrap:has(.row.marked)::before, .row-wrap:has(.mark-btn.active)::before { content: ''; position: absolute; inset: 0; z-index: 0; background: var(--mint, rgba(116,196,178,.33)); pointer-events: none; }
   .row-wrap > .row, .row-wrap > .mobile-row-actions { position: relative; z-index: 1; }
@@ -110,7 +110,11 @@
   html.responsive-drawer-open .drawer-scrim { display: block; position: fixed; inset: 0; z-index: 31; border: 0; background: transparent; }
   .main { min-width: 0; padding: 8px !important; }
   .notebook { max-width: 100%; overflow: visible; }
-  .mobile-app-header { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; min-height: 44px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .notebook::before { clip-path: inset(44px 0 0 0); }
+  .mobile-app-header { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; min-height: 44px; width: 100%; max-width: 100%; box-sizing: border-box; border-bottom: .5px solid rgba(201,119,60,.18); }
+  .note-header { border-bottom: 1px solid rgba(201,119,60,.38) !important; }
+  .table-head.table-head { border-bottom: 1px solid rgba(201,119,60,.38) !important; }
+  .summary-grid.summary-grid { border-top: 1px solid rgba(201,119,60,.42) !important; }
   .mobile-app-wordmark { min-width: 0; overflow: hidden; color: #5f503e; text-align: center; text-overflow: ellipsis; white-space: nowrap; font: 17px/1 Georgia, serif; }
   .mobile-app-header .notebook-toggle, .mobile-app-header .mobile-formula-actions { position: static; display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; background: transparent; color: #80644d; }
   .mobile-app-header .notebook-toggle { font-size: 0; }
