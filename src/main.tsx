@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')!).render(
 
 function ProductionWithIntro() {
   const [introDone, setIntroDone] = useState(false)
-  return <><AccordbookNotebook /><>{!introDone && <IntroSplashBoundary onDone={() => setIntroDone(true)} />}</></>
+  return <><AccordbookNotebook introComplete={introDone} /><>{!introDone && <IntroSplashBoundary onDone={() => setIntroDone(true)} />}</></>
 }
 
 class IntroSplashBoundary extends Component<{ onDone: () => void; children?: ReactNode }, { failed: boolean }> {

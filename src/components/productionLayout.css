@@ -7,6 +7,7 @@
 .app > .main .table-head > div:nth-child(2) span:last-child::after{content:']';margin-left:2px}
 .app > .main .resolver-candidates{max-width:150px;border:0;background:transparent;color:#6a5945;font:10px "Courier New",monospace}
 .app > .main .cas-heading{position:relative;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.app > .main .cas-check-anchor{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex:0 0 16px}
 .app > .main .cas-check-btn{width:16px;height:16px;padding:0;border:1px solid rgba(120,100,75,.45);border-radius:50%;background:transparent;color:#75624d;font:11px/14px "Courier New",monospace;cursor:pointer}
 .app > .main .cas-tooltip-wrap{position:relative;display:inline-flex;align-items:center}
 .app > .main .cas-tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);z-index:30;display:grid;gap:3px;width:170px;padding:7px 9px;border:1px solid rgba(120,100,75,.4);border-radius:4px;background:#fbf5e8;color:#6a5945;box-shadow:0 3px 10px rgba(60,45,30,.14);font:10px/1.35 "Courier New",monospace;text-align:left;white-space:normal;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-50%) translateY(2px);transition:opacity 120ms ease,transform 120ms ease}
@@ -16,14 +17,23 @@
 .app > .main .cas-tooltip-wrap.cas-tooltip-dismissed .cas-tooltip{opacity:0;visibility:hidden}
 .app > .main .table-head{overflow:visible}
 .app > .main .cas-heading{z-index:5}
-.app > .main .cas-result{position:absolute;top:calc(100% + 8px);left:0;right:auto;z-index:29;display:grid;gap:2px;width:max-content;max-width:240px;padding:6px 8px;border:1px solid rgba(120,100,75,.35);background:#fbf5e8;color:#6a5945;box-shadow:0 3px 10px rgba(60,45,30,.12);font:11px/1.35 "Courier New",monospace;text-align:left}
-.app > .main .cas-result-lines{display:grid;gap:2px}
+.app > .main .cas-result{position:absolute;top:calc(100% + 8px);left:0;right:auto;z-index:29;display:grid;gap:2px;width:max-content;max-width:195px;padding:5px 7px;border:1px solid rgba(120,100,75,.35);background:#fbf5e8;color:#6a5945;box-shadow:0 3px 10px rgba(60,45,30,.12);font:11px/1.35 "Courier New",monospace;text-align:left}
+.app > .main .cas-result-lines{display:grid;gap:2px;min-width:165px}
+.app > .main .cas-result-lines > div{display:grid;grid-template-columns:minmax(88px,1fr) auto;column-gap:6px;align-items:baseline;white-space:nowrap}
+.app > .main .cas-result-lines > div > strong{text-align:right}
 .app > .main .cas-status{display:inline-block;margin-left:3px;font:11px/1 "Courier New",monospace;font-weight:700}
 .app > .main .cas-status.warning{color:#a85f3e}
 .app > .main .cas-status.ambiguous{color:#75624d}
 .app > .main input.cas.cas-unresolved{background:rgba(216,185,92,.12)}
 .app > .main .cas-check-btn:hover{background:rgba(117,98,77,.10);color:#5f4c39}
 .app > .main .cas-check-btn:active{transform:translateY(1px)}
+.starter-cas-hint{position:absolute;z-index:20;top:calc(100% + 8px);right:50%;width:min(250px,calc(100vw - 48px));padding:12px 14px;border:1px solid #d8c7aa;border-radius:7px;background:#fffaf0;color:#30291f;box-shadow:0 8px 22px rgba(48,41,31,.18);font-size:11px;line-height:1.45;transform:translateX(50%)}
+.starter-cas-hint{display:grid;gap:4px;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;left:auto;right:0;transform:none}
+.cas-check-anchor .starter-cas-hint{top:calc(100% + 8px);left:50%;right:auto;transform:translateX(-50%)}
+.starter-cas-hint::before{content:"";position:absolute;top:-6px;left:50%;width:10px;height:10px;border-top:1px solid #d8c7aa;border-left:1px solid #d8c7aa;background:#fffaf0;transform:translateX(-50%) rotate(45deg)}
+.starter-cas-hint strong,.starter-cas-hint span{display:block;white-space:normal;overflow-wrap:anywhere}.starter-cas-hint strong{margin-bottom:2px;font-size:12px}.starter-cas-hint span{color:#806f5d}.starter-cas-hint button{justify-self:end;margin-top:6px;padding:4px 9px;border:1px solid #cdb995;border-radius:4px;background:#f4ead8;color:#604c3a;font-size:11px;cursor:pointer}
+.mobile-cas-badge,.mobile-cas-hint,.mobile-cas-result,.mobile-cas-action-slot{display:none}
+.starter-cas-hint strong,.starter-cas-hint span{display:block}.starter-cas-hint strong{margin-bottom:4px;font-size:12px}.starter-cas-hint span{color:#806f5d}.starter-cas-hint button{margin-top:9px;padding:4px 9px;border:1px solid #cdb995;border-radius:4px;background:#f4ead8;color:#604c3a;font-size:11px;cursor:pointer}
 .app > .main .editor-actions{justify-content:space-between;align-items:center}
 .app > .main .editor-actions-left,.app > .main .editor-actions-right{display:flex;align-items:center;gap:8px}
 .app > .main .editor-actions-right{gap:12px}

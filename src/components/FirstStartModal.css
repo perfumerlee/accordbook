@@ -1,0 +1,33 @@
+.first-start-backdrop { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 20px; background: rgba(48, 41, 31, .54); animation: first-start-backdrop-in .28s ease-out both; }
+.first-start-modal { position: relative; width: min(100%, 500px); max-height: min(720px, calc(100svh - 32px)); overflow-y: auto; box-sizing: border-box; padding: 72px 38px 34px; border: 1px solid #d8c7aa; border-radius: 10px; background: #fbf5e8; color: #30291f; box-shadow: 0 18px 50px rgba(48,41,31,.25); animation: first-start-panel-in .32s cubic-bezier(.2,.75,.25,1) .06s both; }
+.first-start-close { position: absolute; top: 12px; right: 14px; border: 0; background: transparent; color: #806f5d; font-size: 25px; line-height: 1; cursor: pointer; }
+.first-start-top-actions { position: absolute; top: 24px; right: 38px; left: 38px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+.first-start-language { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid #d8c7aa; border-radius: 999px; background: #f4ead8; color: #8d7c68; font: 10px ui-monospace, monospace; letter-spacing: .04em; box-shadow: inset 0 1px 1px rgba(48,41,31,.05); }
+.first-start-language button { min-width: 34px; padding: 6px 8px; border: 0; border-radius: 999px; background: transparent; color: inherit; font: inherit; line-height: 1; cursor: pointer; transition: background-color .18s ease, color .18s ease, box-shadow .18s ease; }
+.first-start-language button.active { background: #fffaf0; color: #30291f; font-weight: 700; box-shadow: 0 1px 3px rgba(48,41,31,.16); }
+.first-start-language > span { color: #c2ae91; user-select: none; }
+.first-start-top-actions .first-start-close { position: static; }
+.first-start-kicker { position: absolute; top: 30px; left: 38px; margin: 0; color: #a56943; font: 11px ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; }
+.first-start-modal h2 { margin: 0; font: 400 clamp(27px, 6vw, 38px)/1.12 Georgia, serif; }
+.first-start-subtitle { margin: 10px 0 26px; color: #806f5d; font: 15px/1.5 Georgia, serif; }
+.first-start-options, .first-start-list { display: grid; gap: 10px; }
+.first-start-option { display: grid; gap: 5px; width: 100%; padding: 16px 17px; border: 1px solid #d8c7aa; border-radius: 6px; background: #fffaf0; color: inherit; text-align: left; cursor: pointer; }
+.first-start-option.first-start-primary { border-color: #30291f; background: #30291f; color: #fffaf0; }
+.first-start-option strong, .first-start-starter strong { font-size: 15px; font-weight: 600; }
+.first-start-option span, .first-start-starter small { color: #806f5d; font-size: 12px; line-height: 1.45; }
+.first-start-primary span { color: #e9ddca; }
+.first-start-starter-link, .first-start-back { margin-top: 18px; padding: 4px 0; border: 0; background: transparent; color: #806044; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.first-start-starter { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 14px; align-items: center; width: 100%; padding: 15px 16px; border: 1px solid #d8c7aa; border-radius: 6px; background: #fffaf0; color: inherit; text-align: left; cursor: pointer; }
+.first-start-number { color: #a56943; font: 12px ui-monospace, monospace; }
+.first-start-starter b { color: #806044; font-size: 12px; font-weight: 600; }
+.first-start-starter > span:not(.first-start-number) { display: grid; min-width: 0; gap: 4px; }
+.first-start-starter small { display: block; }
+.first-start-trust { margin: 28px 0 0; color: #8d7c68; font: 11px/1.5 ui-sans-serif, sans-serif; }
+.first-start-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+@media (max-width: 767px) { .first-start-backdrop { padding: 12px; } .first-start-modal { padding: 66px 22px 28px; max-height: calc(100svh - 24px); } .first-start-kicker { left: 22px; } .first-start-top-actions { right: 22px; left: 22px; } }
+.first-start-empty { min-height: 100svh; display: grid; align-content: center; justify-items: center; gap: 14px; box-sizing: border-box; padding: 28px; background: #fbf5e8; color: #30291f; text-align: center; }
+.first-start-empty h1 { margin: 0; font: 400 34px/1.2 Georgia, serif; }
+.first-start-empty p { margin: 0 0 8px; color: #806f5d; }
+@keyframes first-start-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes first-start-panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .first-start-backdrop, .first-start-modal { animation: none; } }
