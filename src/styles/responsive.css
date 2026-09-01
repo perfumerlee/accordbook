@@ -60,6 +60,34 @@
   .action { font-size: 11px; min-width: 25px; padding-left: 2px; padding-right: 2px; }
   .formula-name { font-size: 27px; }
 }
+
+/* Mobile production corrections: the row owns its highlight and natural height. */
+@media (max-width: 767px) {
+  .row-wrap { position: relative; }
+  /* The mobile row is display:contents, so paint the state on its real wrapper. */
+  .row-wrap:has(.row.marked), .row-wrap:has(.mark-btn.active) { background: transparent !important; }
+  .row-wrap:has(.row.marked)::before, .row-wrap:has(.mark-btn.active)::before { content: ''; position: absolute; inset: 0; z-index: 0; background: #f2e4ac99; pointer-events: none; }
+  .row-wrap > .row, .row-wrap > .mobile-row-actions { position: relative; z-index: 1; }
+  .row { height: auto; min-height: 42px; align-items: stretch; }
+  .row.marked { background: #f2e4ac99; }
+  .row.marked::after { content: none; }
+  .material-wrap { min-width: 0; height: auto; min-height: 42px; align-content: center; }
+  .material { min-width: 0; width: 100%; white-space: normal; }
+  .material-meta { min-width: 0; }
+  .dilution-suffix { overflow-wrap: anywhere; white-space: normal; }
+  .editor-actions-right { flex: 0 0 auto; gap: 8px; }
+  .editor-actions-right .btn { flex: 0 0 auto; width: auto; min-width: max-content; padding-inline: 10px; white-space: nowrap; }
+  .dilution-panel { box-sizing: border-box; display: grid; gap: 14px; padding: 14px; margin: 0; width: 100%; }
+  .dilution-panel > div { display: grid; gap: 6px; min-width: 0; }
+  .dilution-panel input { box-sizing: border-box; width: 100%; min-height: 38px; font-size: 16px !important; }
+  .dilution-panel > div:last-child { gap: 10px; }
+  .dilution-actions { display: flex !important; grid-template-columns: 1fr 1fr; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .dilution-panel .btn { width: auto; justify-self: start; min-height: 36px; white-space: nowrap; }
+  .dilution-actions .dilution-confirm { margin-left: auto; border-color: #b9a98b; background: #eee4d2; color: #5f503e; }
+  /* Keep every editable mobile control at iOS Safari's no-auto-zoom threshold. */
+  .row .material { font-size: 16px !important; }
+  .origin-popover { max-width: calc(100vw - 28px); overflow-y: auto; overscroll-behavior: contain; }
+}
 @media (max-width: 850px) {
   .app { grid-template-columns: 1fr; }
   .sidebar { border-right: 0; border-bottom: 1px solid #cfc4b3; }

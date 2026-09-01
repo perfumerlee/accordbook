@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.05 모바일 반응형 디자인 리빌딩 - 2026-09-01
+
+### Mobile design corrections
+
+- Refined mobile material rows, highlighting, dilution layout, origin positioning, and formula action affordances.
+- Unified Accordbook Formula and Notebook Backup downloads under the `.accordbook` extension.
+
 ## v1.04 - 2026-08-30
 
 ### Added
