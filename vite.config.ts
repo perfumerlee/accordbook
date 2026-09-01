@@ -16,7 +16,7 @@ const https = existsSync(keyFile) && existsSync(certFile)
   : undefined
 
 export default defineConfig({
-  base: '/accordbook/',
+  base: '/',
   plugins: [react()],
   server: {
     host: '0.0.0.0',
