@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap');
+
 /* Responsive foundation. Rules are intentionally scoped below 1200px. */
 .notebook-toggle { display: none; }
 .drawer-scrim { display: none; }
@@ -24,8 +26,74 @@
   .notes { max-width: 100%; }
 }
 
+/* Production dilution editor: keep fields and actions evenly spaced. */
+.dilution-panel.dilution-panel {
+  padding: 14px 16px 15px;
+  gap: 14px;
+}
+.dilution-panel.dilution-panel label { margin-bottom: 6px; }
+.dilution-panel.dilution-panel input,
+.dilution-panel.dilution-panel .dilution-result {
+  min-height: 36px;
+  box-sizing: border-box;
+}
+.dilution-panel.dilution-panel input { padding: 6px 8px; }
+.dilution-panel.dilution-panel .dilution-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.dilution-panel.dilution-panel .dilution-confirm { margin-left: auto; }
+.dilution-panel.dilution-panel .dilution-breakdown {
+  margin-left: 5px;
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .title-primary .formula-name {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: clamp(28px, 8vw, 40px);
+    line-height: 1.08;
+    letter-spacing: -.035em;
+    white-space: nowrap;
+  }
+  .dilution-panel.dilution-panel {
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 14px;
+    gap: 14px;
+  }
+  .dilution-panel.dilution-panel > div {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+  .dilution-panel.dilution-panel > div:last-child { gap: 10px; }
+  .dilution-panel.dilution-panel .dilution-actions {
+    width: 100%;
+    margin-top: 2px;
+  }
+  .dilution-panel.dilution-panel .dilution-actions .btn {
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .dilution-panel.dilution-panel .dilution-breakdown {
+    margin-left: 4px;
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
 /* Production mobile row highlight: .row is display: contents, so paint the real wrapper. */
 @media (max-width: 767px) {
+  .rows { background: none !important; }
+  .row-wrap { border-bottom: 1px solid #dfc5a8; }
   .row-wrap:has(.row.marked), .row-wrap:has(.mark-btn.active) { background: transparent !important; }
   .row-wrap:has(.row.marked)::before, .row-wrap:has(.mark-btn.active)::before { content: ''; position: absolute; inset: 0; z-index: 0; background: var(--mint, rgba(116,196,178,.33)); pointer-events: none; }
   .row-wrap > .row, .row-wrap > .mobile-row-actions { position: relative; z-index: 1; }
@@ -56,7 +124,7 @@
   .quick-print { display: none; }
   .note-header { grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
   .title-primary { min-width: 0; padding-left: 0; }
-  .title-primary > label { display: none; }
+  .title-primary > label { display: block; margin: 4px 0 8px; color: #8b765d; font: 10px/1.2 ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
   .formula-name { max-width: 100%; width: 100%; font-size: clamp(24px, 7vw, 34px); }
   .header-tools { flex-wrap: wrap; }
   .table-head, .row { grid-template-columns: 64px minmax(0, 1fr) minmax(92px, auto); gap: 5px; }
@@ -101,6 +169,7 @@
   .mobile-detail-close { position: absolute; top: 8px; right: 10px; width: 44px; height: 44px; border: 0; background: transparent; color: #6a5945; font-size: 24px; }
   .mobile-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
   .mobile-detail-actions button, .mobile-detail-remove { min-height: 40px; padding: 8px 12px; border: 1px solid #ae9c80; background: transparent; color: #5f503e; }
+  .mobile-detail-actions .mark-btn.active { border-color: #6d9f91; background: var(--mint, rgba(116,196,178,.33)); color: #244f46; box-shadow: inset 0 0 0 1px rgba(36,79,70,.12); }
   .mobile-detail-actions .mobile-detail-remove { margin-top: 0; color: #8b4d35; }
   .mobile-detail-confirm { width: 100%; min-height: 42px; margin-top: 16px; padding: 9px 12px; border: 1px solid #8f765d; background: #75624d; color: #fffaf0; font: 14px Georgia, serif; }
   .notebook, .note-header, .title-area, .page-box, .header-tools, .summary-grid, .metrics, .editor-actions, .notes, .footer { min-width: 0; max-width: 100%; box-sizing: border-box; }
@@ -120,3 +189,17 @@
   .mobile-detail-sheet, .mobile-detail-sheet * { box-sizing: border-box; max-width: 100%; }
 }
 
+/* Korean UI: pair the notebook's English serif style with a readable Korean serif stack. */
+html[lang="ko"] .app,
+html[lang="ko"] .app input,
+html[lang="ko"] .app textarea,
+html[lang="ko"] .app button,
+html[lang="ko"] .app select {
+  font-family: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", "Batang", Georgia, "Times New Roman", serif;
+  font-synthesis: none;
+}
+html[lang="ko"] .app .title-primary > label {
+  font-family: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", "Batang", Georgia, "Times New Roman", serif;
+  letter-spacing: .04em;
+  text-transform: none;
+}
