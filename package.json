@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-dev.ps1",
     "build": "tsc -b && vite build",
     "test": "vitest run"
   },

@@ -19,7 +19,9 @@ export default defineConfig({
   base: '/accordbook/',
   plugins: [react()],
   server: {
-    host: true,
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
     https,
   },
 })
