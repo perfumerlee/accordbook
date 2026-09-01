@@ -1,0 +1,176 @@
+.accordbook-intro {
+  --intro-paper: #f6f0e2;
+  --intro-ink: #24211d;
+  --intro-rule: #c47c45;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  background: var(--intro-paper);
+  color: var(--intro-ink);
+}
+
+.accordbook-intro__content {
+  width: min(84vw, 470px);
+  text-align: center;
+}
+
+.accordbook-intro__mark {
+  display: block;
+  width: min(48vw, 214px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.accordbook-intro__drawing {
+  opacity: 1;
+  animation: accordbookDrawingFade .12s ease-out 1.50s forwards;
+}
+
+.accordbook-intro__guide,
+.accordbook-intro__core {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.accordbook-intro__guide {
+  opacity: .18;
+}
+
+.accordbook-intro__core {
+  opacity: .98;
+  filter: url(#accordbookInkTexture);
+}
+
+.accordbook-intro__guide--left,
+.accordbook-intro__core--left {
+  animation: accordbookDrawLeft .50s cubic-bezier(.2,.68,.32,1) .06s forwards;
+}
+
+.accordbook-intro__guide--right,
+.accordbook-intro__core--right {
+  animation: accordbookDrawRight .50s cubic-bezier(.2,.68,.32,1) .44s forwards;
+}
+
+.accordbook-intro__guide--spiral,
+.accordbook-intro__core--spiral {
+  animation: accordbookDrawSpiral .58s cubic-bezier(.14,.7,.25,1) .82s forwards;
+}
+
+.accordbook-intro__guide--left { stroke-width: 11.5; }
+.accordbook-intro__core--left { stroke-width: 5.8; }
+
+.accordbook-intro__guide--right { stroke-width: 12.5; }
+.accordbook-intro__core--right { stroke-width: 6.2; }
+
+.accordbook-intro__guide--spiral { stroke-width: 8.0; }
+.accordbook-intro__core--spiral { stroke-width: 4.2; }
+
+.accordbook-intro__nib {
+  fill: currentColor;
+  opacity: 0;
+  filter: url(#accordbookNibSoft);
+}
+
+.accordbook-intro__nib--left {
+  animation: accordbookNibLife .50s linear .06s forwards;
+}
+
+.accordbook-intro__nib--right {
+  animation: accordbookNibLife .50s linear .44s forwards;
+}
+
+.accordbook-intro__nib--spiral {
+  animation: accordbookNibLife .58s linear .82s forwards;
+}
+
+.accordbook-intro__drop {
+  fill: currentColor;
+  opacity: 0;
+  filter: url(#accordbookInkSoft);
+}
+
+.accordbook-intro__drop--left {
+  animation: accordbookDropIn .14s ease-out .06s forwards, accordbookDropOut .18s ease-in .30s forwards;
+}
+
+.accordbook-intro__drop--right {
+  animation: accordbookDropIn .14s ease-out .44s forwards, accordbookDropOut .18s ease-in .68s forwards;
+}
+
+.accordbook-intro__drop--spiral {
+  animation: accordbookDropIn .12s ease-out .82s forwards, accordbookDropOut .16s ease-in 1.02s forwards;
+}
+
+.accordbook-intro__final-logo {
+  fill: currentColor;
+  opacity: 0;
+  animation: accordbookLogoIn .14s ease-out 1.50s forwards;
+}
+
+.accordbook-intro__wordmark {
+  margin-top: 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 7vw, 42px);
+  font-weight: 400;
+  letter-spacing: .02em;
+  opacity: 0;
+  transform: translateY(4px);
+  animation: accordbookWordIn .18s ease-out 1.62s forwards;
+}
+
+.accordbook-intro__tagline {
+  margin-top: 8px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: accordbookSoftIn .14s ease-out 1.76s forwards;
+}
+
+.accordbook-intro__rule {
+  width: 38px;
+  height: 1px;
+  margin: 16px auto 0;
+  background: var(--intro-rule);
+  opacity: 0;
+  animation: accordbookSoftIn .14s ease-out 1.80s forwards;
+}
+
+@keyframes accordbookDrawLeft { to { stroke-dashoffset: 0; } }
+@keyframes accordbookDrawRight { to { stroke-dashoffset: 0; } }
+@keyframes accordbookDrawSpiral { to { stroke-dashoffset: 0; } }
+@keyframes accordbookDrawingFade { to { opacity: 0; } }
+@keyframes accordbookLogoIn { to { opacity: 1; } }
+@keyframes accordbookWordIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes accordbookSoftIn { to { opacity: .68; } }
+@keyframes accordbookNibLife { 0%, 92% { opacity: .95; } 100% { opacity: 0; } }
+@keyframes accordbookDropIn { to { opacity: .24; } }
+@keyframes accordbookDropOut { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .accordbook-intro__drawing,
+  .accordbook-intro__nib,
+  .accordbook-intro__drop {
+    display: none;
+  }
+
+  .accordbook-intro__final-logo,
+  .accordbook-intro__wordmark,
+  .accordbook-intro__tagline,
+  .accordbook-intro__rule {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
