@@ -13,7 +13,7 @@ Accordbook is a local-first formula notebook designed for perfumers to write, ca
 
 ## Try Accordbook
 
-**[Open Accordbook →](https://perfumerlee.github.io/accordbook/)**
+**[Open Accordbook.org →](https://accordbook.org/)**
 
 ---
 
