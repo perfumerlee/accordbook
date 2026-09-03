@@ -16,7 +16,7 @@ declare global {
 const completedFormulaIds = new Set<string>()
 
 function isProductionHost(): boolean {
-  return typeof window !== 'undefined' && window.location.hostname === 'perfumerlee.github.io'
+  return typeof window !== 'undefined' && window.location.hostname === 'accordbook.org'
 }
 
 export function trackEvent(name: ProductAnalyticsEvent, params?: AnalyticsParams): void {

@@ -10,7 +10,7 @@ describe('product analytics', () => {
   beforeEach(() => {
     resetAnalyticsForTests()
     vi.stubGlobal('window', { dataLayer: [] })
-    setHost('perfumerlee.github.io')
+    setHost('accordbook.org')
   })
 
   it('pushes only the event and approved creation method on production', () => {
@@ -26,6 +26,12 @@ describe('product analytics', () => {
 
   it('is a no-op on localhost', () => {
     setHost('localhost')
+    trackFormulaCreated('new')
+    expect(window.dataLayer).toEqual([])
+  })
+
+  it('does not send custom events from the retired GitHub Pages host', () => {
+    setHost('perfumerlee.github.io')
     trackFormulaCreated('new')
     expect(window.dataLayer).toEqual([])
   })
