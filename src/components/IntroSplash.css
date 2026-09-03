@@ -31,6 +31,13 @@
   animation: accordbookDrawingFade .12s ease-out 1.50s forwards;
 }
 
+/* Keep the opening mark clean: transient ink drops/nibs can read as a
+   stray blinking dot in the otherwise empty loading field. */
+.accordbook-intro__drop,
+.accordbook-intro__nib {
+  display: none;
+}
+
 .accordbook-intro__guide,
 .accordbook-intro__core {
   fill: none;
