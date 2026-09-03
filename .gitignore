@@ -145,3 +145,8 @@ vite.config.ts.timestamp-*
 # Local HTTPS development certificates
 certs/
 rootCA.pem
+
+# Local investigation and implementation reports
+*-REPORT.md
+*-PLAN.md
+*-DIAGNOSIS.md
