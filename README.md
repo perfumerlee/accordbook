@@ -7,7 +7,7 @@ Built by a perfumer, for perfumers.
 > **Private by default**  
 > Your formulas stay on your device.
 
-Accordbook is a local-first formula notebook designed for perfumers to write, calculate, revise, organize, and share fragrance formulas without requiring an account or backend.
+Accordbook is a local-first formula notebook designed for perfumers to write, calculate, revise, organize, preserve, and share fragrance formulas without requiring an account or backend.
 
 ---
 
@@ -29,50 +29,48 @@ Accordbook is a local-first formula notebook designed for perfumers to write, ca
 <!-- SMARTPHONE SCREENSHOT -->
 <img width="1672" height="941" alt="accordbook_readme_main2" src="https://github.com/user-attachments/assets/0ad68896-ae2e-4514-b6a5-6c84fd47bccd" />
 
-
 ---
 
-## v1.05
+## v1.06 — Time Machine
 
-Accordbook v1.05 expands the formula notebook with local CAS checking, Formula File sharing, provenance and revision tools, Formula Origins, and improved responsive layouts for desktop and mobile use.
+Accordbook v1.06 introduces **Time Machine**, a new way to preserve meaningful stages of a formula while continuing to experiment with the current version.
+
+This release also improves first-time onboarding, Sample formulas, Formula Origins, Notebook Backup, responsive layouts, and printed formula records.
+
+### Time Machine
+
+- Save meaningful formula states as permanent versions
+- Keep everyday Auto Save separate from version history
+- Browse the history of the current formula
+- Add an optional note when saving a version
+- Open historical versions in read-only mode
+- Compare saved versions with other versions or the current formula
+- See added, removed, changed, and unchanged materials
+- Restore a previous version without deleting later history
+- Automatically preserve the current state as a Restore Point when needed
 
 ### Formula notebook
 
 - 1,000-part formula notebook with a 10.00 g reference batch
 - Formula ID and customizable prefix management
-- Formula editing with Parts, Material, CAS / Ref., and Notes
-- Dilution handling and direct solvent recognition
+- Formula editing with Parts, Material, CAS / Ref., dilution, and Notes
 - Automatic concentrate, solvent, batch, shortage, and completion calculations
 - Formula duplication and material reset
 - Archive, restore, and permanent delete
-- Local autosave using IndexedDB with session fallback
+- Local Auto Save using browser storage
 
-### Formula files and backup
+### Starter formulas
 
-- Standalone Formula File export for sharing individual formulas
-- Official Formula File extension: `.accordbook`
-- Legacy `.json` Formula Files remain supported for import
-- Safe Formula import that adds formulas without replacing the existing Notebook
-- Automatic local Formula ID generation when importing a Formula File
-- Notebook Backup and Restore for full Notebook recovery
-- Formula Files and Notebook Backups remain separate workflows
-
-### Formula provenance
-
-- Formula source and lineage records
-- Revision history
-- SHA-256 content fingerprints
-- Local revision integrity verification
-- Hash-chain revision records
-- Reconstruction support for compatible revisions
-- Formula Time Machine
-- Read-only viewing of reconstructable past revisions
-- Comparison between a past revision and the current formula
-- Restoration of past formula states as new revisions without rewriting history
+- First-visit onboarding for new users
+- Create a new formula or open an existing `.accordbook` file
+- Try included Sample formulas
+- Sample formulas always create independent editable formulas
+- Sample-derived formulas keep their Origin relationship
+- Starter formulas never create Time Machine history automatically
 
 ### Formula Origins
 
-Formula Origins record where a formula began while keeping user claims separate from verified system facts.
+Accordbook keeps Formula Origin simple and focused on the relationship to its source.
 
 Available states include:
 
@@ -81,22 +79,24 @@ Available states include:
 - Adapted from
 - Unknown
 
-Optional Origin details can include:
+Detailed provenance information can remain stored internally without making the main notebook interface unnecessarily complex.
 
-- Source / Reference
-- Creator / Author
-- Link
-- Note
+### Formula files and backup
 
-Origin metadata does not affect the formula content fingerprint.
+- Standalone `.accordbook` Formula Files for sharing individual formulas
+- Formula imports add a new Formula without replacing the existing Notebook
+- Legacy `.json` Formula Files remain supported for import
+- Notebook Backup for full recovery and migration
+- Notebook Backup now preserves Time Machine versions and Restore Points
+- Older backup formats remain supported
+- Formula Files and Notebook Backups remain separate workflows
 
 ### CAS Check
 
-- Review all materials in the current formula at once
+- Review materials in the current formula
 - Safe CAS autofill for exact, single-candidate matches
 - Existing user-entered CAS / Ref. values are never overwritten automatically
-- Result summary with total, autofilled, verified, review-required, and unresolved counts
-- Visual highlighting for unresolved empty CAS fields
+- Visual identification of unresolved materials
 - Local CAS resolver data
 - No live external fragrance-database lookup required during normal use
 
@@ -104,46 +104,49 @@ Origin metadata does not affect the formula content fingerprint.
 
 - English / Korean interface
 - Desktop, tablet, and smartphone-safe layouts
-- Current-formula browser printing
-- Header Quick Print on supported layouts
-- Formula Actions help
-- Material highlighting
-- Dedicated mobile formula workspace
-- Responsive material rows
+- Dedicated Time Machine workspace
+- Improved first-visit experience
+- Responsive Notebook and Formula navigation
 - Mobile Formula and Material actions
-- Improved Notebook and Archive navigation for longer lists
+- Current-formula browser printing
+- Improved CAS and Origin presentation in printed records
+- Cleaner print output with interaction controls removed
 
 ---
 
-## CAS Check
+## Time Machine
 
-Accordbook v1.05 includes a local CAS checking assistant for reviewing material information in the currently open formula.
+Perfume formulas often develop through many experiments rather than a single finished draft.
 
-CAS Check fills an empty CAS / Ref. field only when the local resolver produces a sufficiently certain result.
+Time Machine lets you preserve the stages that matter without turning every Auto Save into a version.
 
-Automatic entry requires:
+A simple workflow looks like this:
 
-- an existing material name
-- an empty CAS / Ref. field
-- an exact normalized material-name match
-- exactly one resolver candidate
-- a valid CAS number for that candidate
+```text
+Current Formula
+      ↓
+Save Version
+      ↓
+v1
+      ↓
+Continue experimenting
+      ↓
+v2
+      ↓
+Compare / Restore
+```
 
-Accordbook does not automatically apply ambiguous, fuzzy, invalid, or missing matches.
+The current Formula always remains the editable working state.
 
-Existing user-entered CAS / Ref. values are preserved and are never overwritten automatically.
+Saved versions are immutable snapshots that can be opened later for reference or comparison.
 
-After a check, Accordbook summarizes the result using categories such as:
+### Restore without losing history
 
-- **Total materials**
-- **Autofilled**
-- **Verified**
-- **Needs review**
-- **Not found**
+Restoring an earlier version does not erase what happened afterward.
 
-Unresolved empty CAS fields can be highlighted so materials requiring manual review are easier to locate.
+When necessary, Accordbook creates a **Restore Point** before applying the historical state.
 
-> CAS Check is an assistance tool. Supplier documentation, SDS information, regulatory references, and other authoritative sources should remain the primary references for material identification.
+This allows experimentation to continue without treating restoration as destructive history rewriting.
 
 ---
 
@@ -157,91 +160,68 @@ The official extension is:
 .accordbook
 ```
 
-Formula Files remain JSON-based internally while using an Accordbook-specific file identity.
-
-A Formula File can be exported from the currently open formula and imported into another Accordbook Notebook.
+A Formula File can be exported from the currently open Formula and imported into another Accordbook Notebook.
 
 When imported:
 
 - the Formula is added as a new Notebook entry
 - existing formulas are not replaced
 - archived formulas are not changed
-- a new local Formula ID is generated automatically
+- a new local Formula identity is created
 
-Legacy `.json` Formula Files remain supported for import.
+Formula Files remain intentionally separate from Notebook Backups.
 
 ### Formula File vs Notebook Backup
 
-These two formats serve different purposes.
-
 **Formula File**
 
-- shares one formula
+- shares one Formula
 - uses `.accordbook`
 - imports additively
+- does not include Time Machine history
 - does not replace the Notebook
 
 **Notebook Backup**
 
 - preserves the full Notebook
-- is used for recovery or migration
+- includes Time Machine history
+- is intended for recovery or migration
 - restores Notebook-level data
 
 Use **Import formula** for shared formulas.
 
-Use **Restore backup** only when restoring the complete Notebook.
+Use **Restore backup** when restoring the complete Notebook.
 
 ---
 
-## Formula provenance
+## Formula Origins
 
-Accordbook can preserve provenance information alongside a formula.
+Formula Origins describe how a Formula relates to its source.
 
-This includes:
+Accordbook uses four simple classifications:
 
-- formula lineage
-- revision history
-- content fingerprints
-- revision integrity records
-- reconstruction information where available
+- **Original**
+- **Inspired by**
+- **Adapted from**
+- **Unknown**
 
-Formula composition is normalized through a versioned canonicalization process and fingerprinted using SHA-256.
+For example, a Formula created from an Accordbook Sample is identified as **Adapted from**, while a Formula created from scratch is **Original**.
 
-Source information such as Origin or Author is treated as a recorded claim rather than proof of authorship.
-
-The provenance system is designed to preserve evidence of how a formula changed without requiring the formula itself to be uploaded to an external service.
+Origin information does not change the actual composition of the Formula.
 
 ---
 
-## Formula Time Machine
+## CAS Check
 
-Accordbook can reconstruct supported past formula states from locally recorded revision evidence.
+CAS Check is a local assistant for reviewing material information in the currently open Formula.
 
-When sufficient reconstruction data exists, a historical formula state can be rebuilt and fingerprinted again.
+Accordbook can fill an empty CAS / Ref. field when the local resolver finds a sufficiently certain match.
 
-The reconstructed fingerprint is compared with the fingerprint recorded for that revision.
+Existing user-entered CAS / Ref. values are never overwritten automatically.
 
-Past formula states can be:
+Ambiguous or unresolved materials remain available for manual review.
 
-- viewed without changing the current formula
-- compared with the current formula
-- restored as a new revision
-
-Restoring a historical state never deletes later history.
-
-For example:
-
-```text
-Revision #18
-      ↓ Restore
-Revision #31
-```
-
-The formula state from Revision #18 becomes the new current state as Revision #31.
-
-Revisions #19–#30 remain preserved.
-
-Older provenance records without reconstruction data remain valid evidence records but may not be reconstructable.
+> CAS Check is an assistance tool. Supplier documentation, SDS information, regulatory references, and other authoritative sources should remain the primary references for material identification.
 
 ---
 
@@ -249,35 +229,13 @@ Older provenance records without reconstruction data remain valid evidence recor
 
 Accordbook is **private by default**.
 
-No account or backend is required for normal formula storage.
+No account or backend is required for normal Formula storage.
 
-The following information is kept in the browser/device storage used by Accordbook:
+Formula data, Notes, Origins, Time Machine history, and other working information remain in the browser/device storage used by Accordbook.
 
-- formulas
-- material data
-- Notes
-- Formula Origins
-- provenance records
-- revision history
-- reconstruction data
-- fingerprints
-- local CAS resolver results
+CAS Check uses local resolver data during normal use and does not require sending Formula materials to a live external fragrance database.
 
-CAS Check uses local resolver data during normal use and does not require sending formula materials to a live external fragrance database.
-
-Formula sharing files and Notebook Backups are generated locally and downloaded by the user.
-
-Accordbook does not send the following formula content to analytics:
-
-- Formula titles
-- Material names
-- CAS / Ref. values
-- Parts
-- Notes
-- dilution details
-- fingerprints
-- provenance records
-- Formula File contents
+Formula Files and Notebook Backups are generated locally by the user.
 
 For portability and recovery, keeping a recent Notebook Backup is recommended.
 
@@ -290,7 +248,7 @@ Accordbook uses a simple 1,000-parts system.
 - **1,000 parts = 10.00 g**
 - **1 part = 0.01 g**
 - Percentage is derived from Parts
-- Diluted materials retain surface notation such as `@10% in ALC`
+- Diluted materials retain notation such as `@10% in ALC`
 - Direct solvent rows are included in solvent calculations
 - Dilution carriers are included in solvent calculations
 
@@ -312,19 +270,9 @@ Accordbook supports:
 
 Only system interface text is translated.
 
-User-entered formula content is never automatically translated.
+User-entered Formula content is never automatically translated.
 
-This includes:
-
-- Formula titles
-- Material names
-- CAS / Ref. values
-- Notes
-- Source / Reference values
-- Creator / Author names
-- Links
-- Origin Notes
-- user-entered solvent text
+This includes Formula titles, Material names, CAS / Ref. values, Notes, Version Notes, and user-entered source information.
 
 Technical notation such as `PARTS`, `CAS / REF.`, `DIL`, `ALC`, `DPG`, `IPM`, and `TEC` can remain unchanged across interface languages.
 
@@ -342,25 +290,15 @@ Accordbook runs entirely in the browser for normal use.
 
 ---
 
-## Evidence specification
+## Data integrity
 
-Accordbook v1.05 preserves the existing evidence specification.
+Accordbook preserves local provenance and revision information to help maintain a record of how formulas change over time.
 
-- **Canonicalization v1**
-- **Revision Hash Payload v1**
+Formula content can be fingerprinted using SHA-256, and compatible revision records can be checked for integrity.
 
-Existing content fingerprints and revision histories remain compatible.
+These mechanisms are designed to be **tamper-evident, not tamper-proof**.
 
-The provenance system is designed to be **tamper-evident**, not tamper-proof.
-
-Accordbook does not claim to certify:
-
-- original authorship
-- copyright ownership
-- formula authenticity
-- trusted timestamps
-
-Those require separate trust layers such as digital signatures, trusted timestamping, or independent verification.
+Accordbook does not claim to certify original authorship, copyright ownership, formula authenticity, or trusted timestamps.
 
 ---
 
