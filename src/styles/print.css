@@ -23,8 +23,8 @@
   .formula-name { color: #000; font-size: clamp(19px, 5cqw, 24px) !important; line-height: 32px; min-width: 0; }
   .formula-name-long, .formula-name-very-long { font-size: clamp(19px, 5cqw, 24px) !important; letter-spacing: -.01em; }
   .summary-grid > div:first-child { min-width: 0; }
-  .summary-grid .notes { display: none !important; }
-  .summary-grid .notes-print { display: block !important; min-height: 192px; padding: 5px 12px 0; color: #000; white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/32px Georgia, serif; background: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, #c8c8c8 31px, #c8c8c8 32px); }
+  .summary-grid .notes { display: none !important; visibility: hidden !important; background: none !important; background-image: none !important; border: 0 !important; box-shadow: none !important; }
+  .summary-grid .notes-print { display: block !important; min-height: 192px; padding: 5px 12px 0; color: #000; white-space: pre-wrap; overflow-wrap: anywhere; background: none !important; background-image: none !important; box-shadow: none !important; }
   .simple-total .main-line { margin-bottom: 8px; }
   .simple-total .main-line strong { font-size: 22px; }
   .simple-total .total-details { display: grid; gap: 5px; margin-top: 10px; }

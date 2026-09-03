@@ -1128,7 +1128,7 @@ input:focus, textarea:focus{
     height:auto;
     min-height:192px;
     background-color:transparent;
-    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 31px, #c8c8c8 31px, #c8c8c8 32px) !important;
+    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 31px, #a9a9a9 31px, #a9a9a9 32px) !important;
     background-size:100% 32px;
     background-repeat:repeat-y;
     background-position:0 0;
