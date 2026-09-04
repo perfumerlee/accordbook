@@ -74,7 +74,7 @@
   .note-header .tablet-utility-row .notebook-toggle::before { content: ''; display: block; flex: 0 0 15px; width: 15px; height: 15px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='4' width='16' height='16' rx='1.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M9 4v16M12.5 8h4M12.5 12h4M12.5 16h4' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='4' width='16' height='16' rx='1.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M9 4v16M12.5 8h4M12.5 12h4M12.5 16h4' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat; }
   .note-header .tablet-utility-row .notebook-toggle::after { content: 'NOTEBOOK'; }
   html[lang="ko"] .note-header .tablet-utility-row .notebook-toggle::after { content: '노트북'; }
-  .calculation-helper { font-size: 11px; line-height: 1.2; letter-spacing: 0; }
+  .calculation-helper { font-size: 10px; line-height: 1.2; letter-spacing: 0; }
   .simple-total .main-line > span,
   .simple-total .total-details span,
   .simple-total .total-status .status { font-size: 12px; }
