@@ -90,6 +90,7 @@
   .table-head { font-size: 11px; }
   .row > .cas { font-size: 14px !important; }
   .actions-heading .actions-help-trigger { display: none; }
+  .app .main .metrics { border-left: none; }
   .row-wrap > .row > .parts { padding-left: 22px; padding-right: 22px; text-align: center; }
   .row-wrap > .row { position: relative; }
   .tablet-parts-stepper { position: absolute; left: 2px; top: 50%; z-index: 2; display: inline-flex; width: 74px; justify-content: space-between; pointer-events: none; transform: translateY(-50%); }
@@ -107,10 +108,14 @@
   .material { min-width: 0; }
   .notes { max-width: 100%; }
   .notes { overflow-y: hidden !important; resize: none; }
-  .actions-heading { justify-content: center; gap: 0; }
+  .actions-heading { justify-content: center; gap: 3px; }
   .summary-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
   .summary-grid > .metrics { order: 1; }
   .summary-grid > :first-child { order: 2; }
+}
+
+@media (max-width: 767px) {
+  .calculation-helper { font-size: 10px; }
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
@@ -342,7 +347,7 @@ html[lang="ko"] .app .title-primary > label {
   .mobile-cas-hint button { justify-self: end; margin-top: 6px; padding: 4px 9px; border: 1px solid #cdb995; border-radius: 4px; background: #f4ead8; color: #604c3a; font-size: 11px; cursor: pointer; }
   .mobile-cas-result { display: grid; gap: 3px; margin: 6px 0 -2px; color: #6a5945; font: 10px/1.35 "Courier New", monospace; white-space: normal; }
   .mobile-cas-result strong { font-size: 11px; }
-  .app > .main .mobile-cas-result { top: calc(100% + 1px); left: 50%; right: auto; width: max-content; min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; transform: translateX(-85%); }
+  .app .main .cas-result { top: calc(100% + 2px); left: -320%; right: auto; width: max-content; min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; transform: none; }
   .mobile-cas-action-slot { left: 85% !important; right: auto !important; top: -10px !important; bottom: auto !important; transform: none !important; }
   .mobile-cas-hint { z-index: 100; background: #fffaf0 !important; opacity: 1; isolation: isolate; }
 }
