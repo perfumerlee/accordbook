@@ -166,10 +166,24 @@
 @keyframes accordbookDropOut { to { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .accordbook-intro__drawing,
+  .accordbook-intro__drawing {
+    display: block;
+  }
+
   .accordbook-intro__nib,
   .accordbook-intro__drop {
     display: none;
+  }
+
+  .accordbook-intro__drawing {
+    animation: none;
+    opacity: 1;
+  }
+
+  .accordbook-intro__guide,
+  .accordbook-intro__core {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 
   .accordbook-intro__final-logo,

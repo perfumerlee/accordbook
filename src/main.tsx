@@ -1,4 +1,4 @@
-import { Component, StrictMode, useState, type ReactNode } from 'react'
+import { Component, StrictMode, useCallback, useState, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import AccordbookNotebook from './components/AccordbookNotebook'
 import { IntroSplash } from './components/IntroSplash'
@@ -14,7 +14,8 @@ createRoot(document.getElementById('root')!).render(
 
 function ProductionWithIntro() {
   const [introDone, setIntroDone] = useState(false)
-  return <><AccordbookNotebook introComplete={introDone} /><>{!introDone && <IntroSplashBoundary onDone={() => setIntroDone(true)} />}</></>
+  const handleIntroDone = useCallback(() => setIntroDone(true), [])
+  return <><AccordbookNotebook introComplete={introDone} /><>{!introDone && <IntroSplashBoundary onDone={handleIntroDone} />}</></>
 }
 
 class IntroSplashBoundary extends Component<{ onDone: () => void; children?: ReactNode }, { failed: boolean }> {

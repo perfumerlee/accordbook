@@ -45,7 +45,7 @@ export function IntroSplash({
   }, [onDone, oncePerSession]);
 
   return (
-    <div className="accordbook-intro" role="status" aria-label="Opening Accordbook">
+    <div className="accordbook-intro" role="status" aria-label="Loading">
       <div className="accordbook-intro__content">
         <svg className="accordbook-intro__mark" viewBox="0 0 1254 1254" aria-hidden="true">
           <defs>

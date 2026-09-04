@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap');
 
 /* Responsive foundation. Rules are intentionally scoped below 1200px. */
-.loading-fallback { min-height: 100svh; display: grid; place-items: center; box-sizing: border-box; padding: 24px; background: #e8e1d5; color: #806f5d; font: 14px/1.5 Georgia, serif; text-align: center; }
+.loading-fallback { position: fixed; inset: 0; z-index: 10000; width: 100%; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; box-sizing: border-box; padding: 24px; background: #e8e1d5; color: #806f5d; font: 14px/1.5 Georgia, serif; text-align: center; }
 .notebook-toggle { display: none; }
 .drawer-scrim { display: none; }
 .mobile-row-actions { display: none; }
@@ -9,6 +9,7 @@
 .formula-search { display: block; margin: 12px 0 10px; }
 .formula-search input { width: 100%; box-sizing: border-box; min-height: 36px; padding: 8px 10px; border: 1px solid rgba(185,168,144,.68); border-radius: 8px; background: rgba(255,250,240,.72); color: inherit; font: 14px/1.2 Inter,Pretendard,system-ui,sans-serif; }
 .formula-search-empty { padding: 10px 5px; color: #806f5d; font-size: 12px; }
+.notes { height: auto; max-height: none; overflow-y: hidden; }
 .sidebar:has(.archive-section-heading[aria-expanded="true"]) > .formula-search:not(.archive-search) { display: none; }
 .library-notebook-title[aria-expanded="false"] + .formula-search { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

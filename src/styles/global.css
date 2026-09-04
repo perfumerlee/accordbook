@@ -1,4 +1,5 @@
 :root { font-family: Georgia, 'Times New Roman', serif; color: #30291f; background: #e7dcc8; font-synthesis: none; }
+html, body, #root { background: #e8e1d5; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
 button { font: inherit; }
