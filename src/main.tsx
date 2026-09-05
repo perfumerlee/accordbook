@@ -1,12 +1,18 @@
 import { Component, StrictMode, useCallback, useState, type ReactNode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, type Root } from 'react-dom/client'
 import AccordbookNotebook from './components/AccordbookNotebook'
 import { IntroSplash } from './components/IntroSplash'
 import Rev30Preview from './rev30-preview/Rev30Preview'
 
 const isRev30Preview = new URLSearchParams(window.location.search).get('rev30preview') === '1'
 
-createRoot(document.getElementById('root')!).render(
+// Keep one React root when Vite re-evaluates this entry during development.
+const root: Root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
+if (import.meta.hot) {
+  import.meta.hot.dispose((data) => { data.root = root })
+}
+
+root.render(
   <StrictMode>
     {isRev30Preview ? <Rev30Preview /> : <ProductionWithIntro />}
   </StrictMode>,

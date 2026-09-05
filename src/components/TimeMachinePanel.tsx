@@ -1,5 +1,5 @@
 import { ScaleBatchView } from './ScaleBatchView'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Formula, FormulaVersion, FormulaVersionSnapshot } from '../models/formula'
 import type { AccordbookStorage } from '../storage/storageService'
 import { createFormulaVersion, listFormulaVersions } from '../services/formulaVersionLifecycle'
@@ -12,6 +12,10 @@ import { restoreFormulaVersion } from '../services/formulaVersionLifecycle'
 export const TIME_MACHINE_TABS = ['version', 'compare'] as const
 type TimeMachineTab = typeof TIME_MACHINE_TABS[number]
 
+function usable(element: HTMLElement | null): element is HTMLElement {
+  return !!element && element.isConnected && !element.matches(':disabled') && !element.closest('[hidden], [inert]') && element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden'
+}
+
 export function formatVersionNote(version: FormulaVersion, language: 'en' | 'ko'): string {
   if (version.kind === 'restore-point' && language === 'ko') {
     const match = /^Before restoring (v\d+)$/i.exec(version.note.trim())
@@ -20,8 +24,22 @@ export function formatVersionNote(version: FormulaVersion, language: 'en' | 'ko'
   return version.note
 }
 
-export default function TimeMachinePanel({ formula, storage, language, onClose, onBeforeSaveVersion, onRestore, isOpen }: { formula: Formula; storage: AccordbookStorage; language: 'en' | 'ko'; onClose: () => void; onBeforeSaveVersion?: () => Promise<void>; onRestore?: (formula: Formula) => Promise<void>; isOpen: boolean }) {
+export default function TimeMachinePanel({ formula, storage, language, onClose, onBeforeSaveVersion, onRestore, isOpen, opener, openSequence = 0 }: { formula: Formula; storage: AccordbookStorage; language: 'en' | 'ko'; onClose: () => void; onBeforeSaveVersion?: () => Promise<void>; onRestore?: (formula: Formula) => Promise<void>; isOpen: boolean; opener?: HTMLElement | null; openSequence?: number }) {
   const t = messages[language]
+  const panelRef = useRef<HTMLElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const closeTimerRef = useRef<number | undefined>(undefined)
+  const focusFrameRef = useRef<number | undefined>(undefined)
+  const returnPending = useRef(false)
+  const [companion, setCompanion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1840px)').matches)
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1840px)')
+    const change = () => setCompanion(query.matches)
+    query.addEventListener('change', change)
+    return () => query.removeEventListener('change', change)
+  }, [])
+  const cancelFocusFrame = () => { window.cancelAnimationFrame(focusFrameRef.current ?? 0); focusFrameRef.current = undefined }
+  const cancelClose = () => { window.clearTimeout(closeTimerRef.current); closeTimerRef.current = undefined }
   const [batchOpen, setBatchOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const batchActionRef = useRef<HTMLButtonElement>(null)
@@ -30,27 +48,92 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   const openBatch = () => {
     detailScroll.current = contentRef.current?.scrollTop ?? 0
     setBatchOpen(true)
-    window.requestAnimationFrame(() => { if (contentRef.current) contentRef.current.scrollTop = 0; batchBackRef.current?.focus({ preventScroll: true }) })
   }
   const backToVersion = () => {
     setBatchOpen(false)
     setActiveTab('version')
-    window.requestAnimationFrame(() => { batchActionRef.current?.focus({ preventScroll: true }); if (contentRef.current) contentRef.current.scrollTop = detailScroll.current })
+    batchReturnPending.current = true
   }
   const formulaIdRef = useRef(formula.id); const [versions, setVersions] = useState<FormulaVersion[]>([]); const [compareTarget, setCompareTarget] = useState<FormulaVersion>(); const [activeTab, setActiveTab] = useState<TimeMachineTab>("version"); const [selected, setSelected] = useState<FormulaVersion>(); const [noteOpen, setNoteOpen] = useState(false); const [note, setNote] = useState(''); const [saving, setSaving] = useState(false); const [restoring, setRestoring] = useState(false); const [restoreConfirm, setRestoreConfirm] = useState(false); const [closing, setClosing] = useState(false); const [contextChanging, setContextChanging] = useState(false); const ko = language === 'ko'
+  const batchReturnPending = useRef(false)
+  const live = useRef({ isOpen, formulaId: formula.id, batchOpen, versionId: selected?.versionId, openSequence })
+  useLayoutEffect(() => { live.current = { isOpen, formulaId: formula.id, batchOpen, versionId: selected?.versionId, openSequence } })
+  useLayoutEffect(() => {
+    cancelClose(); cancelFocusFrame(); returnPending.current = false; batchReturnPending.current = false; setClosing(false)
+    return () => { cancelClose(); cancelFocusFrame() }
+  }, [formula.id, openSequence])
+  useLayoutEffect(() => {
+    if (!isOpen || companion) return
+    const panel = panelRef.current
+    if (!panel) return
+    // Inert only background branches; the Time Machine sibling stays usable.
+    const roots = Array.from(document.querySelectorAll<HTMLElement>('.app > .sidebar, .formula-stage, .app > .starter-picker-backdrop, .app > .first-start-backdrop, .notebook-toggle, .drawer-scrim'))
+    const previous = roots.map(root => root.inert)
+    roots.forEach(root => { root.inert = true })
+    if (!panel.contains(document.activeElement)) closeRef.current?.focus({ preventScroll: true })
+    const containFocus = (event: FocusEvent) => { if (!panel.contains(event.target as Node)) closeRef.current?.focus({ preventScroll: true }) }
+    document.addEventListener('focusin', containFocus)
+    return () => { document.removeEventListener('focusin', containFocus); roots.forEach((root, index) => { root.inert = previous[index] }) }
+  }, [isOpen, companion, openSequence])
+  useLayoutEffect(() => {
+    if (isOpen) { cancelClose(); returnPending.current = false; return }
+    cancelClose(); cancelFocusFrame()
+    if (returnPending.current) { returnPending.current = false; if (usable(opener ?? null)) opener!.focus({ preventScroll: true }) }
+  }, [isOpen, opener])
+  useEffect(() => {
+    cancelFocusFrame()
+    if (!isOpen || closing || !selected || (!batchOpen && !batchReturnPending.current)) return
+    const context = { formulaId: formula.id, versionId: selected.versionId, openSequence, batchOpen }
+    focusFrameRef.current = window.requestAnimationFrame(() => {
+      focusFrameRef.current = undefined
+      const current = live.current
+      if (!current.isOpen || closeTimerRef.current !== undefined || current.formulaId !== context.formulaId || current.versionId !== context.versionId || current.openSequence !== context.openSequence || current.batchOpen !== context.batchOpen) return
+      const target = batchOpen ? batchBackRef.current : batchActionRef.current
+      if (usable(target)) { target.focus({ preventScroll: true }); if (contentRef.current) contentRef.current.scrollTop = batchOpen ? 0 : detailScroll.current }
+      batchReturnPending.current = false
+    })
+    return cancelFocusFrame
+  }, [isOpen, closing, batchOpen, formula.id, selected?.versionId, openSequence])
   const reload = async () => setVersions(await listFormulaVersions(storage, formula.id)); const formulaContextChanged = formula.id !== formulaIdRef.current; useEffect(() => { formulaIdRef.current = formula.id; setSelected(undefined); setBatchOpen(false); setCompareTarget(undefined); setActiveTab("version"); setNoteOpen(false); setRestoreConfirm(false); setContextChanging(true); const timer = window.setTimeout(() => setContextChanging(false), 160); void reload(); return () => window.clearTimeout(timer) }, [formula.id])
   const save = async () => { setSaving(true); try { await onBeforeSaveVersion?.(); await createFormulaVersion(storage, formula, note); setNote(''); setNoteOpen(false); await reload() } finally { setSaving(false) } }
   useEffect(() => { if (isOpen) { setClosing(false); setBatchOpen(false); setActiveTab("version") } }, [isOpen]);
   useEffect(() => { if (!isOpen || !ko) return; document.querySelectorAll<HTMLElement>('.tm-header-meta').forEach((element) => { element.textContent = element.textContent?.replace(/(\d+) VERSIONS?/, (_, count) => `${count} 버전`) ?? element.textContent }) }, [isOpen, ko, versions.length])
-  const requestClose = () => { if (closing) return; setClosing(true); window.setTimeout(onClose, 280) }; useEffect(() => { const onKeyDown = (event: KeyboardEvent) => { if (isOpen && event.key === "Escape") requestClose() }; window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown) }, [closing, isOpen]); const date = (value: string) => new Date(value).toLocaleString(ko ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  const requestClose = () => {
+    if (!isOpen || closeTimerRef.current !== undefined) return
+    cancelFocusFrame()
+    setClosing(true)
+    const context = live.current
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = undefined
+      if (!live.current.isOpen || live.current.formulaId !== context.formulaId || live.current.openSequence !== context.openSequence) return
+      returnPending.current = true
+      onClose()
+    }, 280)
+  }
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!isOpen) return
+    if (event.key === 'Escape' && !event.nativeEvent.isComposing) {
+      event.preventDefault(); event.stopPropagation()
+      if (restoreConfirm) { setRestoreConfirm(false); panelRef.current?.querySelector<HTMLButtonElement>('.tm-make-batch')?.focus({ preventScroll: true }) }
+      else requestClose()
+      return
+    }
+    if (event.key !== 'Tab' || companion || closing) return
+    const items = Array.from(panelRef.current?.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], [tabindex]') ?? []).filter(element => element.tabIndex >= 0 && usable(element))
+    const first = items[0]; const last = items[items.length - 1]
+    if (!first) { event.preventDefault(); panelRef.current?.focus(); return }
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { event.preventDefault(); last.focus() }
+    else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) { event.preventDefault(); first.focus() }
+  }
+  const date = (value: string) => new Date(value).toLocaleString(ko ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   const restore = async () => { if (!selected || restoring) return; setRestoring(true); try { await onBeforeSaveVersion?.(); const restored = await restoreFormulaVersion(storage, formula, selected); await onRestore?.(restored); setRestoreConfirm(false); setSelected(undefined); setActiveTab("version"); await reload() } finally { setRestoring(false) } }
   const selectTab = (tab: TimeMachineTab) => {
     if (tab === 'compare') setCompareTarget(compareTarget ?? selected)
     setActiveTab(tab)
   }
   return <div className={`tm-backdrop ${closing ? 'is-closing' : ''}`}>
-    <section className={'tm-panel ' + (selected ? 'tm-detail ' : '') + ((contextChanging || formulaContextChanged) ? 'tm-context-switch' : '')} role="dialog" aria-modal="true" aria-label="Time Machine">
-      <header><div><h2>TIME MACHINE</h2><p className="tm-header-meta">{formula.formulaId} · {versions.filter(version => version.kind === 'manual').length} {ko ? '버전' : 'VERSIONS'}</p></div><button className="tm-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={requestClose}>×</button></header>
+    <section ref={panelRef} tabIndex={-1} inert={!isOpen} onKeyDown={handlePanelKeyDown} className={'tm-panel ' + (selected ? 'tm-detail ' : '') + ((contextChanging || formulaContextChanged) ? 'tm-context-switch' : '')} role="dialog" aria-modal={!companion ? true : undefined} aria-label="Time Machine">
+      <header><div><h2>TIME MACHINE</h2><p className="tm-header-meta">{formula.formulaId} · {versions.filter(version => version.kind === 'manual').length} {ko ? '버전' : 'VERSIONS'}</p></div><button ref={closeRef} className="tm-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={requestClose}>×</button></header>
       {!batchOpen && <div className="tm-view-tabs" role="tablist" aria-label="Time Machine">
         {TIME_MACHINE_TABS.map((tab, index) => <button key={tab} id={`tm-tab-${tab}`} type="button" role="tab" aria-selected={activeTab === tab} aria-controls={`tm-view-${tab}`} tabIndex={activeTab === tab ? 0 : -1} className={activeTab === tab ? 'active' : ''} onClick={() => selectTab(tab)} onKeyDown={event => {
           const next = event.key === 'ArrowRight' ? (index + 1) % TIME_MACHINE_TABS.length : event.key === 'ArrowLeft' ? (index + TIME_MACHINE_TABS.length - 1) % TIME_MACHINE_TABS.length : event.key === 'Home' ? 0 : event.key === 'End' ? TIME_MACHINE_TABS.length - 1 : undefined
