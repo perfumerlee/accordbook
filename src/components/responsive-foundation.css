@@ -364,3 +364,35 @@ html[lang="ko"] .app .title-primary > label {
   .mobile-cas-action-slot { left: 85% !important; right: auto !important; top: -10px !important; bottom: auto !important; transform: none !important; }
   .mobile-cas-hint { z-index: 100; background: #fffaf0 !important; opacity: 1; isolation: isolate; }
 }
+.material-wrap{position:relative;min-width:0}
+.material-suggestions{position:absolute;left:0;right:0;top:calc(100% + 2px);z-index:30;display:grid;gap:2px;padding:4px;border:1px solid #b9a98b;background:#fbf5e8;box-shadow:0 4px 16px rgba(48,41,31,.16)}
+.material-suggestion{min-height:36px;padding:8px 10px;color:#5f503e;font:12px Georgia,serif;overflow-wrap:anywhere;cursor:pointer}
+.material-suggestion:hover,.material-suggestion.active{background:rgba(185,168,144,.22);color:#30291f}
+
+.material-wrap{min-width:0}
+.material-input-wrap{position:relative;min-width:0}
+.material-suggestions:empty{display:none}
+
+
+.row-wrap,.row,.material-wrap,.material-input-wrap{overflow:visible !important}
+.material-suggestions{display:grid !important;visibility:visible;opacity:1}
+.material-suggestions:empty{display:none !important}
+
+
+.material-suggestions{width:max(100%,220px);max-width:min(360px,calc(100vw - 24px));box-sizing:border-box}
+@media(max-width:420px){.material-suggestions{min-width:0;width:calc(100vw - 32px);max-width:calc(100vw - 32px)}}
+
+
+@media(max-width:767px){.material-suggestions{left:0;right:auto;width:min(300px,calc(100vw - 48px));max-width:calc(100vw - 48px)}.material-suggestion{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+
+@media(max-width:767px){.material-suggestions{width:min(280px,calc(100vw - 96px));max-width:calc(100vw - 96px)}}
+
+@media(max-width:767px){.material-suggestions{width:min(300px,70vw);max-width:100%;left:0;right:auto}}
+
+@media(max-width:767px){.material-suggestion{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}}
+
+@media(max-width:767px){.material-suggestions{width:min(280px,calc(100vw - 96px));max-width:none}}
+
+@media(max-width:767px){.material-suggestions{width:min(280px,calc(100vw - 120px));max-width:calc(100vw - 120px)}}
+@media(max-width:420px){.material-suggestions{width:min(260px,calc(100vw - 112px));max-width:calc(100vw - 112px)}}
+
