@@ -18,6 +18,19 @@ export async function duplicateFormula(storage: AccordbookStorage, source: Formu
   copy.provenance = await createProvenance(copy, 'duplicated', { originType: 'adapted_from', title: source.formulaId }, source.provenance ? { rootRecordId: source.provenance.rootRecordId, parentRecordId: source.provenance.recordId, parentFingerprint: source.provenance.currentFingerprint } : undefined)
   await storage.formulas.save(copy); return copy
 }
+export async function createFormulaFromVersion(storage: AccordbookStorage, version: import('../models/formula').FormulaVersion, prefix = 'ACC'): Promise<Formula> {
+  const base = await createFormula(storage, prefix)
+  const snapshot = version.snapshot
+  const suffix = version.kind === 'manual' && version.versionNumber !== null ? ` — V${version.versionNumber}` : ''
+  const created: Formula = { ...base, name: snapshot.name ? snapshot.name + suffix : base.name, notes: snapshot.notes, rows: snapshot.rows.map((row) => ({ id: crypto.randomUUID(), rowId: crypto.randomUUID(), material: row.material, cas: row.cas, parts: row.parts, dilution: row.dilution ? { ...row.dilution } : undefined })) }
+  const sourceFormula = await storage.formulas.get(version.parentFormulaId)
+  const sourceId = sourceFormula?.formulaId ?? version.snapshot.formulaId
+  const sourceName = snapshot.name || sourceFormula?.name || sourceId
+  const versionLabel = version.versionNumber === null ? '' : ` · V${version.versionNumber}`
+  created.provenance = await createProvenance(created, 'created', { originType: 'adapted_from', title: `${sourceName} · ${sourceId}${versionLabel}` })
+  await storage.formulas.save(created)
+  return created
+}
 export function resetMaterials(formula: Formula): Formula { return { ...formula, rows: [emptyRow()], updatedAt: timestamp() } }
 export function archiveFormula(storage: AccordbookStorage, formula: Formula): Promise<void> { return storage.formulas.moveToArchive(formula) }
 export function restoreFormula(storage: AccordbookStorage, formula: Formula): Promise<void> { return storage.archive.restore(formula) }

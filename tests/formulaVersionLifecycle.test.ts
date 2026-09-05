@@ -3,6 +3,7 @@ import type { Formula } from '../src/models/formula'
 import { createStorage } from '../src/storage/storageService'
 import { areRestoreSafetyStatesEqual, areVersionSnapshotsEqual, createFormulaVersion, createVersionSnapshot, restoreFormulaVersion } from '../src/services/formulaVersionLifecycle'
 import { createProvenance, verifyIntegrity } from '../src/services/provenance'
+import { createFormulaFromVersion } from '../src/services/formulaLifecycle'
 
 const makeFormula = (): Formula => ({ id: 'formula-1', formulaId: 'ACC-001', date: '2026-09-03', name: 'Test', notes: 'current', rows: [{ id: 'row-1', rowId: 'stable-row-1', parts: 100, material: 'Hedione', dilution: { enabled: true, percent: 10, solvent: 'ALC' } }], createdAt: '2026-09-03T00:00:00.000Z', updatedAt: '2026-09-03T00:00:00.000Z' })
 
@@ -81,5 +82,21 @@ describe('Formula Version lifecycle', () => {
     await expect(restoreFormulaVersion(storage, other, version)).rejects.toThrow('does not belong')
     const restored = await restoreFormulaVersion(storage, { ...formula, name: 'edited' }, version)
     expect(restored.id).toBe(formula.id); expect(restored.formulaId).toBe(formula.formulaId); expect(restored.createdAt).toBe(formula.createdAt); expect(restored.updatedAt).not.toBe(formula.updatedAt)
+  })
+
+  it('creates a new Formula with adapted-from Origin for the selected historical version', async () => {
+    const storage = await createStorage(); const source = { ...makeFormula(), name: 'Renamed Current Formula', provenance: await createProvenance(makeFormula()) }; await storage.formulas.save(source)
+    const version = await createFormulaVersion(storage, { ...source, name: 'Original Citrus' }, 'V2 note')
+    const created = await createFormulaFromVersion(storage, version, 'ACC')
+    expect(created.id).not.toBe(source.id); expect(created.formulaId).not.toBe(source.formulaId); expect(created.name).toBe('Original Citrus — V1')
+    expect(created.provenance?.claimedSource).toEqual({ originType: 'adapted_from', title: 'Original Citrus · ACC-001 · V1' })
+    const persistedSource = await storage.formulas.get(source.id); expect(persistedSource?.id).toBe(source.id); expect(persistedSource?.formulaId).toBe(source.formulaId); expect(persistedSource?.name).toBe(source.name); expect(await storage.versions.get(version.versionId)).toEqual(version)
+  })
+
+  it('falls back to source Formula ID when the historical name is empty', async () => {
+    const storage = await createStorage(); const source = { ...makeFormula(), provenance: await createProvenance(makeFormula()) }; await storage.formulas.save(source)
+    const version = await createFormulaVersion(storage, { ...source, name: '' })
+    const created = await createFormulaFromVersion(storage, version)
+    expect(created.provenance?.claimedSource.title).toBe('Test · ACC-001 · V1')
   })
 })
