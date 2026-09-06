@@ -109,7 +109,7 @@ function verifyLicense_(input, pepper) {
     if (!row) return reply_({ ok: false });
     const attempts = Number(row[10] || 0);
     const lockedUntil = row[11] ? new Date(row[11]).getTime() : 0;
-    if (lockedUntil > Date.now()) return reply_({ ok: false });
+    if (lockedUntil > Date.now()) return reply_({ ok: false, locked: true, retryAfterSeconds: Math.ceil((lockedUntil - Date.now()) / 1000) });
     const expected = hmac_(JSON.stringify([input.packageId, input.buyerName.normalize('NFC').trim(), input.phoneLast4, input.pin]), pepper);
     if (row[6] !== 'active' || row[4] !== expected) {
       const nextAttempts = attempts + 1;
@@ -117,7 +117,7 @@ function verifyLicense_(input, pepper) {
       const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
       sheet.getRange(rowIndex, 11, 1, 2).setValues([[nextAttempts, nextLocked]]);
       SpreadsheetApp.flush();
-      return reply_({ ok: false });
+      return nextLocked ? reply_({ ok: false, locked: true, retryAfterSeconds: 1800 }) : reply_({ ok: false });
     }
     const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
     sheet.getRange(rowIndex, 11, 1, 3).setValues([[0, '', new Date().toISOString()]]);

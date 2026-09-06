@@ -1,6 +1,6 @@
 import { normalizeBuyerCredentials, type BuyerCredentials } from './paidFormulaPackage'
 
-export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyc4gBzVVnF9sRUj4ierratWBbVLDNgSNSyawcjwonglShp3ZaX_wHYMiBMHsSg6jTK/exec'
+export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf6CSd35zBMwqUh8a5ftpV7lGfS8MzjmkpCLWiIToEK_0c4OsbWna-307qrDIwWTWJ/exec'
 
 export async function verifyPaidFormula(packageId: string, credentials: BuyerCredentials): Promise<void> {
   const buyer = normalizeBuyerCredentials(credentials)
@@ -12,6 +12,7 @@ export async function verifyPaidFormula(packageId: string, credentials: BuyerCre
   })
   if (!response.ok) throw new Error('Verification failed')
   const result = await response.json()
+  if (result.locked === true) throw new Error(`LOCKED:${Math.max(0, Number(result.retryAfterSeconds) || 0)}`)
   if (result.ok !== true || result.packageId !== packageId) throw new Error('Verification failed')
 }
 
