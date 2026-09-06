@@ -44,7 +44,7 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
   useEffect(() => { if (error) errorRef.current?.focus() }, [error])
   return createPortal(<dialog ref={dialog} className="paid-export-dialog" aria-labelledby="licensed-import-title" onCancel={event => { event.preventDefault(); if (!running.current) onClose() }}>
     <h2 id="licensed-import-title">{locked ? (ko ? '가져오기가 잠겼습니다' : 'Import temporarily locked') : (ko ? '라이선스 포뮬러 가져오기' : 'Import licensed formula')}</h2>
-    {checking ? <><p className="paid-import-checking" role="status"><span className="paid-import-spinner" aria-hidden="true" />{ko ? '파일의 잠금 상태를 확인하고 있습니다' : 'Checking file lock status'}<span className="paid-import-dots" aria-hidden="true">...</span></p><div className="paid-export-actions"><button type="button" className="btn" onClick={onClose}>{ko ? '닫기' : 'Close'}</button></div></> : locked ? <>
+    {checking ? <><p className="paid-import-checking" role="status"><span className="paid-import-spinner" aria-hidden="true" />{ko ? '파일의 잠금 상태를 확인하고 있습니다…' : 'Checking file lock status…'}</p><div className="paid-export-actions"><button type="button" className="btn" onClick={onClose}>{ko ? '닫기' : 'Close'}</button></div></> : locked ? <>
       <p ref={errorRef} className="paid-import-error" role="alert" tabIndex={-1}>{ko ? '인증 시도 횟수를 초과해 이 파일의 가져오기가 일시적으로 제한되었습니다.' : 'Too many verification attempts. Importing this file is temporarily restricted.'}</p>
       <p>{ko ? `약 ${minutes}분 후 다시 시도할 수 있습니다.` : `You can try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`}</p>
       <div className="paid-export-actions"><button type="button" className="btn primary" onClick={onClose}>{ko ? '닫기' : 'Close'}</button></div>
