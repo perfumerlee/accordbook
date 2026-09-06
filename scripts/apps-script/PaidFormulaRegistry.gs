@@ -21,6 +21,7 @@ const HEADER_NOTES = [
 
 function setupPaidFormulaRegistry() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  ss.setSpreadsheetTimeZone('Asia/Seoul');
   const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
   if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
   checkHeaders_(sheet);
@@ -81,7 +82,7 @@ function doPost(e) {
         return reply_({ ok: row[9] === requestVerifier && row[6] === 'active', packageId: input.packageId });
       }
     }
-    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date().toISOString(), 'offline-credentials-v1', requestVerifier, 0, '', ''];
+    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date(), 'offline-credentials-v1', requestVerifier, 0, '', ''];
     const range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, HEADERS.length);
     range.setNumberFormat('@');
     range.setValues([row]);
@@ -125,14 +126,14 @@ function verifyLicense_(input, pepper) {
     const expected = hmac_(JSON.stringify([input.packageId, input.buyerName.normalize('NFC').trim(), input.phoneLast4, input.pin]), pepper);
     if (row[6] !== 'active' || row[4] !== expected) {
       const nextAttempts = attempts + 1;
-      const nextLocked = nextAttempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000).toISOString() : '';
+      const nextLocked = nextAttempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000) : '';
       const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
       sheet.getRange(rowIndex, 11, 1, 2).setValues([[nextAttempts, nextLocked]]);
       SpreadsheetApp.flush();
       return nextLocked ? reply_({ ok: false, locked: true, retryAfterSeconds: 1800 }) : reply_({ ok: false });
     }
     const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
-    sheet.getRange(rowIndex, 11, 1, 3).setValues([[0, '', new Date().toISOString()]]);
+    sheet.getRange(rowIndex, 11, 1, 3).setValues([[0, '', new Date()]]);
     SpreadsheetApp.flush();
     return reply_({ ok: true, packageId: input.packageId });
   } finally { lock.releaseLock(); }

@@ -20,7 +20,7 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
   const cache = new Map<string, string>()
   const context: any = {
     CacheService: { getScriptCache: () => ({ get: (key: string) => cache.get(key), put: (key: string, value: string) => cache.set(key, value), remove: (key: string) => cache.delete(key) }) },
-    SpreadsheetApp: { openById: () => ({ getSheetByName: () => sheet }), flush: () => {} },
+    SpreadsheetApp: { openById: () => ({ getSheetByName: () => sheet, setSpreadsheetTimeZone: () => {} }), flush: () => {} },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (name: string) => name === 'SELLER_TOKEN' ? token : 'pepper-secret-'.repeat(4) }) },
     LockService: { getScriptLock: () => ({ waitLock: () => {}, hasLock: () => true, releaseLock: () => {} }) },
     Utilities: { Charset: { UTF_8: 'utf8' }, computeHmacSha256Signature: (value: string, key: string) => createHmac('sha256', key).update(value).digest(), base64Encode: (value: Uint8Array) => Buffer.from(value).toString('base64') },
