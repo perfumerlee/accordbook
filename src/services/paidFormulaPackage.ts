@@ -60,7 +60,7 @@ export function createPaidFormulaFilename(formulaName: string, packageId: string
     .replace(/^[_\.]+|[_\.]+$/g, '')
     .slice(0, 80) || 'accordbook-formula'
   const idPrefix = packageId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'package'
-  return `${safeName}__Paid__${idPrefix}.accordbook`
+  return `${safeName}__Licensed__${idPrefix}.accordbook`
 }
 
 export function downloadPaidFormulaPackage(file: PaidFormulaPackage, formulaName = 'accordbook-formula'): void {
