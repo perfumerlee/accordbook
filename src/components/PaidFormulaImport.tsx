@@ -23,7 +23,7 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
   useEffect(() => { if (error) errorRef.current?.focus() }, [error])
   return createPortal(<dialog ref={dialog} className="paid-export-dialog" aria-labelledby="licensed-import-title" onCancel={event => { event.preventDefault(); if (!running.current) onClose() }}>
     <h2 id="licensed-import-title">{ko ? '라이선스 포뮬러 가져오기' : 'Import licensed formula'}</h2>
-    <p><strong>{ko ? '구매자 정보를 확인합니다. 각 항목을 작성해주세요.' : 'We will verify your purchase. Please complete each field.'}</strong><br />{ko ? '입력한 정보는 라이선스 확인 서버로 전송됩니다. 인터넷 연결이 필요합니다. 인증에 5회 실패하면 30분 동안 다시 시도할 수 없습니다.' : 'Your information is sent to the license server. An internet connection is required. Five failed verification attempts trigger a 30-minute lock.'}</p>
+    <p><strong>{ko ? '구매자 정보를 확인합니다. 각 항목을 작성해주세요.' : 'We will verify your purchase. Please complete each field.'}</strong></p>
     <form onSubmit={async event => {
       event.preventDefault()
       if (running.current) return
