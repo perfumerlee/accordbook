@@ -1,3 +1,5 @@
+import { VersionCompositionView } from './VersionCompositionView'
+import { canShowVersionComposition } from '../services/versionComposition'
 import { ScaleBatchView } from './ScaleBatchView'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Formula, FormulaVersion, FormulaVersionSnapshot } from '../models/formula'
@@ -41,6 +43,20 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   const cancelFocusFrame = () => { window.cancelAnimationFrame(focusFrameRef.current ?? 0); focusFrameRef.current = undefined }
   const cancelClose = () => { window.clearTimeout(closeTimerRef.current); closeTimerRef.current = undefined }
   const [batchOpen, setBatchOpen] = useState(false)
+  const [compositionOpen, setCompositionOpen] = useState(false)
+  const compositionActionRef = useRef<HTMLButtonElement>(null)
+  const compositionBackRef = useRef<HTMLButtonElement>(null)
+  const compositionReturnPending = useRef(false)
+  const openComposition = () => {
+    if (!selected || !canShowVersionComposition(selected)) return
+    detailScroll.current = contentRef.current?.scrollTop ?? 0
+    setCompositionOpen(true)
+  }
+  const backFromComposition = () => {
+    compositionReturnPending.current = true
+    setCompositionOpen(false)
+    setActiveTab('version')
+  }
   const [creatingAsNew, setCreatingAsNew] = useState(false)
   const handoffRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -56,12 +72,14 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     setActiveTab('version')
     batchReturnPending.current = true
   }
-  const formulaIdRef = useRef(formula.id); const [versions, setVersions] = useState<FormulaVersion[]>([]); const [compareTarget, setCompareTarget] = useState<FormulaVersion>(); const [activeTab, setActiveTab] = useState<TimeMachineTab>("version"); const [selected, setSelected] = useState<FormulaVersion>(); const [noteOpen, setNoteOpen] = useState(false); const [note, setNote] = useState(''); const [saving, setSaving] = useState(false); const [restoring, setRestoring] = useState(false); const [restoreConfirm, setRestoreConfirm] = useState(false); const [closing, setClosing] = useState(false); const [contextChanging, setContextChanging] = useState(false); const ko = language === 'ko'
+  const formulaIdRef = useRef(formula.id); const [versions, setVersions] = useState<FormulaVersion[]>([]); const [compareTarget, setCompareTarget] = useState<FormulaVersion>(); const [activeTab, setActiveTab] = useState<TimeMachineTab>("version"); const [selected, setSelected] = useState<FormulaVersion>(); const [noteOpen, setNoteOpen] = useState(false); const [note, setNote] = useState(''); const [saving, setSaving] = useState(false); const [capitalizationWarnings, setCapitalizationWarnings] = useState<string[]>([]); const [restoring, setRestoring] = useState(false); const [restoreConfirm, setRestoreConfirm] = useState(false); const [closing, setClosing] = useState(false); const [contextChanging, setContextChanging] = useState(false); const ko = language === 'ko'
   const batchReturnPending = useRef(false)
-  const live = useRef({ isOpen, formulaId: formula.id, batchOpen, versionId: selected?.versionId, openSequence })
-  useLayoutEffect(() => { live.current = { isOpen, formulaId: formula.id, batchOpen, versionId: selected?.versionId, openSequence } })
+  const capitalizationEditRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { if (capitalizationWarnings.length > 0) capitalizationEditRef.current?.focus({ preventScroll: true }) }, [capitalizationWarnings.length])
+  const live = useRef({ isOpen, formulaId: formula.id, batchOpen, compositionOpen, versionId: selected?.versionId, openSequence })
+  useLayoutEffect(() => { live.current = { isOpen, formulaId: formula.id, batchOpen, compositionOpen, versionId: selected?.versionId, openSequence } })
   useLayoutEffect(() => {
-    cancelClose(); cancelFocusFrame(); returnPending.current = false; batchReturnPending.current = false; setClosing(false)
+    cancelClose(); cancelFocusFrame(); returnPending.current = false; batchReturnPending.current = false; compositionReturnPending.current = false; setCompositionOpen(false); setClosing(false)
     return () => { cancelClose(); cancelFocusFrame() }
   }, [formula.id, openSequence])
   useLayoutEffect(() => {
@@ -85,20 +103,21 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   }, [isOpen, opener])
   useEffect(() => {
     cancelFocusFrame()
-    if (!isOpen || closing || !selected || (!batchOpen && !batchReturnPending.current)) return
-    const context = { formulaId: formula.id, versionId: selected.versionId, openSequence, batchOpen }
+    if (!isOpen || closing || !selected || (!batchOpen && !compositionOpen && !batchReturnPending.current && !compositionReturnPending.current)) return
+    const context = { formulaId: formula.id, versionId: selected.versionId, openSequence, batchOpen, compositionOpen }
     focusFrameRef.current = window.requestAnimationFrame(() => {
       focusFrameRef.current = undefined
       const current = live.current
-      if (!current.isOpen || closeTimerRef.current !== undefined || current.formulaId !== context.formulaId || current.versionId !== context.versionId || current.openSequence !== context.openSequence || current.batchOpen !== context.batchOpen) return
-      const target = batchOpen ? batchBackRef.current : batchActionRef.current
-      if (usable(target)) { target.focus({ preventScroll: true }); if (contentRef.current) contentRef.current.scrollTop = batchOpen ? 0 : detailScroll.current }
+      if (!current.isOpen || closeTimerRef.current !== undefined || current.formulaId !== context.formulaId || current.versionId !== context.versionId || current.openSequence !== context.openSequence || current.batchOpen !== context.batchOpen || current.compositionOpen !== context.compositionOpen) return
+      const target = compositionOpen ? compositionBackRef.current : compositionReturnPending.current ? compositionActionRef.current : batchOpen ? batchBackRef.current : batchActionRef.current
+      if (usable(target)) { target.focus({ preventScroll: true }); if (contentRef.current) contentRef.current.scrollTop = (batchOpen || compositionOpen) ? 0 : detailScroll.current }
       batchReturnPending.current = false
+      compositionReturnPending.current = false
     })
     return cancelFocusFrame
-  }, [isOpen, closing, batchOpen, formula.id, selected?.versionId, openSequence])
-  const reload = async () => setVersions(await listFormulaVersions(storage, formula.id)); const formulaContextChanged = formula.id !== formulaIdRef.current; useEffect(() => { formulaIdRef.current = formula.id; setSelected(undefined); setBatchOpen(false); setCompareTarget(undefined); setActiveTab("version"); setNoteOpen(false); setRestoreConfirm(false); setContextChanging(true); const timer = window.setTimeout(() => setContextChanging(false), 160); void reload(); return () => window.clearTimeout(timer) }, [formula.id])
-  const save = async () => { setSaving(true); try { await onBeforeSaveVersion?.(); await createFormulaVersion(storage, formula, note); setNote(''); setNoteOpen(false); await reload() } finally { setSaving(false) } }
+  }, [isOpen, closing, batchOpen, compositionOpen, formula.id, selected?.versionId, openSequence])
+  const reload = async () => setVersions(await listFormulaVersions(storage, formula.id)); const formulaContextChanged = formula.id !== formulaIdRef.current; useEffect(() => { formulaIdRef.current = formula.id; setSelected(undefined); setBatchOpen(false); setCompositionOpen(false); setCompareTarget(undefined); setActiveTab("version"); setNoteOpen(false); setRestoreConfirm(false); setContextChanging(true); const timer = window.setTimeout(() => setContextChanging(false), 160); void reload(); return () => window.clearTimeout(timer) }, [formula.id])
+  const save = async (confirmed = false) => { if (!confirmed) { const warnings = [...new Set(formula.rows.map(row => row.material.trim()).filter(name => /^[a-z]/.test(name)))]; if (warnings.length) { setCapitalizationWarnings(warnings); return } } setSaving(true); try { await onBeforeSaveVersion?.(); await createFormulaVersion(storage, formula, note); setCapitalizationWarnings([]); setNote(''); setNoteOpen(false); await reload() } finally { setSaving(false) } }
   useEffect(() => { if (isOpen) { setClosing(false); setBatchOpen(false); setActiveTab("version") } }, [isOpen]);
   useEffect(() => { if (!isOpen || !ko) return; document.querySelectorAll<HTMLElement>('.tm-header-meta').forEach((element) => { element.textContent = element.textContent?.replace(/(\d+) VERSIONS?/, (_, count) => `${count} 버전`) ?? element.textContent }) }, [isOpen, ko, versions.length])
   const requestClose = () => {
@@ -118,6 +137,7 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     if (!isOpen) return
     if (event.key === 'Escape' && !event.nativeEvent.isComposing) {
       event.preventDefault(); event.stopPropagation()
+      if (capitalizationWarnings.length > 0) { setCapitalizationWarnings([]); return }
       if (restoreConfirm) { setRestoreConfirm(false); panelRef.current?.querySelector<HTMLButtonElement>('.tm-make-batch')?.focus({ preventScroll: true }) }
       else requestClose()
       return
@@ -137,20 +157,25 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   }
   return <div className={`tm-backdrop ${closing ? 'is-closing' : ''}`}>
     <section ref={panelRef} tabIndex={-1} inert={!isOpen} onKeyDown={handlePanelKeyDown} className={'tm-panel ' + (selected ? 'tm-detail ' : '') + ((contextChanging || formulaContextChanged) ? 'tm-context-switch' : '')} role="dialog" aria-modal={!companion ? true : undefined} aria-label="Time Machine">
-      <header><div><h2>TIME MACHINE</h2><p className="tm-header-meta">{formula.formulaId} · {versions.filter(version => version.kind === 'manual').length} {ko ? '버전' : 'VERSIONS'}</p></div><button ref={closeRef} className="tm-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={requestClose}>×</button></header>
-      {!batchOpen && <div className="tm-view-tabs" role="tablist" aria-label="Time Machine">
+      <header><div><h2>TIME MACHINE</h2><p hidden={compositionOpen} className="tm-header-meta">{formula.formulaId} · {versions.filter(version => version.kind === 'manual').length} {ko ? '버전' : 'VERSIONS'}</p></div><button ref={closeRef} className="tm-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={requestClose}>×</button></header>
+      {!batchOpen && !compositionOpen && <div className="tm-view-tabs" role="tablist" aria-label="Time Machine">
         {TIME_MACHINE_TABS.map((tab, index) => <button key={tab} id={`tm-tab-${tab}`} type="button" role="tab" aria-selected={activeTab === tab} aria-controls={`tm-view-${tab}`} tabIndex={activeTab === tab ? 0 : -1} className={activeTab === tab ? 'active' : ''} onClick={() => selectTab(tab)} onKeyDown={event => {
           const next = event.key === 'ArrowRight' ? (index + 1) % TIME_MACHINE_TABS.length : event.key === 'ArrowLeft' ? (index + TIME_MACHINE_TABS.length - 1) % TIME_MACHINE_TABS.length : event.key === 'Home' ? 0 : event.key === 'End' ? TIME_MACHINE_TABS.length - 1 : undefined
           if (next !== undefined) { event.preventDefault(); selectTab(TIME_MACHINE_TABS[next]); document.getElementById(`tm-tab-${TIME_MACHINE_TABS[next]}`)?.focus() }
         }}>{tab === 'version' ? (ko ? '버전' : 'VERSION') : (ko ? '비교' : 'COMPARE')}</button>)}
       </div>}
       <div className="tm-content" ref={contentRef}>
-        <div id="tm-view-version" role="tabpanel" aria-labelledby="tm-tab-version" hidden={batchOpen || activeTab !== 'version'}>
-          {selected ? <><button className="tm-version-list-back" type="button" onClick={() => setSelected(undefined)}>← {t.batchVersionList}</button><h2 className="tm-version-title">{selected.kind === 'manual' ? `v${selected.versionNumber}` : (ko ? '복원 지점' : 'RESTORE POINT')}</h2><div className="tm-version-meta"><span>{ko ? '읽기 전용' : 'READ ONLY'}</span><time>{date(selected.createdAt)}</time></div>{selected.note && <div className="tm-note"><span>{ko ? '버전 메모' : 'VERSION NOTE'}</span><p>{selected.note}</p></div>}{Array.isArray(selected.snapshot?.rows) ? <HistoricalFormula snapshot={selected.snapshot} language={language} /> : <p className="tm-batch-helper">{t.batchUnavailable}</p>}<div className="tm-restore-action">{restoreConfirm ? <div className="tm-restore-confirm" role="alertdialog" aria-label={ko ? '복원 확인' : 'Restore confirmation'}><strong>{ko ? `v${selected.versionNumber ?? ''}를 현재 포뮬러로 복원할까요?` : `Restore ${selected.kind === 'manual' ? `v${selected.versionNumber}` : 'this restore point'} to Current?`}</strong><p>{ko ? '현재 포뮬러의 내용이 이 버전으로 변경됩니다. 기존 버전 기록은 그대로 유지됩니다.' : 'The current formula will be replaced with this version. Your version history will be kept.'}</p><div><button className="btn" type="button" onClick={() => setRestoreConfirm(false)}>{ko ? '취소' : 'CANCEL'}</button><button className="btn primary" type="button" disabled={restoring} onClick={() => void restore()}>{restoring ? '…' : (ko ? '복원' : 'RESTORE')}</button></div></div> : <><button className="tm-restore-button" type="button" onClick={() => setRestoreConfirm(true)}><svg className="tm-restore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 5 11l4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 11h7a6 6 0 0 1 6 6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg><span>{ko ? '이 버전 복원' : 'RESTORE THIS VERSION'}</span></button><button className="tm-restore-button" type="button" disabled={creatingAsNew} onClick={() => void createAsNew()}>{creatingAsNew ? '…' : (ko ? '새 포뮬러로 만들기' : 'CREATE AS NEW')}</button></>}<button ref={batchActionRef} className="tm-restore-button tm-make-batch" type="button" onClick={openBatch}>{t.makeBatch}</button></div><button className="tm-detail-back" type="button" onClick={() => setSelected(undefined)}>← TIME MACHINE</button></> : <div className="tm-timeline"><div className="tm-current"><b>● {ko ? '현재' : 'CURRENT'}</b><span>{date(formula.updatedAt)}</span><small>{ko ? '편집 가능한 현재 Formula' : 'Current working formula'}</small></div><button className="tm-save" type="button" onClick={() => setNoteOpen(true)}>{ko ? '+ 버전 저장' : '+ SAVE VERSION'}</button>{noteOpen && <div className="tm-save-box"><label>{ko ? '버전 메모' : 'Version note'}<textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={ko ? '실험 또는 시향 메모 (선택)' : 'Optional experiment or sensory note'} /></label><div><button className="btn" type="button" onClick={() => setNoteOpen(false)}>{ko ? '취소' : 'Cancel'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save()}>{saving ? '…' : (ko ? '버전 저장' : 'Save Version')}</button></div></div>}{versions.length === 0 && <div className="tm-empty"><strong>{ko ? '저장된 버전이 없습니다.' : 'No saved versions yet.'}</strong><span>{ko ? '나중에 돌아올 수 있도록 의미 있는 Formula 단계를 저장하세요.' : 'Save a meaningful stage of your formula to return to it later.'}</span></div>}{[...versions].reverse().map((version) => <button className={`tm-item ${version.kind}`} key={version.versionId} type="button" onClick={() => { setSelected(version); setCompareTarget(undefined); setActiveTab("version") }}><b>{version.kind === 'manual' ? `○ v${version.versionNumber}` : `◇ ${ko ? '복원 지점' : 'RESTORE POINT'}`}</b><span>{date(version.createdAt)}</span>{version.note && <small>{formatVersionNote(version, language)}</small>}</button>)}</div>}
+        <div id="tm-view-version" role="tabpanel" aria-labelledby="tm-tab-version" hidden={batchOpen || compositionOpen || activeTab !== 'version'}>
+          {selected ? <><button className="tm-version-list-back" type="button" onClick={() => setSelected(undefined)}>← {t.batchVersionList}</button><h2 className="tm-version-title">{selected.kind === 'manual' ? `v${selected.versionNumber}` : (ko ? '복원 지점' : 'RESTORE POINT')}</h2><div className="tm-version-meta"><span>{ko ? '읽기 전용' : 'READ ONLY'}</span><time>{date(selected.createdAt)}</time></div>{selected.note && <div className="tm-note"><span>{ko ? '버전 메모' : 'VERSION NOTE'}</span><p>{selected.note}</p></div>}{Array.isArray(selected.snapshot?.rows) ? <HistoricalFormula snapshot={selected.snapshot} language={language} /> : <p className="tm-batch-helper">{t.batchUnavailable}</p>}<div className={`tm-restore-action ${!restoreConfirm ? 'tm-version-actions-grid' : ''}`}>{restoreConfirm ? <div className="tm-restore-confirm" role="alertdialog" aria-label={ko ? '복원 확인' : 'Restore confirmation'}><strong>{ko ? `v${selected.versionNumber ?? ''}를 현재 포뮬러로 복원할까요?` : `Restore ${selected.kind === 'manual' ? `v${selected.versionNumber}` : 'this restore point'} to Current?`}</strong><p>{ko ? '현재 포뮬러의 내용이 이 버전으로 변경됩니다. 기존 버전 기록은 그대로 유지됩니다.' : 'The current formula will be replaced with this version. Your version history will be kept.'}</p><div><button className="btn" type="button" onClick={() => setRestoreConfirm(false)}>{ko ? '취소' : 'CANCEL'}</button><button className="btn primary" type="button" disabled={restoring} onClick={() => void restore()}>{restoring ? '…' : (ko ? '복원' : 'RESTORE')}</button></div></div> : <><button className="tm-restore-button" type="button" onClick={() => setRestoreConfirm(true)}><svg className="tm-restore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 5 11l4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 11h7a6 6 0 0 1 6 6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg><span>{ko ? '이 버전 복원' : 'RESTORE THIS VERSION'}</span></button><button className="tm-restore-button" type="button" disabled={creatingAsNew} onClick={() => void createAsNew()}>{creatingAsNew ? '…' : (ko ? '새 포뮬러로 만들기' : 'CREATE AS NEW')}</button></>}<button ref={batchActionRef} className="tm-restore-button tm-make-batch" type="button" onClick={openBatch}>{t.makeBatch}</button>{!restoreConfirm && canShowVersionComposition(selected) && <button ref={compositionActionRef} className="tm-restore-button tm-composition-action" type="button" onClick={openComposition}>{t.composition}</button>}</div><button className="tm-detail-back" type="button" onClick={() => setSelected(undefined)}>← TIME MACHINE</button></> : <div className="tm-timeline"><div className="tm-current"><b>● {ko ? '현재' : 'CURRENT'}</b><span>{date(formula.updatedAt)}</span><small>{ko ? '편집 가능한 현재 Formula' : 'Current working formula'}</small></div><button className="tm-save" type="button" onClick={() => setNoteOpen(true)}>{ko ? '+ 버전 저장' : '+ SAVE VERSION'}</button>{noteOpen && <div className="tm-save-box"><label>{ko ? '버전 메모' : 'Version note'}<textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={ko ? '실험 또는 시향 메모 (선택)' : 'Optional experiment or sensory note'} /></label><div><button className="btn" type="button" onClick={() => setNoteOpen(false)}>{ko ? '취소' : 'Cancel'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save()}>{saving ? '…' : (ko ? '버전 저장' : 'Save Version')}</button></div></div>}{versions.length === 0 && <div className="tm-empty"><strong>{ko ? '저장된 버전이 없습니다.' : 'No saved versions yet.'}</strong><span>{ko ? '나중에 돌아올 수 있도록 의미 있는 Formula 단계를 저장하세요.' : 'Save a meaningful stage of your formula to return to it later.'}</span></div>}{[...versions].reverse().map((version) => <button className={`tm-item ${version.kind}`} key={version.versionId} type="button" onClick={() => { setSelected(version); setCompareTarget(undefined); setActiveTab("version") }}><b>{version.kind === 'manual' ? `○ v${version.versionNumber}` : `◇ ${ko ? '복원 지점' : 'RESTORE POINT'}`}</b><span>{date(version.createdAt)}</span>{version.note && <small>{formatVersionNote(version, language)}</small>}</button>)}</div>}
+        {capitalizationWarnings.length > 0 && <div className="tm-capitalization-warning" role="alert"><strong>{ko ? '소문자로 시작하는 원료명이 있습니다.' : 'Some material names start with a lowercase letter.'}</strong><ul>{capitalizationWarnings.map(name => <li key={name}>{name}</li>)}</ul><p>{ko ? '원료명은 자동으로 수정되지 않습니다. 그대로 저장할까요?' : 'Material names will not be changed automatically. Save as entered?'}</p><div><button className="btn" type="button" onClick={() => setCapitalizationWarnings([])}>{ko ? '수정하기' : 'Edit'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save(true)}>{ko ? '그대로 저장' : 'Save as entered'}</button></div></div>}
         </div>
-        <div id="tm-view-compare" role="tabpanel" aria-labelledby="tm-tab-compare" hidden={batchOpen || activeTab !== 'compare'}>
+        <div id="tm-view-compare" role="tabpanel" aria-labelledby="tm-tab-compare" hidden={batchOpen || compositionOpen || activeTab !== 'compare'}>
           {Array.isArray((compareTarget ?? selected)?.snapshot?.rows) ? <FormulaCompareView key={(compareTarget ?? selected)!.versionId} from={(compareTarget ?? selected)!.snapshot} to={formula} versions={versions} language={language} /> : <p className="tm-batch-helper">{t.compareSelectVersion}</p>}
         </div>
+        {compositionOpen && selected && !formulaContextChanged && canShowVersionComposition(selected) && <div className="tm-composition-workspace" role="region" aria-labelledby="tm-composition-title">
+          <button ref={compositionBackRef} className="tm-batch-back" type="button" onClick={backFromComposition}>← {t.batchBack}: v{selected.versionNumber}</button>
+          <VersionCompositionView snapshot={selected.snapshot} versionNumber={selected.versionNumber} language={language} />
+        </div>}
         <div className="tm-batch-workspace" role="region" aria-labelledby="tm-batch-title" hidden={!batchOpen}>
           <button ref={batchBackRef} className="tm-batch-back" type="button" aria-label={t.batchBack + ': ' + (selected?.kind === 'manual' ? 'v' + selected.versionNumber : t.batchRestorePoint)} onClick={backToVersion}>← {selected?.kind === 'manual' ? 'v' + selected.versionNumber : t.batchRestorePoint}</button>
           <ScaleBatchView key={formula.id + ':' + String(isOpen)} version={formulaContextChanged ? undefined : selected} language={language} />

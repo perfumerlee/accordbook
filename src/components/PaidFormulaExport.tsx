@@ -11,7 +11,7 @@ export default function PaidFormulaExport({ formula, language }: { formula: Form
   const [snapshot, setSnapshot] = useState<Formula>()
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
-      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || event.code !== 'KeyP') return
+      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || event.code !== 'KeyL') return
       const target = event.target
       if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="dialog"], [inert]')) return
       if (document.querySelector('dialog[open], [aria-modal="true"]:not([inert]), .time-machine-stage.is-open, .origin-popover, .mobile-formula-menu.open, .material-focus-backdrop')) return
