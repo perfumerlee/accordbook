@@ -134,7 +134,18 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   }, [isOpen, closing, batchOpen, compositionOpen, formula.id, selected?.versionId, openSequence])
   const reload = async () => setVersions(await listFormulaVersions(storage, formula.id)); const formulaContextChanged = formula.id !== formulaIdRef.current; useEffect(() => { formulaIdRef.current = formula.id; setSelected(undefined); setBatchOpen(false); setCompositionOpen(false); setCompareTarget(undefined); setActiveTab("version"); setNoteOpen(false); setRestoreConfirm(false); setContextChanging(true); const timer = window.setTimeout(() => setContextChanging(false), 160); void reload(); return () => window.clearTimeout(timer) }, [formula.id])
   const save = async (confirmed = false) => { if (!confirmed) { const warnings = [...new Set(formula.rows.map(row => row.material.trim()).filter(name => /^[a-z]/.test(name)))]; if (warnings.length) { setCapitalizationWarnings(warnings); return } } setSaving(true); try { await onBeforeSaveVersion?.(); await createFormulaVersion(storage, formula, note); setCapitalizationWarnings([]); setNote(''); setNoteOpen(false); await reload() } finally { setSaving(false) } }
-  useEffect(() => { if (isOpen) { setClosing(false); setBatchOpen(false); setActiveTab("version") } }, [isOpen]);
+  useEffect(() => {
+    if (isOpen) { setClosing(false); setBatchOpen(false); setCompositionOpen(false); setActiveTab('version'); return }
+    setSelected(undefined)
+    setCompareTarget(undefined)
+    setNoteOpen(false)
+    setNote('')
+    setCapitalizationWarnings([])
+    setRestoreConfirm(false)
+    setBatchOpen(false)
+    setCompositionOpen(false)
+    setCreatingAsNew(false)
+  }, [isOpen])
   useEffect(() => { if (!isOpen || !ko) return; document.querySelectorAll<HTMLElement>('.tm-header-meta').forEach((element) => { element.textContent = element.textContent?.replace(/(\d+) VERSIONS?/, (_, count) => `${count} 버전`) ?? element.textContent }) }, [isOpen, ko, versions.length])
   const requestClose = () => {
     if (!isOpen || closeTimerRef.current !== undefined) return
