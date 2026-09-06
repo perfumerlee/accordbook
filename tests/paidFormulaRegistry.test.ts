@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { formatBuyerPhone, validateBuyerPhone, generateBuyerPin, registerPaidFormula } from '../src/services/paidFormulaRegistry'
-import { verifyPaidFormula } from '../src/services/paidFormulaRegistry'
+import { checkPaidFormulaLock, verifyPaidFormula } from '../src/services/paidFormulaRegistry'
 
 afterEach(() => vi.restoreAllMocks())
 describe('Paid Formula registration', () => {
+  it('checks package lock status before credentials are submitted', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ok: true, locked: true, retryAfterSeconds: 120 })))
+    await expect(checkPaidFormulaLock('id')).resolves.toBe(120)
+    expect(JSON.parse(fetcher.mock.calls[0][1]?.body as string)).toEqual({ action: 'lock-status', packageId: 'id' })
+    fetcher.mockResolvedValue(new Response(JSON.stringify({ ok: true, locked: false })))
+    await expect(checkPaidFormulaLock('id')).resolves.toBeUndefined()
+  })
   it('buyer verification requires a matching server acknowledgement and fails closed', async () => {
     const buyer = { name: ' Buyer ', phoneLast4: '0012', pin: '000123' }
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ok: true, packageId: 'id' })))

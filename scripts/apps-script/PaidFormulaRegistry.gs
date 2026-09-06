@@ -59,6 +59,7 @@ function doPost(e) {
     const props = PropertiesService.getScriptProperties();
     const sellerToken = configValue_('SELLER_TOKEN') || props.getProperty('SELLER_TOKEN');
     const pepper = configValue_('PIN_PEPPER') || props.getProperty('PIN_PEPPER');
+    if (input.action === 'lock-status') return lockStatus_(input);
     if (input.action === 'verify') return verifyLicense_(input, pepper);
     if (!sellerToken || sellerToken.length < 32 || !pepper || pepper.length < 32 || input.sellerToken !== sellerToken || input.action !== 'register') return reply_({ ok: false });
     if (typeof input.buyerName !== 'string' || typeof input.productName !== 'string' || typeof input.phone !== 'string' || typeof input.pin !== 'string' || typeof input.packageId !== 'string') return reply_({ ok: false });
@@ -90,6 +91,17 @@ function doPost(e) {
     // Never echo or log credentials / request bodies.
     return reply_({ ok: false });
   } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+
+function lockStatus_(input) {
+  if (typeof input.packageId !== 'string' || !/^[0-9a-f-]{36}$/i.test(input.packageId)) return reply_({ ok: false });
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+  if (!sheet) return reply_({ ok: true, locked: false });
+  const count = sheet.getLastRow() - 1;
+  if (count <= 0) return reply_({ ok: true, locked: false });
+  const row = sheet.getRange(2, 1, count, HEADERS.length).getValues().find(item => item[0] === input.packageId);
+  const lockedUntil = row && row[11] ? new Date(row[11]).getTime() : 0;
+  return lockedUntil > Date.now() ? reply_({ ok: true, locked: true, retryAfterSeconds: Math.ceil((lockedUntil - Date.now()) / 1000) }) : reply_({ ok: true, locked: false });
 }
 
 function verifyLicense_(input, pepper) {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { FormulaFile } from '../models/formulaFile'
 import { decryptPaidFormulaPackage, type PaidFormulaPackage } from '../services/paidFormulaPackage'
-import { verifyPaidFormula } from '../services/paidFormulaRegistry'
+import { checkPaidFormulaLock, verifyPaidFormula } from '../services/paidFormulaRegistry'
 import './paidFormulaExport.css'
 
 export default function PaidFormulaImport({ file, language, onImport, onClose }: {
@@ -20,6 +20,15 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
     dialog.current?.showModal()
     return () => { mounted.current = false; dialog.current?.close() }
   }, [])
+  useEffect(() => {
+    let cancelled = false
+    void checkPaidFormulaLock(file.packageId).then(seconds => {
+      if (cancelled || seconds === undefined) return
+      const minutes = Math.max(1, Math.ceil(seconds / 60))
+      setError(ko ? `인증 시도 횟수를 초과했습니다. 약 ${minutes}분 후 다시 시도해주세요.` : `Too many verification attempts. Please try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [file.packageId, ko])
   useEffect(() => { if (error) errorRef.current?.focus() }, [error])
   return createPortal(<dialog ref={dialog} className="paid-export-dialog" aria-labelledby="licensed-import-title" onCancel={event => { event.preventDefault(); if (!running.current) onClose() }}>
     <h2 id="licensed-import-title">{ko ? '라이선스 포뮬러 가져오기' : 'Import licensed formula'}</h2>
@@ -44,7 +53,7 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
           if (lockMatch) {
             const minutes = Math.max(1, Math.ceil(Number(lockMatch[1]) / 60))
             setError(ko ? `인증 시도 횟수를 초과했습니다. 약 ${minutes}분 후 다시 시도해주세요.` : `Too many verification attempts. Please try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`)
-          } else setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요.' : 'The file could not be imported. Check your information and try again.')
+          } else setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요. 인증에 5회 실패하면 30분 동안 다시 시도할 수 없습니다.' : 'The file could not be imported. Check your information and try again. Five failed verification attempts prevent another attempt for 30 minutes.')
         }
       }
       finally { running.current = false; if (mounted.current) setBusy(false) }

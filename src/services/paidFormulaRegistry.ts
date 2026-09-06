@@ -1,6 +1,14 @@
 import { normalizeBuyerCredentials, type BuyerCredentials } from './paidFormulaPackage'
 
-export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf6CSd35zBMwqUh8a5ftpV7lGfS8MzjmkpCLWiIToEK_0c4OsbWna-307qrDIwWTWJ/exec'
+export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz-LlnQF0ka63cW5Gc6w0Dtp0idqqnh6P5c1Crt6libKUOTC-OP5TlA0gA9WxUQ5yKG/exec'
+
+export async function checkPaidFormulaLock(packageId: string): Promise<number | undefined> {
+  const response = await fetch(PAID_REGISTRY_ENDPOINT, { method: 'POST', redirect: 'follow', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ action: 'lock-status', packageId }), signal: AbortSignal.timeout(30000) })
+  if (!response.ok) throw new Error('Lock status unavailable')
+  const result = await response.json()
+  if (result.locked === true) return Math.max(0, Number(result.retryAfterSeconds) || 0)
+  return undefined
+}
 
 export async function verifyPaidFormula(packageId: string, credentials: BuyerCredentials): Promise<void> {
   const buyer = normalizeBuyerCredentials(credentials)
