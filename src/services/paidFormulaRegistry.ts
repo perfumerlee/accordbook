@@ -1,3 +1,20 @@
+import { normalizeBuyerCredentials, type BuyerCredentials } from './paidFormulaPackage'
+
+export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyq--X62ubSyR5qA-GJSB4asfc9ug6zkpWrbaow1uC8FU7gXX69b8kzu5zfL4zPJmUd/exec'
+
+export async function verifyPaidFormula(packageId: string, credentials: BuyerCredentials): Promise<void> {
+  const buyer = normalizeBuyerCredentials(credentials)
+  const response = await fetch(PAID_REGISTRY_ENDPOINT, {
+    method: 'POST', redirect: 'follow', credentials: 'omit',
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+    body: JSON.stringify({ action: 'verify', packageId, buyerName: buyer.name, phoneLast4: buyer.phoneLast4, pin: buyer.pin }),
+    signal: AbortSignal.timeout(30000),
+  })
+  if (!response.ok) throw new Error('Verification failed')
+  const result = await response.json()
+  if (result.ok !== true || result.packageId !== packageId) throw new Error('Verification failed')
+}
+
 export function formatBuyerPhone(input: string): string {
   const digits = input.replace(/[^0-9]/g, '').slice(0, 11)
   if (digits.length <= 3) return digits

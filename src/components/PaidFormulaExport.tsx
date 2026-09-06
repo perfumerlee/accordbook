@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Formula } from '../models/formula'
 import { createPaidFormulaPackage, downloadPaidFormulaPackage, type PaidFormulaPackage } from '../services/paidFormulaPackage'
-import { formatBuyerPhone, generateBuyerPin, registerPaidFormula, validateBuyerPhone, type LicenseRegistration } from '../services/paidFormulaRegistry'
+import { PAID_REGISTRY_ENDPOINT, formatBuyerPhone, generateBuyerPin, registerPaidFormula, validateBuyerPhone, type LicenseRegistration } from '../services/paidFormulaRegistry'
 import './paidFormulaExport.css'
 
-const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxzzg4xyW4xeGaceoNZ7rrbXmXlLaa1LM1-UQRRipAMNKk3RiEW9C6237C5L98zzy9e/exec'
 
 export default function PaidFormulaExport({ formula, language }: { formula: Formula; language: 'en' | 'ko' }) {
   const [snapshot, setSnapshot] = useState<Formula>()
@@ -68,7 +67,7 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
     }}>
       <h2 id="paid-export-title">{ko ? '판매용 Formula Export' : 'Paid Formula Export'}</h2>
       <p>{formula.name || (ko ? '제목 없는 포뮬러' : 'Untitled formula')}</p>
-      <p>{ko ? '구매 기록을 PaidFormulaLicenses 시트에 저장한 후 파일을 내려받습니다. 구매자 Import는 Phase 3에서 지원합니다.' : 'Registers the purchase in PaidFormulaLicenses before download. Buyer import is planned for Phase 3.'}</p>
+      <p>{ko ? '구매 기록을 등록한 후 파일을 내려받습니다. 구매자는 포뮬러 가져오기에서 구매 정보와 PIN을 확인한 뒤 열 수 있습니다.' : 'Registers the purchase before download. Buyers can use Import formula and verify their purchase details and PIN to open the file.'}</p>
       <fieldset disabled={busy || registered}>
         <label>{ko ? '판매자 등록 키' : 'Seller registration token'}<input name="sellerToken" type="password" minLength={32} autoComplete="off" required /></label>
       </fieldset>

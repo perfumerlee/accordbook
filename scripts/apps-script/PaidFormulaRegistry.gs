@@ -39,6 +39,7 @@ function doPost(e) {
     const props = PropertiesService.getScriptProperties();
     const sellerToken = configValue_('SELLER_TOKEN') || props.getProperty('SELLER_TOKEN');
     const pepper = configValue_('PIN_PEPPER') || props.getProperty('PIN_PEPPER');
+    if (input.action === 'verify') return verifyLicense_(input, pepper);
     if (!sellerToken || sellerToken.length < 32 || !pepper || pepper.length < 32 || input.sellerToken !== sellerToken || input.action !== 'register') return reply_({ ok: false });
     if (typeof input.buyerName !== 'string' || typeof input.productName !== 'string' || typeof input.phone !== 'string' || typeof input.pin !== 'string' || typeof input.packageId !== 'string') return reply_({ ok: false });
     const name = input.buyerName.normalize('NFC').trim();
@@ -69,4 +70,31 @@ function doPost(e) {
     // Never echo or log credentials / request bodies.
     return reply_({ ok: false });
   } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+
+function verifyLicense_(input, pepper) {
+  if (!pepper || pepper.length < 32 || typeof input.packageId !== 'string' || !/^[0-9a-f-]{36}$/i.test(input.packageId)
+    || typeof input.buyerName !== 'string' || !input.buyerName.trim() || input.buyerName.length > 100
+    || typeof input.phoneLast4 !== 'string' || !/^\d{4}$/.test(input.phoneLast4)
+    || typeof input.pin !== 'string' || !/^\d{6}$/.test(input.pin)) return reply_({ ok: false });
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    // Bound online guessing per package; never store credentials in cache or logs.
+    const cache = CacheService.getScriptCache();
+    const key = 'verify-attempts:' + input.packageId;
+    const attempts = Number(cache.get(key) || 0);
+    if (attempts >= 10) return reply_({ ok: false });
+    cache.put(key, String(attempts + 1), 900);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+    if (!sheet) return reply_({ ok: false });
+    checkHeaders_(sheet);
+    const count = sheet.getLastRow() - 1;
+    if (count <= 0) return reply_({ ok: false });
+    const row = sheet.getRange(2, 1, count, HEADERS.length).getValues().find(row => row[0] === input.packageId);
+    const expected = hmac_(JSON.stringify([input.packageId, input.buyerName.normalize('NFC').trim(), input.phoneLast4, input.pin]), pepper);
+    if (!row || row[6] !== 'active' || row[4] !== expected) return reply_({ ok: false });
+    cache.remove(key);
+    return reply_({ ok: true, packageId: input.packageId });
+  } finally { lock.releaseLock(); }
 }

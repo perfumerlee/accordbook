@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Formula } from '../src/models/formula'
 import { createPaidFormulaPackage, normalizeBuyerCredentials, type PaidFormulaPackage } from '../src/services/paidFormulaPackage'
 import { parseFormulaFile } from '../src/services/formulaFile'
+import { decryptPaidFormulaPackage, parsePaidFormulaPackage } from '../src/services/paidFormulaPackage'
 
 const formula: Formula = { id: 'local-id', formulaId: 'ACC-TEST', date: '2026-09-07', name: 'Secret Citrus', notes: 'Private notes', createdAt: '', updatedAt: '', rows: [{ id: 'row-id', material: 'Linalool', parts: 1000, dilution: { enabled: true, percent: 10, solvent: 'ALC' } }] }
 const buyer = { name: '홍길동', phoneLast4: '0012', pin: '012345' }
@@ -15,6 +16,15 @@ async function decrypt(file: PaidFormulaPackage, pin = buyer.pin) {
 }
 
 describe('Paid Formula export', () => {
+  it('production importer decrypts valid packages and rejects invalid credentials and parameters', async () => {
+    const file = await createPaidFormulaPackage(formula, buyer)
+    const parsed = parsePaidFormulaPackage(JSON.stringify(file))
+    expect((await decryptPaidFormulaPackage(parsed, buyer)).formula.name).toBe(formula.name)
+    await expect(decryptPaidFormulaPackage(parsed, { ...buyer, pin: '999999' })).rejects.toThrow()
+    await expect(decryptPaidFormulaPackage({ ...parsed, ciphertext: 'AAAA' + parsed.ciphertext.slice(4) }, buyer)).rejects.toThrow()
+    expect(() => parsePaidFormulaPackage(JSON.stringify({ ...file, kdf: { ...file.kdf, iterations: 999999999 } }))).toThrow()
+    expect(() => parsePaidFormulaPackage(JSON.stringify({ ...file, encryption: { ...file.encryption, iv: 'AA==' } }))).toThrow()
+  })
   it('round-trips contents without mutating the source or exposing plaintext', async () => {
     const original = structuredClone(formula)
     const file = await createPaidFormulaPackage(formula, buyer)

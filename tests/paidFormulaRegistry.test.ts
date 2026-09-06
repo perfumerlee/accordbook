@@ -1,8 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { formatBuyerPhone, validateBuyerPhone, generateBuyerPin, registerPaidFormula } from '../src/services/paidFormulaRegistry'
+import { verifyPaidFormula } from '../src/services/paidFormulaRegistry'
 
 afterEach(() => vi.restoreAllMocks())
 describe('Paid Formula registration', () => {
+  it('buyer verification requires a matching server acknowledgement and fails closed', async () => {
+    const buyer = { name: ' Buyer ', phoneLast4: '0012', pin: '000123' }
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ok: true, packageId: 'id' })))
+    await verifyPaidFormula('id', buyer)
+    expect(JSON.parse(fetcher.mock.calls[0][1]?.body as string)).toEqual({ action: 'verify', packageId: 'id', buyerName: 'Buyer', phoneLast4: '0012', pin: '000123' })
+    for (const result of [{ ok: false }, { ok: true, packageId: 'other' }]) {
+      fetcher.mockResolvedValue(new Response(JSON.stringify(result)))
+      await expect(verifyPaidFormula('id', buyer)).rejects.toThrow()
+    }
+    fetcher.mockRejectedValue(new TypeError('Offline'))
+    await expect(verifyPaidFormula('id', buyer)).rejects.toThrow()
+  })
   it('formats phone input and validates full 010 numbers', () => {
     expect(formatBuyerPhone('01012340012')).toBe('010-1234-0012')
     expect(formatBuyerPhone('010-1234-0012')).toBe('010-1234-0012')

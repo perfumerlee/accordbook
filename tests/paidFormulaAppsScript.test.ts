@@ -16,7 +16,9 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
     }),
   }
   const token = 'seller-secret-'.repeat(4)
+  const cache = new Map<string, string>()
   const context: any = {
+    CacheService: { getScriptCache: () => ({ get: (key: string) => cache.get(key), put: (key: string, value: string) => cache.set(key, value), remove: (key: string) => cache.delete(key) }) },
     SpreadsheetApp: { openById: () => ({ getSheetByName: () => sheet }), flush: () => {} },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (name: string) => name === 'SELLER_TOKEN' ? token : 'pepper-secret-'.repeat(4) }) },
     LockService: { getScriptLock: () => ({ waitLock: () => {}, hasLock: () => true, releaseLock: () => {} }) },
@@ -37,6 +39,15 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
   expect(post(request).ok).toBe(true)
   expect(rows).toHaveLength(2)
   expect(post({ ...request, pin: '999999' }).ok).toBe(false)
+  const verify = { action: 'verify', packageId: request.packageId, buyerName: request.buyerName, phoneLast4: '0012', pin: request.pin }
+  expect(post(verify)).toEqual({ ok: true, packageId: request.packageId })
+  expect(post({ ...verify, phoneLast4: '9999' }).ok).toBe(false)
+  expect(post({ ...verify, buyerName: 'Other' }).ok).toBe(false)
+  for (let i = 0; i < 10; i++) expect(post({ ...verify, pin: '999999' }).ok).toBe(false)
+  expect(post(verify).ok).toBe(false)
+  cache.clear()
+  expect(post(verify).ok).toBe(true)
   rows[1][6] = 'revoked'
+  expect(post(verify).ok).toBe(false)
   expect(post(request).ok).toBe(false)
 })

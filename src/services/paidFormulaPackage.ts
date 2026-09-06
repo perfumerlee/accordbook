@@ -1,5 +1,6 @@
 import type { Formula } from '../models/formula'
 import { toFormulaFile } from '../models/formulaFile'
+import { parseFormulaFile } from './formulaFile'
 
 export interface BuyerCredentials { name: string; phoneLast4: string; pin: string }
 export interface PaidFormulaPackage {
@@ -16,6 +17,35 @@ const encode64 = (bytes: Uint8Array) => {
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
   return btoa(binary)
+}
+
+const decode64 = (value: string) => Uint8Array.from(atob(value), c => c.charCodeAt(0))
+
+export function parsePaidFormulaPackage(text: string): PaidFormulaPackage {
+  if (text.length > 16_000_000) throw new Error('Package too large')
+  const file = JSON.parse(text)
+  if (!file || file.type !== 'accordbook-paid-package' || file.formatVersion !== 1 || file.accessMode !== 'offline-credentials-v1'
+    || typeof file.packageId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(file.packageId)
+    || file.kdf?.algorithm !== 'PBKDF2' || file.kdf.hash !== 'SHA-256' || file.kdf.iterations !== 600000
+    || file.encryption?.algorithm !== 'AES-GCM' || file.encryption.tagLength !== 128
+    || typeof file.kdf.salt !== 'string' || typeof file.encryption.iv !== 'string' || typeof file.ciphertext !== 'string'
+    || decode64(file.kdf.salt).length !== 16 || decode64(file.encryption.iv).length !== 12 || decode64(file.ciphertext).length < 16) throw new Error('Invalid licensed package')
+  return file
+}
+
+export async function decryptPaidFormulaPackage(file: PaidFormulaPackage, credentials: BuyerCredentials) {
+  parsePaidFormulaPackage(JSON.stringify(file))
+  const buyer = normalizeBuyerCredentials(credentials)
+  const { ciphertext, ...header } = file
+  const encoder = new TextEncoder()
+  const password = encoder.encode(JSON.stringify([buyer.name, buyer.phoneLast4, buyer.pin]))
+  try {
+    const material = await crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveKey'])
+    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: decode64(file.kdf.salt), iterations: 600000 }, material, { name: 'AES-GCM', length: 256 }, false, ['decrypt'])
+    const plaintext = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: decode64(file.encryption.iv), tagLength: 128, additionalData: encoder.encode(JSON.stringify(header)) }, key, decode64(ciphertext)))
+    try { return parseFormulaFile(new TextDecoder('utf-8', { fatal: true }).decode(plaintext)) }
+    finally { plaintext.fill(0) }
+  } finally { password.fill(0) }
 }
 
 export function normalizeBuyerCredentials(value: BuyerCredentials): BuyerCredentials {
