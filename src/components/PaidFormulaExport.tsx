@@ -5,6 +5,7 @@ import { createPaidFormulaPackage, downloadPaidFormulaPackage, type PaidFormulaP
 import { PAID_REGISTRY_ENDPOINT, formatBuyerPhone, generateBuyerPin, registerPaidFormula, validateBuyerPhone, type LicenseRegistration } from '../services/paidFormulaRegistry'
 import './paidFormulaExport.css'
 
+const SELLER_TOKEN_STORAGE_KEY = 'accordbook.paid.seller-token'
 
 export default function PaidFormulaExport({ formula, language }: { formula: Formula; language: 'en' | 'ko' }) {
   const [snapshot, setSnapshot] = useState<Formula>()
@@ -29,6 +30,7 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
   const running = useRef(false)
   const mounted = useRef(true)
   const [busy, setBusy] = useState(false)
+  const [sellerToken, setSellerToken] = useState(() => localStorage.getItem(SELLER_TOKEN_STORAGE_KEY) ?? '')
   const [error, setError] = useState(false)
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState('')
@@ -60,7 +62,9 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
           issuance.current = { file, record: { packageId: file.packageId, buyerName: name, phone: fullPhone, pin, productName: formula.name } }
         }
         const pending = issuance.current
-        await registerPaidFormula(PAID_REGISTRY_ENDPOINT, String(data.get('sellerToken') ?? ''), pending.record)
+        const token = String(data.get('sellerToken') ?? '').trim()
+        await registerPaidFormula(PAID_REGISTRY_ENDPOINT, token, pending.record)
+        localStorage.setItem(SELLER_TOKEN_STORAGE_KEY, token)
         if (mounted.current) { setRegistered(true); downloadPaidFormulaPackage(pending.file, formula.name) }
       } catch { if (mounted.current) setError(true) }
       finally { if (mounted.current) { running.current = false; setBusy(false) } }
@@ -69,8 +73,9 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
       <p>{formula.name || (ko ? '제목 없는 포뮬러' : 'Untitled formula')}</p>
       <p>{ko ? '구매 기록을 등록한 후 파일을 내려받습니다. 구매자는 포뮬러 가져오기에서 구매 정보와 PIN을 확인한 뒤 열 수 있습니다.' : 'Registers the purchase before download. Buyers can use Import formula and verify their purchase details and PIN to open the file.'}</p>
       <fieldset disabled={busy || registered}>
-        <label>{ko ? '판매자 등록 키' : 'Seller registration token'}<input name="sellerToken" type="password" minLength={32} autoComplete="off" required /></label>
+        <label>{ko ? '판매자 등록 키' : 'Seller registration token'}<input name="sellerToken" type="password" minLength={32} autoComplete="off" value={sellerToken} onChange={event => setSellerToken(event.target.value)} required /></label>
       </fieldset>
+      <button className="btn token-clear-btn" type="button" onClick={() => { localStorage.removeItem(SELLER_TOKEN_STORAGE_KEY); setSellerToken('') }} disabled={busy || registered}>{ko ? '저장된 등록 키 삭제' : 'Clear saved token'}</button>
       <fieldset disabled={busy || !!issuance.current}>
         <label>{ko ? '구매자 이름' : 'Buyer name'}<input name="buyerName" required maxLength={100} autoFocus /></label>
         <label>{ko ? '휴대폰 번호' : 'Phone number'}<input name="phone" type="tel" inputMode="numeric" placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}" maxLength={13} value={phone} onChange={event => setPhone(formatBuyerPhone(event.target.value))} required /></label>
