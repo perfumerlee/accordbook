@@ -69,9 +69,9 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
       } catch { if (mounted.current) setError(true) }
       finally { if (mounted.current) { running.current = false; setBusy(false) } }
     }}>
-      <h2 id="paid-export-title">{ko ? '판매용 Formula Export' : 'Paid Formula Export'}</h2>
+      <h2 id="paid-export-title">{ko ? '라이선스 Formula 내보내기' : 'Licensed Formula Export'}</h2>
       <p>{formula.name || (ko ? '제목 없는 포뮬러' : 'Untitled formula')}</p>
-      <p>{ko ? '구매 기록을 등록한 후 파일을 내려받습니다. 구매자는 포뮬러 가져오기에서 구매 정보와 PIN을 확인한 뒤 열 수 있습니다.' : 'Registers the purchase before download. Buyers can use Import formula and verify their purchase details and PIN to open the file.'}</p>
+      <p>{ko ? '라이선스 발급 기록을 등록한 후 파일을 내려받습니다. 구매자는 포뮬러 가져오기에서 구매 정보와 PIN을 확인한 뒤 열 수 있습니다.' : 'Registers the license before download. Buyers can use Import formula and verify their purchase details and PIN to open the file.'}</p>
       <fieldset disabled={busy || registered}>
         <label>{ko ? '판매자 등록 키' : 'Seller registration token'}<input name="sellerToken" type="password" minLength={32} autoComplete="off" value={sellerToken} onChange={event => setSellerToken(event.target.value)} required /></label>
       </fieldset>
@@ -81,10 +81,10 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
         <label>{ko ? '휴대폰 번호' : 'Phone number'}<input name="phone" type="tel" inputMode="numeric" placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}" maxLength={13} value={phone} onChange={event => setPhone(formatBuyerPhone(event.target.value))} required /></label>
         <button className="btn" type="button" onClick={() => { setPin(generateBuyerPin()); setCopied(false) }}>{pin ? (ko ? 'PIN 다시 생성' : 'Regenerate PIN') : (ko ? 'PIN 생성' : 'Generate PIN')}</button>
       </fieldset>
-      {pin && <><label>{ko ? '발급 PIN — 구매자에게 전달하세요' : 'Issued PIN — share with buyer'}<input readOnly value={pin} aria-label="PIN" /></label><button className="btn" type="button" onClick={async () => { try { await navigator.clipboard.writeText(pin); setCopied(true) } catch { setCopied(false) } }}>{copied ? (ko ? '복사됨' : 'Copied') : (ko ? 'PIN 복사' : 'Copy PIN')}</button></>}
+      {pin && <><label>{ko ? '라이선스 PIN — 구매자에게 전달하세요' : 'License PIN — share with buyer'}<input readOnly value={pin} aria-label="PIN" /></label><button className="btn" type="button" onClick={async () => { try { await navigator.clipboard.writeText(pin); setCopied(true) } catch { setCopied(false) } }}>{copied ? (ko ? '복사됨' : 'Copied') : (ko ? 'PIN 복사' : 'Copy PIN')}</button></>}
       {error && <p role="alert">{ko ? '등록 확인에 실패했습니다. URL·판매자 키·배포 권한을 확인하고 같은 요청으로 다시 시도하세요. 시트에 이미 기록됐을 수도 있으며 재시도 시 중복 등록하지 않습니다.' : 'Registration not confirmed. Check URL, seller token and deployment access, then retry. The row may already exist; retries are deduplicated.'}</p>}
       {registered && <p role="status">{ko ? '시트 등록 완료. PIN을 복사한 뒤 닫으세요.' : 'Registered. Copy the PIN before closing.'}</p>}
-      <div className="paid-export-actions"><button type="button" className="btn" onClick={close} disabled={busy}>{ko ? '닫기' : 'Close'}</button>{registered ? <button className="btn" type="button" onClick={() => issuance.current && downloadPaidFormulaPackage(issuance.current.file, formula.name)}>{ko ? '파일 다시 받기' : 'Download again'}</button> : <button className="btn primary" type="submit" disabled={busy}>{busy ? (ko ? '등록 중…' : 'Registering…') : (ko ? '시트 등록 후 파일 저장' : 'Register and download')}</button>}</div>
+      <div className="paid-export-actions"><button type="button" className="btn" onClick={close} disabled={busy}>{ko ? '닫기' : 'Close'}</button>{registered ? <button className="btn" type="button" onClick={() => issuance.current && downloadPaidFormulaPackage(issuance.current.file, formula.name)}>{ko ? '파일 다시 받기' : 'Download again'}</button> : <button className="btn primary" type="submit" disabled={busy}>{busy ? (ko ? '등록 중…' : 'Registering…') : (ko ? '라이선스 등록 후 파일 저장' : 'Register license and download')}</button>}</div>
     </form>
   </dialog>, document.body)
 }
