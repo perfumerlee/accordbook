@@ -144,6 +144,21 @@
   .summary-grid { grid-template-columns: 1fr; }
 }
 
+/* Keep the complete Formula total together at every viewport. */
+.simple-total .main-line strong { white-space: nowrap; }
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .simple-total .main-line strong { font-size: clamp(20px, 2.3vw, 28px); }
+}
+
+@media (min-width: 768px) and (max-width: 899px) {
+  .simple-total .main-line strong { font-size: 28px; }
+}
+
+@media (max-width: 767px) {
+  .simple-total .main-line strong { font-size: clamp(20px, 5.5vw, 24px); }
+}
+
 /* Production dilution editor: keep fields and actions evenly spaced. */
 .dilution-panel.dilution-panel {
   padding: 14px 16px 15px;
