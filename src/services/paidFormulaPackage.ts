@@ -50,11 +50,24 @@ export async function createPaidFormulaPackage(formula: Formula, credentials: Bu
   } finally { password.fill(0) }
 }
 
-export function downloadPaidFormulaPackage(file: PaidFormulaPackage): void {
+export function createPaidFormulaFilename(formulaName: string, packageId: string): string {
+  const safeName = formulaName
+    .normalize('NFC')
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, '')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^[_\.]+|[_\.]+$/g, '')
+    .slice(0, 80) || 'accordbook-formula'
+  const idPrefix = packageId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'package'
+  return `${safeName}__Paid__${idPrefix}.accordbook`
+}
+
+export function downloadPaidFormulaPackage(file: PaidFormulaPackage, formulaName = 'accordbook-formula'): void {
   const url = URL.createObjectURL(new Blob([JSON.stringify(file, null, 2)], { type: 'application/vnd.accordbook' }))
   const link = document.createElement('a')
   link.href = url
-  link.download = `accordbook-paid-${file.packageId}.accordbook`
+  link.download = createPaidFormulaFilename(formulaName, file.packageId)
   document.body.append(link)
   try { link.click() } finally { link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000) }
 }

@@ -62,7 +62,7 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
         }
         const pending = issuance.current
         await registerPaidFormula(PAID_REGISTRY_ENDPOINT, String(data.get('sellerToken') ?? ''), pending.record)
-        if (mounted.current) { setRegistered(true); downloadPaidFormulaPackage(pending.file) }
+        if (mounted.current) { setRegistered(true); downloadPaidFormulaPackage(pending.file, formula.name) }
       } catch { if (mounted.current) setError(true) }
       finally { if (mounted.current) { running.current = false; setBusy(false) } }
     }}>
@@ -80,7 +80,7 @@ function ExportDialog({ formula, language, close }: { formula: Formula; language
       {pin && <><label>{ko ? '발급 PIN — 구매자에게 전달하세요' : 'Issued PIN — share with buyer'}<input readOnly value={pin} aria-label="PIN" /></label><button className="btn" type="button" onClick={async () => { try { await navigator.clipboard.writeText(pin); setCopied(true) } catch { setCopied(false) } }}>{copied ? (ko ? '복사됨' : 'Copied') : (ko ? 'PIN 복사' : 'Copy PIN')}</button></>}
       {error && <p role="alert">{ko ? '등록 확인에 실패했습니다. URL·판매자 키·배포 권한을 확인하고 같은 요청으로 다시 시도하세요. 시트에 이미 기록됐을 수도 있으며 재시도 시 중복 등록하지 않습니다.' : 'Registration not confirmed. Check URL, seller token and deployment access, then retry. The row may already exist; retries are deduplicated.'}</p>}
       {registered && <p role="status">{ko ? '시트 등록 완료. PIN을 복사한 뒤 닫으세요.' : 'Registered. Copy the PIN before closing.'}</p>}
-      <div className="paid-export-actions"><button type="button" className="btn" onClick={close} disabled={busy}>{ko ? '닫기' : 'Close'}</button>{registered ? <button className="btn" type="button" onClick={() => issuance.current && downloadPaidFormulaPackage(issuance.current.file)}>{ko ? '파일 다시 받기' : 'Download again'}</button> : <button className="btn primary" type="submit" disabled={busy}>{busy ? (ko ? '등록 중…' : 'Registering…') : (ko ? '시트 등록 후 파일 저장' : 'Register and download')}</button>}</div>
+      <div className="paid-export-actions"><button type="button" className="btn" onClick={close} disabled={busy}>{ko ? '닫기' : 'Close'}</button>{registered ? <button className="btn" type="button" onClick={() => issuance.current && downloadPaidFormulaPackage(issuance.current.file, formula.name)}>{ko ? '파일 다시 받기' : 'Download again'}</button> : <button className="btn primary" type="submit" disabled={busy}>{busy ? (ko ? '등록 중…' : 'Registering…') : (ko ? '시트 등록 후 파일 저장' : 'Register and download')}</button>}</div>
     </form>
   </dialog>, document.body)
 }
