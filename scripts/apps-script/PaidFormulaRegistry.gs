@@ -2,21 +2,41 @@
 const SPREADSHEET_ID = '1_myhyTYQ_SOHwBp4ljps9KQHMFDH32QgntVzbEZ5_iE';
 const SHEET_NAME = 'PaidFormulaLicenses';
 const CONFIG_SHEET_NAME = 'PaidFormulaConfig';
-const HEADERS = ['packageId', 'buyerName', 'phone', 'phoneLast4', 'pinVerifier', 'productName', 'status', 'issuedAt', 'accessMode', 'requestVerifier'];
+const HEADERS = ['packageId', 'buyerName', 'phone', 'phoneLast4', 'pinVerifier', 'productName', 'status', 'issuedAt', 'accessMode', 'requestVerifier', 'failedAttempts', 'lockedUntil', 'lastVerifiedAt'];
+const HEADER_NOTES = [
+  '유료 파일을 식별하는 고유 패키지 ID입니다.',
+  '구매자 이름입니다.',
+  '구매자가 입력한 전체 전화번호입니다. 판매자 운영용 원본 값입니다.',
+  '인증에 사용하는 전화번호 끝 4자리입니다.',
+  'PIN 원문이 아닌 서버 검증용 HMAC 값입니다. 직접 수정하거나 삭제하지 마세요.',
+  '판매된 Formula 이름입니다.',
+  '라이선스 상태입니다. 예: active, revoked.',
+  '라이선스가 발급된 시각입니다.',
+  '패키지 인증 방식입니다.',
+  '중복 등록 요청 검증용 서버 값입니다. 직접 수정하거나 삭제하지 마세요.',
+  '현재까지 누적된 인증 실패 횟수입니다. 정상 인증 성공 시 0으로 초기화됩니다.',
+  '인증 잠금이 해제되는 시각입니다. 5회 실패 시 30분 잠깁니다.',
+  '마지막 정상 인증 시각입니다.'
+];
 
 function setupPaidFormulaRegistry() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
   if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
   checkHeaders_(sheet);
+  sheet.getRange(1, 1, 1, HEADERS.length).setNotes([HEADER_NOTES]);
   sheet.setFrozenRows(1);
   const config = ss.getSheetByName(CONFIG_SHEET_NAME) || ss.insertSheet(CONFIG_SHEET_NAME);
   if (config.getLastRow() === 0) config.getRange(1, 1, 3, 2).setValues([['key', 'value'], ['SELLER_TOKEN', 'PASTE_SELLER_TOKEN_HERE'], ['PIN_PEPPER', 'PASTE_PIN_PEPPER_HERE']]);
   config.setFrozenRows(1);
+  config.getRange(1, 1, 1, 2).setNotes([['설정 키 이름입니다. SELLER_TOKEN과 PIN_PEPPER를 정확히 입력합니다.', '설정 값입니다. 두 비밀값은 최소 32자 이상이며 구매자에게 공개하지 않습니다.']]);
 }
 
 function checkHeaders_(sheet) {
-  if (JSON.stringify(sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0]) !== JSON.stringify(HEADERS)) throw new Error('Invalid headers');
+  const current = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn ? sheet.getLastColumn() : HEADERS.length, HEADERS.length)).getValues()[0];
+  const legacy = HEADERS.slice(0, 10);
+  if (JSON.stringify(current.slice(0, 10)) !== JSON.stringify(legacy)) throw new Error('Invalid headers');
+  if (current.slice(10, HEADERS.length).join('|') !== HEADERS.slice(10).join('|')) sheet.getRange(1, 11, 1, 3).setValues([HEADERS.slice(10)]);
 }
 function configValue_(name) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(CONFIG_SHEET_NAME);
@@ -60,7 +80,7 @@ function doPost(e) {
         return reply_({ ok: row[9] === requestVerifier && row[6] === 'active', packageId: input.packageId });
       }
     }
-    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date().toISOString(), 'offline-credentials-v1', requestVerifier];
+    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date().toISOString(), 'offline-credentials-v1', requestVerifier, 0, '', ''];
     const range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, HEADERS.length);
     range.setNumberFormat('@');
     range.setValues([row]);
@@ -80,21 +100,28 @@ function verifyLicense_(input, pepper) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    // Bound online guessing per package; never store credentials in cache or logs.
-    const cache = CacheService.getScriptCache();
-    const key = 'verify-attempts:' + input.packageId;
-    const attempts = Number(cache.get(key) || 0);
-    if (attempts >= 10) return reply_({ ok: false });
-    cache.put(key, String(attempts + 1), 900);
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
     if (!sheet) return reply_({ ok: false });
     checkHeaders_(sheet);
     const count = sheet.getLastRow() - 1;
     if (count <= 0) return reply_({ ok: false });
     const row = sheet.getRange(2, 1, count, HEADERS.length).getValues().find(row => row[0] === input.packageId);
+    if (!row) return reply_({ ok: false });
+    const attempts = Number(row[10] || 0);
+    const lockedUntil = row[11] ? new Date(row[11]).getTime() : 0;
+    if (lockedUntil > Date.now()) return reply_({ ok: false });
     const expected = hmac_(JSON.stringify([input.packageId, input.buyerName.normalize('NFC').trim(), input.phoneLast4, input.pin]), pepper);
-    if (!row || row[6] !== 'active' || row[4] !== expected) return reply_({ ok: false });
-    cache.remove(key);
+    if (row[6] !== 'active' || row[4] !== expected) {
+      const nextAttempts = attempts + 1;
+      const nextLocked = nextAttempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000).toISOString() : '';
+      const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
+      sheet.getRange(rowIndex, 11, 1, 2).setValues([[nextAttempts, nextLocked]]);
+      SpreadsheetApp.flush();
+      return reply_({ ok: false });
+    }
+    const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
+    sheet.getRange(rowIndex, 11, 1, 3).setValues([[0, '', new Date().toISOString()]]);
+    SpreadsheetApp.flush();
     return reply_({ ok: true, packageId: input.packageId });
   } finally { lock.releaseLock(); }
 }

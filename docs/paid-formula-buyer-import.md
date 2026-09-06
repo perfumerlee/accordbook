@@ -10,7 +10,7 @@ Replace the Apps Script source with `scripts/apps-script/PaidFormulaRegistry.gs`
 
 Import formula → choose the Licensed `.accordbook` file → enter buyer name, last four phone digits and six-digit PIN → server verifies active status and HMAC → local AES-GCM decryption → existing Formula import lifecycle.
 
-PINs retain leading zeros and are not stored in the sheet or browser storage. The official app requires connectivity and does not import after failed verification. Apps Script receives only package ID and entered credentials, not Formula contents. Per-package failed verification attempts are limited using Apps Script cache (10 attempts, 15-minute cache TTL). Cache is best-effort and may be evicted; this is not a durable lockout mechanism.
+PINs retain leading zeros and are not stored in the sheet or browser storage. The official app requires connectivity and does not import after failed verification. Apps Script receives only package ID and entered credentials, not Formula contents. Per-package failed verification attempts are stored in `PaidFormulaLicenses`: five failed attempts trigger a 30-minute lock, and a successful verification resets the counter to zero. The counter is protected by the Apps Script lock for concurrent requests.
 
 ## Limits
 

@@ -1,6 +1,6 @@
 import { normalizeBuyerCredentials, type BuyerCredentials } from './paidFormulaPackage'
 
-export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyq--X62ubSyR5qA-GJSB4asfc9ug6zkpWrbaow1uC8FU7gXX69b8kzu5zfL4zPJmUd/exec'
+export const PAID_REGISTRY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyc4gBzVVnF9sRUj4ierratWBbVLDNgSNSyawcjwonglShp3ZaX_wHYMiBMHsSg6jTK/exec'
 
 export async function verifyPaidFormula(packageId: string, credentials: BuyerCredentials): Promise<void> {
   const buyer = normalizeBuyerCredentials(credentials)

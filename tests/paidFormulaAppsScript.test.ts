@@ -12,7 +12,8 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
     getRange: (r: number, c: number, height: number, width: number) => ({
       getValues: () => rows.slice(r - 1, r - 1 + height).map(row => row.slice(c - 1, c - 1 + width)),
       setNumberFormat: () => {},
-      setValues: (values: any[][]) => { values.forEach((row, i) => { rows[r - 1 + i] = row }) },
+      setNotes: () => {},
+      setValues: (values: any[][]) => { values.forEach((valueRow, i) => { const target = rows[r - 1 + i] || []; valueRow.forEach((value, j) => { target[c - 1 + j] = value }); rows[r - 1 + i] = target }) },
     }),
   }
   const token = 'seller-secret-'.repeat(4)
@@ -43,9 +44,11 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
   expect(post(verify)).toEqual({ ok: true, packageId: request.packageId })
   expect(post({ ...verify, phoneLast4: '9999' }).ok).toBe(false)
   expect(post({ ...verify, buyerName: 'Other' }).ok).toBe(false)
-  for (let i = 0; i < 10; i++) expect(post({ ...verify, pin: '999999' }).ok).toBe(false)
+  for (let i = 0; i < 4; i++) expect(post({ ...verify, pin: '999999' }).ok).toBe(false)
   expect(post(verify).ok).toBe(false)
-  cache.clear()
+  expect(rows[1][10]).toBe(5)
+  rows[1][10] = 0
+  rows[1][11] = ''
   expect(post(verify).ok).toBe(true)
   rows[1][6] = 'revoked'
   expect(post(verify).ok).toBe(false)
