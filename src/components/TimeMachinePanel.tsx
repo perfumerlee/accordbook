@@ -75,7 +75,23 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
   const formulaIdRef = useRef(formula.id); const [versions, setVersions] = useState<FormulaVersion[]>([]); const [compareTarget, setCompareTarget] = useState<FormulaVersion>(); const [activeTab, setActiveTab] = useState<TimeMachineTab>("version"); const [selected, setSelected] = useState<FormulaVersion>(); const [noteOpen, setNoteOpen] = useState(false); const [note, setNote] = useState(''); const [saving, setSaving] = useState(false); const [capitalizationWarnings, setCapitalizationWarnings] = useState<string[]>([]); const [restoring, setRestoring] = useState(false); const [restoreConfirm, setRestoreConfirm] = useState(false); const [closing, setClosing] = useState(false); const [contextChanging, setContextChanging] = useState(false); const ko = language === 'ko'
   const batchReturnPending = useRef(false)
   const capitalizationEditRef = useRef<HTMLButtonElement>(null)
-  useEffect(() => { if (capitalizationWarnings.length > 0) capitalizationEditRef.current?.focus({ preventScroll: true }) }, [capitalizationWarnings.length])
+  const capitalizationDialogRef = useRef<HTMLDivElement>(null)
+  const capitalizationOpen = isOpen && capitalizationWarnings.length > 0
+  useEffect(() => {
+    if (!capitalizationOpen) return
+    const opener = document.activeElement as HTMLElement | null
+    const background = Array.from(panelRef.current?.children ?? []).filter(
+      (element): element is HTMLElement => element instanceof HTMLElement && !element.classList.contains('tm-capitalization-overlay'),
+    )
+    const previous = background.map(element => element.inert)
+    background.forEach(element => { element.inert = true })
+    capitalizationEditRef.current?.focus({ preventScroll: true })
+    return () => {
+      background.forEach((element, index) => { element.inert = previous[index] })
+      if (usable(opener)) opener.focus({ preventScroll: true })
+    }
+  }, [capitalizationOpen])
+  useEffect(() => { setCapitalizationWarnings([]) }, [formula.id, isOpen])
   const live = useRef({ isOpen, formulaId: formula.id, batchOpen, compositionOpen, versionId: selected?.versionId, openSequence })
   useLayoutEffect(() => { live.current = { isOpen, formulaId: formula.id, batchOpen, compositionOpen, versionId: selected?.versionId, openSequence } })
   useLayoutEffect(() => {
@@ -137,13 +153,13 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     if (!isOpen) return
     if (event.key === 'Escape' && !event.nativeEvent.isComposing) {
       event.preventDefault(); event.stopPropagation()
-      if (capitalizationWarnings.length > 0) { setCapitalizationWarnings([]); return }
+      if (capitalizationOpen) { if (!saving) setCapitalizationWarnings([]); return }
       if (restoreConfirm) { setRestoreConfirm(false); panelRef.current?.querySelector<HTMLButtonElement>('.tm-make-batch')?.focus({ preventScroll: true }) }
       else requestClose()
       return
     }
-    if (event.key !== 'Tab' || companion || closing) return
-    const items = Array.from(panelRef.current?.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], [tabindex]') ?? []).filter(element => element.tabIndex >= 0 && usable(element))
+    if (event.key !== 'Tab' || (companion && !capitalizationOpen) || closing) return
+    const items = Array.from((capitalizationOpen ? capitalizationDialogRef.current : panelRef.current)?.querySelectorAll<HTMLElement>('button, input, select, textarea, a[href], [tabindex]') ?? []).filter(element => element.tabIndex >= 0 && usable(element))
     const first = items[0]; const last = items[items.length - 1]
     if (!first) { event.preventDefault(); panelRef.current?.focus(); return }
     if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { event.preventDefault(); last.focus() }
@@ -167,7 +183,6 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
       <div className="tm-content" ref={contentRef}>
         <div id="tm-view-version" role="tabpanel" aria-labelledby="tm-tab-version" hidden={batchOpen || compositionOpen || activeTab !== 'version'}>
           {selected ? <><button className="tm-version-list-back" type="button" onClick={() => setSelected(undefined)}>← {t.batchVersionList}</button><h2 className="tm-version-title">{selected.kind === 'manual' ? `v${selected.versionNumber}` : (ko ? '복원 지점' : 'RESTORE POINT')}</h2><div className="tm-version-meta"><span>{ko ? '읽기 전용' : 'READ ONLY'}</span><time>{date(selected.createdAt)}</time></div>{selected.note && <div className="tm-note"><span>{ko ? '버전 메모' : 'VERSION NOTE'}</span><p>{selected.note}</p></div>}{Array.isArray(selected.snapshot?.rows) ? <HistoricalFormula snapshot={selected.snapshot} language={language} /> : <p className="tm-batch-helper">{t.batchUnavailable}</p>}<div className={`tm-restore-action ${!restoreConfirm ? 'tm-version-actions-grid' : ''}`}>{restoreConfirm ? <div className="tm-restore-confirm" role="alertdialog" aria-label={ko ? '복원 확인' : 'Restore confirmation'}><strong>{ko ? `v${selected.versionNumber ?? ''}를 현재 포뮬러로 복원할까요?` : `Restore ${selected.kind === 'manual' ? `v${selected.versionNumber}` : 'this restore point'} to Current?`}</strong><p>{ko ? '현재 포뮬러의 내용이 이 버전으로 변경됩니다. 기존 버전 기록은 그대로 유지됩니다.' : 'The current formula will be replaced with this version. Your version history will be kept.'}</p><div><button className="btn" type="button" onClick={() => setRestoreConfirm(false)}>{ko ? '취소' : 'CANCEL'}</button><button className="btn primary" type="button" disabled={restoring} onClick={() => void restore()}>{restoring ? '…' : (ko ? '복원' : 'RESTORE')}</button></div></div> : <><button className="tm-restore-button" type="button" onClick={() => setRestoreConfirm(true)}><svg className="tm-restore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 5 11l4 4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M6 11h7a6 6 0 0 1 6 6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg><span>{ko ? '이 버전 복원' : 'RESTORE THIS VERSION'}</span></button><button className="tm-restore-button" type="button" disabled={creatingAsNew} onClick={() => void createAsNew()}>{creatingAsNew ? '…' : (ko ? '새 포뮬러로 만들기' : 'CREATE AS NEW')}</button></>}<button ref={batchActionRef} className="tm-restore-button tm-make-batch" type="button" onClick={openBatch}>{t.makeBatch}</button>{!restoreConfirm && canShowVersionComposition(selected) && <button ref={compositionActionRef} className="tm-restore-button tm-composition-action" type="button" onClick={openComposition}>{t.composition}</button>}</div><button className="tm-detail-back" type="button" onClick={() => setSelected(undefined)}>← TIME MACHINE</button></> : <div className="tm-timeline"><div className="tm-current"><b>● {ko ? '현재' : 'CURRENT'}</b><span>{date(formula.updatedAt)}</span><small>{ko ? '편집 가능한 현재 Formula' : 'Current working formula'}</small></div><button className="tm-save" type="button" onClick={() => setNoteOpen(true)}>{ko ? '+ 버전 저장' : '+ SAVE VERSION'}</button>{noteOpen && <div className="tm-save-box"><label>{ko ? '버전 메모' : 'Version note'}<textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={ko ? '실험 또는 시향 메모 (선택)' : 'Optional experiment or sensory note'} /></label><div><button className="btn" type="button" onClick={() => setNoteOpen(false)}>{ko ? '취소' : 'Cancel'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save()}>{saving ? '…' : (ko ? '버전 저장' : 'Save Version')}</button></div></div>}{versions.length === 0 && <div className="tm-empty"><strong>{ko ? '저장된 버전이 없습니다.' : 'No saved versions yet.'}</strong><span>{ko ? '나중에 돌아올 수 있도록 의미 있는 Formula 단계를 저장하세요.' : 'Save a meaningful stage of your formula to return to it later.'}</span></div>}{[...versions].reverse().map((version) => <button className={`tm-item ${version.kind}`} key={version.versionId} type="button" onClick={() => { setSelected(version); setCompareTarget(undefined); setActiveTab("version") }}><b>{version.kind === 'manual' ? `○ v${version.versionNumber}` : `◇ ${ko ? '복원 지점' : 'RESTORE POINT'}`}</b><span>{date(version.createdAt)}</span>{version.note && <small>{formatVersionNote(version, language)}</small>}</button>)}</div>}
-        {capitalizationWarnings.length > 0 && <div className="tm-capitalization-warning" role="alert"><strong>{ko ? '소문자로 시작하는 원료명이 있습니다.' : 'Some material names start with a lowercase letter.'}</strong><ul>{capitalizationWarnings.map(name => <li key={name}>{name}</li>)}</ul><p>{ko ? '원료명은 자동으로 수정되지 않습니다. 그대로 저장할까요?' : 'Material names will not be changed automatically. Save as entered?'}</p><div><button className="btn" type="button" onClick={() => setCapitalizationWarnings([])}>{ko ? '수정하기' : 'Edit'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save(true)}>{ko ? '그대로 저장' : 'Save as entered'}</button></div></div>}
         </div>
         <div id="tm-view-compare" role="tabpanel" aria-labelledby="tm-tab-compare" hidden={batchOpen || compositionOpen || activeTab !== 'compare'}>
           {Array.isArray((compareTarget ?? selected)?.snapshot?.rows) ? <FormulaCompareView key={(compareTarget ?? selected)!.versionId} from={(compareTarget ?? selected)!.snapshot} to={formula} versions={versions} language={language} /> : <p className="tm-batch-helper">{t.compareSelectVersion}</p>}
@@ -181,6 +196,7 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
           <ScaleBatchView key={formula.id + ':' + String(isOpen)} version={formulaContextChanged ? undefined : selected} language={language} />
         </div>
       </div>
+        {capitalizationOpen && <div className="tm-capitalization-overlay"><div ref={capitalizationDialogRef} className="tm-capitalization-warning" role="alertdialog" aria-modal="true" aria-labelledby="tm-capitalization-title"><strong id="tm-capitalization-title">{ko ? '소문자로 시작하는 원료명이 있습니다.' : 'Some material names start with a lowercase letter.'}</strong><ul>{capitalizationWarnings.map(name => <li key={name}>{name}</li>)}</ul><p>{ko ? '원료명은 자동으로 수정되지 않습니다. 그대로 저장할까요?' : 'Material names will not be changed automatically. Save as entered?'}</p><div><button ref={capitalizationEditRef} className="btn" disabled={saving} type="button" onClick={() => setCapitalizationWarnings([])}>{ko ? '수정하기' : 'Edit'}</button><button className="btn primary" type="button" disabled={saving} onClick={() => void save(true)}>{ko ? '그대로 저장' : 'Save as entered'}</button></div></div></div>}
     </section>
   </div>
 }
