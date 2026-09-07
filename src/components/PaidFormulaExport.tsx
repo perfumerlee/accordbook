@@ -16,7 +16,7 @@ export default function PaidFormulaExport({ formula, language, storage }: { form
       if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
       const target = event.target
       if (target instanceof HTMLElement && target.closest('textarea, select, [contenteditable="true"], [role="dialog"], [inert]')) return
-      if (document.querySelector('dialog[open], [aria-modal="true"]:not([inert]), .time-machine-stage.is-open, .origin-popover, .mobile-formula-menu.open, .material-focus-backdrop')) return
+      if (document.querySelector('dialog[open], [aria-modal="true"]:not(.tm-panel):not([inert]), .origin-popover, .mobile-formula-menu.open, .material-focus-backdrop')) return
       event.preventDefault()
       setSnapshot(structuredClone(formula))
     }
