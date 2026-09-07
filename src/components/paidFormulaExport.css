@@ -1,6 +1,10 @@
 .paid-export-dialog { width: min(440px, calc(100vw - 40px)); max-height: calc(100dvh - 40px); overflow: auto; box-sizing: border-box; padding: 24px; border: 1px solid #b9a98b; border-radius: 10px; background: #fbf5e8; color: #30291f; }
 .paid-export-dialog::backdrop { background: rgba(48,41,31,.35); }
+.paid-export-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
 .paid-export-dialog h2 { margin-top: 0; font: 24px Georgia, serif; }
+.paid-export-close { flex:0 0 auto; border:0; background:transparent; color:#806f59; cursor:pointer; font:28px/1 Arial,sans-serif; padding:0 2px; }
+.paid-export-close:hover, .paid-export-close:focus-visible { color:#30291f; }
+.paid-export-close:disabled { opacity:.45; cursor:not-allowed; }
 .paid-export-source { display: flex; align-items: baseline; gap: 6px; margin: 8px 0 14px; }
 .paid-export-source span { color: #806f59; font: 10px "Courier New", monospace; letter-spacing: .08em; }
 .paid-export-source strong { font-size: 12px; letter-spacing: .03em; }
