@@ -25,7 +25,11 @@ export default function PaidFormulaExport({ formula, language, storage }: { form
     const open = (event: KeyboardEvent) => {
       if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
       const target = event.target
-      if (target instanceof HTMLElement && target.closest('textarea, select, [contenteditable="true"], [role="dialog"], [inert]')) return
+      if (target instanceof HTMLElement) {
+        if (target.closest('textarea, select, [contenteditable="true"], [inert]')) return
+        const dialogTarget = target.closest<HTMLElement>('[role="dialog"]')
+        if (dialogTarget && !dialogTarget.classList.contains('tm-panel')) return
+      }
       if (hasActiveConflictingModal()) return
       event.preventDefault()
       setSnapshot(structuredClone(formula))
