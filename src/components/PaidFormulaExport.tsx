@@ -9,6 +9,16 @@ import './paidFormulaExport.css'
 
 const SELLER_TOKEN_STORAGE_KEY = 'accordbook.paid.seller-token'
 
+function hasActiveConflictingModal(): boolean {
+  const candidates = Array.from(document.querySelectorAll<HTMLElement>('dialog[open], [aria-modal="true"], .origin-popover, .mobile-formula-menu.open, .material-focus-backdrop'))
+  return candidates.some(element => {
+    if (element.classList.contains('tm-panel') || (element.closest('.tm-panel') && !element.matches('[role="alertdialog"]'))) return false
+    if (element.hidden || element.getAttribute('aria-hidden') === 'true' || element.closest('[hidden], [aria-hidden="true"], [inert]')) return false
+    if (element.classList.contains('is-closing') || element.closest('.is-closing')) return false
+    return true
+  })
+}
+
 export default function PaidFormulaExport({ formula, language, storage }: { formula: Formula; language: 'en' | 'ko'; storage: AccordbookStorage }) {
   const [snapshot, setSnapshot] = useState<Formula>()
   useEffect(() => {
@@ -16,7 +26,7 @@ export default function PaidFormulaExport({ formula, language, storage }: { form
       if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
       const target = event.target
       if (target instanceof HTMLElement && target.closest('textarea, select, [contenteditable="true"], [role="dialog"], [inert]')) return
-      if (document.querySelector('dialog[open], [aria-modal="true"]:not(.tm-panel):not([inert]), .origin-popover, .mobile-formula-menu.open, .material-focus-backdrop')) return
+      if (hasActiveConflictingModal()) return
       event.preventDefault()
       setSnapshot(structuredClone(formula))
     }
@@ -79,7 +89,7 @@ function ExportDialog({ formula, language, storage, close }: { formula: Formula;
     }}>
       <h2 id="paid-export-title">{ko ? '라이선스 Formula 내보내기' : 'Licensed Formula Export'}</h2>
       <p>{(source.kind === 'released' ? source.snapshot.name : source.formula.name) || (ko ? '제목 없는 포뮬러' : 'Untitled formula')}</p>
-      <p className="paid-export-source" role="status"><span>{ko ? '소스' : 'SOURCE'}</span><strong>{sourceError ? (ko ? '확인할 수 없음' : 'Unavailable') : source.kind === 'released' ? `● RELEASED · v${source.version.versionNumber}` : 'WORKING FORMULA'}</strong></p>
+      <p className="paid-export-source" role="status"><span>{ko ? '소스' : 'SOURCE'} :</span><strong>{sourceError ? (ko ? '확인할 수 없음' : 'Unavailable') : source.kind === 'released' ? `● RELEASED · v${source.version.versionNumber}` : 'WORKING FORMULA'}</strong></p>
       <p>{ko ? '라이선스 발급 기록을 등록한 후 파일을 내려받습니다. 구매자는 포뮬러 가져오기에서 구매 정보와 PIN을 확인한 뒤 열 수 있습니다.' : 'Registers the license before download. Buyers can use Import formula and verify their purchase details and PIN to open the file.'}</p>
       <fieldset disabled={busy || registered}>
         <label>{ko ? '판매자 등록 키' : 'Seller registration token'}<input name="sellerToken" type="password" minLength={32} autoComplete="off" value={sellerToken} onChange={event => setSellerToken(event.target.value)} required /></label>
