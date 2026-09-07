@@ -14,7 +14,8 @@ export async function createFormula(storage: AccordbookStorage, prefix = 'ACC'):
 }
 export async function duplicateFormula(storage: AccordbookStorage, source: Formula, prefix = 'ACC'): Promise<Formula> {
   const date = new Date(); const stamp = timestamp()
-  const copy: Formula = { ...source, id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: localDate(date), createdAt: stamp, updatedAt: stamp, archivedAt: undefined, rows: source.rows.map((row) => ({ ...row, id: crypto.randomUUID(), rowId: crypto.randomUUID(), dilution: row.dilution ? { ...row.dilution } : undefined })) }
+  const { releasedVersionId: _release, ...content } = source
+  const copy: Formula = { ...content, id: crypto.randomUUID(), formulaId: await generateFormulaId({ prefix, date }, storage.meta), date: localDate(date), createdAt: stamp, updatedAt: stamp, archivedAt: undefined, rows: source.rows.map((row) => ({ ...row, id: crypto.randomUUID(), rowId: crypto.randomUUID(), dilution: row.dilution ? { ...row.dilution } : undefined })) }
   copy.provenance = await createProvenance(copy, 'duplicated', { originType: 'adapted_from', title: source.formulaId }, source.provenance ? { rootRecordId: source.provenance.rootRecordId, parentRecordId: source.provenance.recordId, parentFingerprint: source.provenance.currentFingerprint } : undefined)
   await storage.formulas.save(copy); return copy
 }

@@ -15,6 +15,7 @@ export interface FormulaMaterial {
 }
 
 export interface Formula {
+  releasedVersionId?: string
   id: string
   formulaId: string
   date: string
