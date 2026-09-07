@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateScaledBatch, formatBatchWeight, isScaleBatchEligible } from '../src/services/scaleBatch'
+import { calculateScaledBatch, formatBatchWeight, formatBatchWeightWithUnit, isScaleBatchEligible } from '../src/services/scaleBatch'
 import type { FormulaSnapshotRow } from '../src/models/formula'
 const row = (rowId: string, parts: number | '', material = rowId): FormulaSnapshotRow => ({ rowId, parts, material })
 describe('Scale Batch: selected snapshot physical weights', () => {
@@ -37,5 +37,11 @@ describe('Scale Batch: selected snapshot physical weights', () => {
     const result = calculateScaledBatch([row('a',333),row('b',333),row('c',334)], 0.01)!
     expect(result.totalGrams).toBe(0.01)
     expect(result.rows[0].grams).toBe(0.00333)
+  })
+  it('uses grams through 1000g and kilograms above it', () => {
+    expect(formatBatchWeightWithUnit(999, 'en')).toEqual({ value: '999.00', unit: 'g' })
+    expect(formatBatchWeightWithUnit(1000, 'en')).toEqual({ value: '1.00', unit: 'kg' })
+    expect(formatBatchWeightWithUnit(1000.001, 'en')).toEqual({ value: '1.00', unit: 'kg' })
+    expect(formatBatchWeightWithUnit(1600, 'en')).toEqual({ value: '1.60', unit: 'kg' })
   })
 })

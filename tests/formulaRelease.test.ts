@@ -123,9 +123,9 @@ describe('Released version metadata', () => {
   it.each(['en', 'ko'] as const)('renders eligibility and English product status in %s', async language => {
     const { formula, v1 } = await setup()
     const render = (f: Formula, version: FormulaVersion) => renderToStaticMarkup(createElement(VersionReleaseStatus, { formula: f, version, versions: [v1], language, onConfirm: async () => {} }))
-    expect(render(formula, v1)).toContain('MARK AS RELEASE')
+    expect(render(formula, v1)).toContain('RELEASE THIS VERSION')
     expect(render({ ...formula, releasedVersionId: v1.versionId }, v1)).toContain('RELEASED')
-    expect(render({ ...formula, releasedVersionId: v1.versionId }, v1)).not.toContain('MARK AS RELEASE')
+    expect(render({ ...formula, releasedVersionId: v1.versionId }, v1)).not.toContain('RELEASE THIS VERSION')
     expect(render(formula, { ...v1, kind: 'restore-point', versionNumber: null })).toBe('')
   })
 })

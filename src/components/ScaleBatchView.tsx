@@ -2,7 +2,7 @@ import { calculateTotalParts } from '../services/formulaCalculator'
 import { useState } from 'react'
 import type { FormulaVersion } from '../models/formula'
 import { messages, type Language } from '../i18n/messages'
-import { calculateScaledBatch, formatBatchWeight, isScaleBatchEligible } from '../services/scaleBatch'
+import { calculateScaledBatch, formatBatchWeight, formatBatchWeightWithUnit, isScaleBatchEligible } from '../services/scaleBatch'
 import { batchInput, changeBatchUnit, fromCanonicalGrams } from '../services/batchUnits'
 
 export function ScaleBatchView({ version, language }: { version?: FormulaVersion; language: Language }) {
@@ -24,7 +24,7 @@ export function ScaleBatchView({ version, language }: { version?: FormulaVersion
     <label className="tm-batch-label" htmlFor="tm-batch-amount">{t.batchAmount}</label>
     <div className="tm-batch-input"><input id="tm-batch-amount" type="number" inputMode="decimal" step="any" disabled={!eligible} value={input.amount} aria-invalid={eligible && invalid} aria-describedby={unavailable ? 'tm-batch-unavailable' : invalid ? 'tm-batch-error' : undefined} onChange={event => setInput(batchInput(event.target.value, input.unit))} /><div className="tm-batch-units" role="group" aria-label={t.batchUnit}>{(['g', 'kg'] as const).map(unit => <button key={unit} type="button" aria-pressed={input.unit === unit} disabled={!eligible} onClick={() => setInput(current => changeBatchUnit(current, unit))}>{unit}</button>)}</div></div>
     {eligible && invalid && <p id="tm-batch-error" className="tm-batch-helper">{t.batchInvalid}</p>}
-    {result && <table className="tm-batch-table"><thead><tr><th scope="col">{t.batchMaterial}</th><th scope="col">{t.batchWeight}</th></tr></thead><tbody>{result.rows.map(row => <tr key={row.sourceRowId} data-row-id={row.sourceRowId}><td>{row.material || t.batchUnnamed}{row.dilution?.enabled && <small> @{row.dilution.percent}% in {row.dilution.solvent || 'ALC'}</small>}</td><td>{formatBatchWeight(row.grams, language)} g</td></tr>)}</tbody><tfoot><tr><th scope="row">{t.total}</th><td>{formatBatchWeight(fromCanonicalGrams(result.totalGrams, input.unit), language)} {input.unit}</td></tr></tfoot></table>}
+    {result && <table className="tm-batch-table"><thead><tr><th scope="col">{t.batchMaterial}</th><th scope="col">{t.batchWeight}</th></tr></thead><tbody>{result.rows.map(row => { const weight = formatBatchWeightWithUnit(row.grams, language); return <tr key={row.sourceRowId} data-row-id={row.sourceRowId}><td>{row.material || t.batchUnnamed}{row.dilution?.enabled && <small> @{row.dilution.percent}% in {row.dilution.solvent || 'ALC'}</small>}</td><td>{weight.value} {weight.unit}</td></tr> })}</tbody><tfoot><tr><th scope="row">{t.total}</th><td>{formatBatchWeight(fromCanonicalGrams(result.totalGrams, input.unit), language)} {input.unit}</td></tr></tfoot></table>}
     <div className="tm-batch-helper"><p>{t.batchReadOnly}</p><p>{t.batchScope}</p></div>
   </div>
 }

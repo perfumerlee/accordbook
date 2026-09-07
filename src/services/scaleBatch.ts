@@ -26,3 +26,8 @@ export function formatBatchWeight(grams: number, language: 'en' | 'ko'): string 
     minimumFractionDigits: 2, maximumFractionDigits: 3,
   }).format(grams)
 }
+
+export function formatBatchWeightWithUnit(grams: number, language: 'en' | 'ko'): { value: string; unit: 'g' | 'kg' } {
+  const unit = grams >= 1000 ? 'kg' : 'g'
+  return { value: formatBatchWeight(unit === 'kg' ? grams / 1000 : grams, language), unit }
+}
