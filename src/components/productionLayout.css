@@ -240,10 +240,13 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 .tm-capitalization-warning ul { margin: 8px 0; padding-left: 20px; }
 .tm-capitalization-warning p { margin: 8px 0 12px; color: var(--muted); }
 .tm-capitalization-warning button + button { margin-left: 8px; }
-.tm-release-status { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); font: 10px/1.5 "Courier New", monospace; letter-spacing: .08em; }
+.tm-release-status { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); font: 10px/1.5 "Courier New", monospace; letter-spacing: .08em; }
 .tm-release-status > span:first-child { color: var(--muted); white-space: nowrap; }
 .tm-release-status > button { min-width: 0; border: 1px solid rgba(139,89,56,.48); border-radius: 4px; background: rgba(255,250,240,.72); color: #8b5938; cursor: pointer; padding: 8px 12px; font: inherit; letter-spacing: .05em; white-space: nowrap; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
 .tm-release-status > button:hover, .tm-release-status > button:focus-visible { border-color: #8b5938; background: rgba(139,89,56,.12); color: #5d3824; }
+.tm-release-actions { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+.tm-release-actions button { border:0; background:transparent; color:var(--muted); cursor:pointer; padding:4px 0; font:inherit; letter-spacing:.04em; text-decoration:underline; text-underline-offset:3px; }
+.tm-release-actions button:hover, .tm-release-actions button:focus-visible { color:var(--ink); }
 .tm-item .tm-version-item-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
 .tm-panel .tm-released { color: #6a5945; font: 10px/1.5 "Courier New", monospace; white-space: nowrap; }
 .tm-release-overlay { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box; background: rgba(54,42,29,.35); }

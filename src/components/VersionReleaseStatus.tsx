@@ -5,15 +5,16 @@ import { getReleasedVersion } from '../services/formulaRelease'
 import { messages } from '../i18n/messages'
 
 export function ReleasedIndicator({ language }: { language: 'en' | 'ko' }) {
-  return <span className="tm-released"><span aria-hidden="true">●</span> {messages[language].released}</span>
+  return <span className="tm-released"><span aria-hidden="true">●</span>{messages[language].released}</span>
 }
 
-export function VersionReleaseStatus({ formula, version, versions, language, onConfirm }: {
+export function VersionReleaseStatus({ formula, version, versions, language, onConfirm, onRemove }: {
   formula: Formula
   version: FormulaVersion
   versions: FormulaVersion[]
   language: 'en' | 'ko'
   onConfirm?: (formulaId: string, versionId: string) => Promise<void>
+  onRemove?: (formulaId: string) => Promise<void>
 }) {
   const t = messages[language]
   const released = getReleasedVersion(formula, versions)
@@ -21,6 +22,7 @@ export function VersionReleaseStatus({ formula, version, versions, language, onC
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
+  const [removeConfirming, setRemoveConfirming] = useState(false)
   const rowRef = useRef<HTMLDivElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -29,7 +31,7 @@ export function VersionReleaseStatus({ formula, version, versions, language, onC
   const panel = rowRef.current?.closest<HTMLElement>('.tm-panel')
 
   useEffect(() => {
-    if (!confirming || !panel) return
+    if ((!confirming && !removeConfirming) || !panel) return
     const background = Array.from(panel.children).filter((element): element is HTMLElement => element instanceof HTMLElement && !element.classList.contains('tm-release-overlay'))
     const previous = background.map(element => element.inert)
     background.forEach(element => { element.inert = true })
@@ -39,12 +41,12 @@ export function VersionReleaseStatus({ formula, version, versions, language, onC
       const target = actionRef.current ?? rowRef.current
       if (target?.isConnected && !target.closest('[hidden], [inert]')) target.focus({ preventScroll: true })
     }
-  }, [confirming, panel])
+  }, [confirming, removeConfirming, panel])
 
   if (version.kind !== 'manual' || version.parentFormulaId !== formula.id) return null
   return <div ref={rowRef} className="tm-release-status" tabIndex={-1}>
     <span>{t.releaseStatus}</span>
-    {isReleased ? <ReleasedIndicator language={language} /> : <button ref={actionRef} type="button" disabled={!onConfirm} onClick={() => { setError(false); setConfirming(true) }}>{t.markAsRelease}</button>}
+    {isReleased ? <div className="tm-release-actions"><ReleasedIndicator language={language} /><button ref={actionRef} type="button" disabled={!onRemove} onClick={() => { setError(false); setRemoveConfirming(true) }}>{t.removeRelease}</button></div> : <button ref={actionRef} type="button" disabled={!onConfirm} onClick={() => { setError(false); setConfirming(true) }}>{t.markAsRelease}</button>}
     {confirming && panel && createPortal(<div className="tm-release-overlay">
       <div ref={dialogRef} className="tm-release-confirm" role="alertdialog" aria-modal="true" aria-labelledby="tm-release-title" aria-describedby="tm-release-description" onKeyDown={event => {
         if (event.key === 'Escape' && !event.nativeEvent.isComposing) { event.preventDefault(); event.stopPropagation(); if (!running.current) setConfirming(false) }
@@ -72,5 +74,6 @@ export function VersionReleaseStatus({ formula, version, versions, language, onC
         </div>
       </div>
     </div>, panel)}
+    {removeConfirming && panel && createPortal(<div className="tm-release-overlay"><div ref={dialogRef} className="tm-release-confirm" role="alertdialog" aria-modal="true" aria-labelledby="tm-remove-release-title" aria-describedby="tm-remove-release-description"><h3 id="tm-remove-release-title">{t.removeReleaseTitle}</h3><p id="tm-remove-release-description">{t.removeReleaseDescription}</p>{error && <p role="alert">{t.removeReleaseFailed}</p>}<div className="tm-release-confirm-actions"><button ref={cancelRef} className="btn" type="button" disabled={busy} onClick={() => setRemoveConfirming(false)}>{t.cancel}</button><button className="btn primary" type="button" disabled={busy} onClick={async () => { if (running.current || !onRemove) return; running.current = true; setBusy(true); setError(false); try { await onRemove(formula.id); setRemoveConfirming(false) } catch { setError(true) } finally { running.current = false; setBusy(false) } }}>{busy ? '…' : t.removeRelease}</button></div></div></div>, panel)}
   </div>
 }

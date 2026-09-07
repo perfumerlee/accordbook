@@ -21,6 +21,13 @@ export class FormulaRepository {
     await this.database.put('formulas', id, released)
     return released
   }
+  async removeReleasedVersion(id: string): Promise<Formula> {
+    const formula = await this.get(id)
+    if (!formula) throw new Error('Formula no longer exists.')
+    const { releasedVersionId: _releasedVersionId, ...cleared } = formula
+    await this.database.put('formulas', id, cleared)
+    return cleared
+  }
   list(): Promise<Formula[]> { return this.database.getAll<Formula>('formulas') }
   remove(id: string): Promise<void> { return this.database.delete('formulas', id) }
 
