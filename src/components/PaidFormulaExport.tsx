@@ -20,8 +20,8 @@ export default function PaidFormulaExport({ formula, language, storage }: { form
       event.preventDefault()
       setSnapshot(structuredClone(formula))
     }
-    window.addEventListener('keydown', open)
-    return () => window.removeEventListener('keydown', open)
+    window.addEventListener('keydown', open, true)
+    return () => window.removeEventListener('keydown', open, true)
   }, [formula])
   return snapshot ? <ExportDialog formula={snapshot} language={language} storage={storage} close={() => setSnapshot(undefined)} /> : null
 }
