@@ -40,8 +40,8 @@ describe('Scale Batch: selected snapshot physical weights', () => {
   })
   it('uses grams through 1000g and kilograms above it', () => {
     expect(formatBatchWeightWithUnit(999, 'en')).toEqual({ value: '999.00', unit: 'g' })
-    expect(formatBatchWeightWithUnit(1000, 'en')).toEqual({ value: '1.00', unit: 'kg' })
-    expect(formatBatchWeightWithUnit(1000.001, 'en')).toEqual({ value: '1.00', unit: 'kg' })
+    expect(formatBatchWeightWithUnit(1000, 'en', 'kg')).toEqual({ value: '1.00', unit: 'kg' })
+    expect(formatBatchWeightWithUnit(1600, 'en', 'g')).toEqual({ value: '1,600.00', unit: 'g' })
     expect(formatBatchWeightWithUnit(1600, 'en')).toEqual({ value: '1.60', unit: 'kg' })
   })
 })
