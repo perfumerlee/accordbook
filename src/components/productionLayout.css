@@ -246,3 +246,7 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 .tm-release-confirm p { font-size: 12px; line-height: 1.6; }
 .tm-release-confirm-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .tm-release-confirm-actions button { min-width: 0; white-space: normal; }
+@media (max-width: 767px) {
+  /* Contain the drawer's translated bounds while it opens and closes. */
+  .time-machine-stage > .tm-backdrop { overflow: hidden; }
+}
