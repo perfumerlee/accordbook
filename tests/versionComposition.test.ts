@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import type { FormulaVersion, FormulaVersionSnapshot } from '../src/models/formula'
-import { canShowVersionComposition, getVersionComposition } from '../src/services/versionComposition'
+import { canShowVersionComposition, formatVersionCompositionForClipboard, getVersionComposition } from '../src/services/versionComposition'
 import { VersionCompositionView } from '../src/components/VersionCompositionView'
 
 const snapshot: FormulaVersionSnapshot = {
@@ -48,5 +48,14 @@ describe('Version composition', () => {
   it('uses the historical untitled fallback', () => {
     const html = renderToStaticMarkup(createElement(VersionCompositionView, { snapshot: { ...snapshot, name: '' }, versionNumber: 1, language: 'en' }))
     expect(html).toContain('Untitled')
+  })
+  it.each(['en', 'ko'] as const)('formats a full clipboard composition without hidden data: %s', language => {
+    const text = formatVersionCompositionForClipboard({ name: 'Historical Citrus', versionNumber: 7, materials: ['Bergamot', 'Hedione'], language })
+    expect(text).toContain('Historical Citrus')
+    expect(text).toContain('v7')
+    expect(text).toContain('Bergamot\nHedione')
+    expect(text).not.toContain('987.65')
+    expect(text).not.toContain('PRIVATE')
+    expect(text).toContain(language === 'en' ? 'Proportions hidden' : '함량은 표시되지 않습니다.')
   })
 })

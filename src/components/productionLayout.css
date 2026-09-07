@@ -226,7 +226,11 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 .tm-version-actions-grid > .tm-restore-button { min-width: 0; justify-content: center; }
 .tm-version-actions-grid .tm-restore-icon { flex-shrink: 0; }
 .tm-composition { padding: 20px 0; }
+.tm-composition-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .tm-composition h3 { margin: 0 0 24px; font: italic 26px Georgia, serif; overflow-wrap: anywhere; }
+.tm-composition-copy { flex: 0 0 auto; border: 1px solid var(--line-soft); border-radius: 4px; background: transparent; color: var(--muted); padding: 7px 10px; cursor: pointer; font: 10px "Courier New", monospace; letter-spacing: .06em; }
+.tm-composition-copy:hover, .tm-composition-copy:focus-visible { color: var(--ink); border-color: var(--accent); background: rgba(201,119,60,.08); }
+.tm-composition-copy-status { min-height: 1.4em; margin: 8px 0 0; color: var(--muted); font-size: 11px; }
 .tm-composition h4 { margin: 0 0 8px; font-size: 12px; letter-spacing: .06em; }
 .tm-composition-meta, .tm-composition-footer { font-size: 12px; color: #746d60; }
 .tm-composition ul { list-style: none; margin: 24px 0; padding: 0; }

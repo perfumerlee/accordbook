@@ -1,4 +1,4 @@
-import type { Formula } from '../models/formula'
+import type { Formula, FormulaVersionSnapshot, FormulaProvenance } from '../models/formula'
 import { toFormulaFile } from '../models/formulaFile'
 import { parseFormulaFile } from './formulaFile'
 
@@ -11,6 +11,19 @@ export interface PaidFormulaPackage {
   kdf: { algorithm: 'PBKDF2'; hash: 'SHA-256'; iterations: number; salt: string }
   encryption: { algorithm: 'AES-GCM'; iv: string; tagLength: 128 }
   ciphertext: string
+}
+
+export type PaidFormulaContent = Omit<ReturnType<typeof toFormulaFile>, 'exportedAt'> & { provenance: Record<string, unknown> }
+
+export function toPaidFormulaContent(source: Formula | FormulaVersionSnapshot, provenance: FormulaProvenance | Record<string, unknown> = {}): PaidFormulaContent {
+  const file = 'id' in source ? toFormulaFile(source) : {
+    type: 'accordbook-formula' as const,
+    formatVersion: 2 as const,
+    exportedAt: new Date().toISOString(),
+    formula: { name: source.name, notes: source.notes, rows: source.rows.map(row => ({ ...row })) },
+  }
+  const { exportedAt: _exportedAt, ...content } = file
+  return { ...content, provenance: provenance as Record<string, unknown> }
 }
 
 const encode64 = (bytes: Uint8Array) => {
@@ -57,6 +70,10 @@ export function normalizeBuyerCredentials(value: BuyerCredentials): BuyerCredent
 }
 
 export async function createPaidFormulaPackage(formula: Formula, credentials: BuyerCredentials): Promise<PaidFormulaPackage> {
+  return createPaidFormulaPackageFromContent(toPaidFormulaContent(formula, formula.provenance ?? {}), credentials)
+}
+
+export async function createPaidFormulaPackageFromContent(content: PaidFormulaContent, credentials: BuyerCredentials): Promise<PaidFormulaPackage> {
   const buyer = normalizeBuyerCredentials(credentials)
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))
@@ -71,8 +88,7 @@ export async function createPaidFormulaPackage(formula: Formula, credentials: Bu
   try {
     const material = await crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveKey'])
     const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: header.kdf.iterations }, material, { name: 'AES-GCM', length: 256 }, false, ['encrypt'])
-    // All Formula data, including provenance checkpoints, stays inside the ciphertext.
-    const plaintext = encoder.encode(JSON.stringify({ ...toFormulaFile(formula), provenance: formula.provenance ?? {} }))
+    const plaintext = encoder.encode(JSON.stringify({ ...content, exportedAt: new Date().toISOString() }))
     try {
       const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, tagLength: 128, additionalData: encoder.encode(JSON.stringify(header)) }, key, plaintext)
       return { ...header, ciphertext: encode64(new Uint8Array(encrypted)) }
