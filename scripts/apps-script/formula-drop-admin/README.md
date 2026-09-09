@@ -28,4 +28,8 @@ FormulaDropEvents
 11. Verify header Notes, frozen row 1, filters, validation, and Plain Text handling for `publicAccessLast4` and `publicAccessPin`.
 12. Verify that no `PaidFormulaLicenses` data exists in this workbook.
 
-The initializer is fail-safe for non-empty sheets with mismatched headers. It does not rewrite, move, or delete production data. Admin Web App deployment instructions belong to Phase 6.
+The initializer is fail-safe for non-empty sheets with mismatched headers. It does not rewrite, move, or delete production data.
+
+## Phase 6 — private read-only dashboard
+
+`FormulaDropAdmin.gs` and `Dashboard.html` also provide a read-only HtmlService Web App. Deploy it as a Web App restricted to the owner/operator or explicitly authorized Google accounts. Anonymous access must not be enabled. The dashboard reads only `FormulaDrops` and `FormulaDropEvents`, aggregates metrics server-side, and never returns PINs, file URLs, license IDs, or visitor/session/event ID lists. It has no write, status, revoke, export, or scheduler actions. Verify the restriction with an incognito/logged-out browser before production use.

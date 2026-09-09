@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { margin: 0; background: #eee8dc; color: #302a26; font: 15px Georgia, serif; }
+    main { max-width: 1180px; margin: auto; padding: 36px 24px; }
+    h1 { font-size: 32px; margin: 0 0 8px; }
+    h2 { margin-top: 34px; border-top: 1px solid #c8bdad; padding-top: 22px; }
+    .eyebrow, th { font: 700 12px monospace; letter-spacing: .12em; text-transform: uppercase; color: #895437; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card { border: 1px solid #c8bdad; padding: 18px; background: #f5f0e7; }
+    .num { font-size: 30px; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; background: #f5f0e7; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #d8cdbd; }
+    button { font: inherit; background: none; border: 1px solid #9e9283; padding: 10px 14px; cursor: pointer; }
+    button:hover, button:focus { background: #e2d8ca; }
+    .muted { color: #75695e; }
+    .error { color: #8a3428; }
+    @media (max-width: 700px) {
+      main { padding: 24px 14px; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      table { font-size: 13px; display: block; overflow: auto; white-space: nowrap; }
+      h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Accordbook Formula Drop Admin</div>
+    <h1>Formula Drop 운영 대시보드</h1>
+    <p id="state" class="muted">Formula Drop 데이터를 불러오는 중…</p>
+    <section id="app"></section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
+
+    const percent = (value) => value == null ? '—' : `${Number(value).toFixed(1)}%`;
+
+    const labels = {
+      source: '유입 경로',
+      uniqueVisitors: '고유 방문자',
+      uniqueDownloaders: '고유 다운로드 사용자',
+      uniqueImporters: '고유 Import 사용자',
+      reason: '실패 원인',
+      count: '횟수',
+    };
+
+    function loadDashboard() {
+      $('state').textContent = 'Formula Drop 데이터를 불러오는 중…';
+      google.script.run
+        .withSuccessHandler(renderDashboard)
+        .withFailureHandler(() => {
+          $('state').innerHTML = '<span class="error">대시보드 데이터를 불러오지 못했습니다.</span> <button onclick="loadDashboard()">다시 시도</button>';
+        })
+        .getFormulaDropDashboardData();
+    }
+
+    function metricCard(label, value) {
+      return `<div class="card"><div class="eyebrow">${label}</div><div class="num">${value}</div></div>`;
+    }
+
+    function renderDashboard(data) {
+      $('state').textContent = data.active.length ? '활성 Drop' : '활성 상태의 Formula Drop이 없습니다.';
+      const active = data.active[0];
+      const metrics = active?.metrics;
+
+      let html = '';
+      if (active) {
+        html += `<h2>활성 Drop</h2><p><b>${esc(active.dropId)}</b> · ${esc(active.title)} · ${esc(active.effectiveStatus)}</p><div class="cards">
+          ${metricCard('고유 방문자', metrics.uniqueVisitors)}
+          ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
+          ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
+          ${metricCard('방문 → 다운로드', percent(metrics.visitToDownload))}
+          ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
+          ${metricCard('방문 → Import', percent(metrics.visitToImport))}
+          ${metricCard('전체 다운로드', metrics.totalDownloads)}
+          ${metricCard('Import 실패', metrics.importFailures)}
+        </div>`;
+      }
+
+      html += `<h2>최근 Drop</h2><table><tr><th>Drop</th><th>제목</th><th>원본 상태</th><th>현재 상태</th><th>방문자</th><th>다운로드</th><th>Import</th><th>방문 → Import</th></tr>`;
+      html += data.drops.map((drop) => `<tr><td><button onclick="showDetail('${esc(drop.dropId)}')">${esc(drop.dropId)}</button></td><td>${esc(drop.title)}</td><td>${esc(drop.status)}</td><td>${esc(drop.effectiveStatus)}</td><td>${drop.metrics.uniqueVisitors}</td><td>${drop.metrics.uniqueDownloaders}</td><td>${drop.metrics.uniqueImporters}</td><td>${percent(drop.metrics.visitToImport)}</td></tr>`).join('');
+      html += '</table>';
+      $('app').innerHTML = html;
+    }
+
+    function showDetail(dropId) {
+      google.script.run
+        .withSuccessHandler(renderDetail)
+        .withFailureHandler(() => alert('Drop 상세 데이터를 불러오지 못했습니다.'))
+        .getFormulaDropDetail(dropId);
+    }
+
+    function renderDetail(data) {
+      const metrics = data.metrics;
+      $('state').textContent = `${data.drop.dropId} · ${data.drop.effectiveStatus}`;
+      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button><h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)} · 원본 상태 ${esc(data.drop.status)} · 현재 상태 ${esc(data.drop.effectiveStatus)}</p><div class="cards">
+        ${metricCard('고유 방문자', metrics.uniqueVisitors)}
+        ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
+        ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
+        ${metricCard('전체 조회', metrics.totalViews)}
+        ${metricCard('전체 다운로드', metrics.totalDownloads)}
+        ${metricCard('반복 다운로드', metrics.repeatDownloads)}
+        ${metricCard('Import 시도', metrics.importAttempts)}
+        ${metricCard('Import 성공', metrics.totalImportSuccesses)}
+        ${metricCard('Import 실패', metrics.importFailures)}
+        ${metricCard('방문 → 다운로드', percent(metrics.visitToDownload))}
+        ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
+        ${metricCard('방문 → Import', percent(metrics.visitToImport))}
+      </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
+    }
+
+    function renderTable(rows, columns) {
+      if (!rows.length) return '<p class="muted">데이터가 없습니다.</p>';
+      return `<table><tr>${columns.map((column) => `<th>${labels[column]}</th>`).join('')}</tr>${rows.map((row) => `<tr>${columns.map((column) => `<td>${esc(row[column])}</td>`).join('')}</tr>`).join('')}</table>`;
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
