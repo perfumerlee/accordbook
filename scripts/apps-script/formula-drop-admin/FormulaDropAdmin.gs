@@ -255,7 +255,7 @@ function expireFormulaDropInternal_(dropId, expectedUpdatedAt, requireLicense) {
     if (String(row[6]) !== 'ACTIVE') return { ok: false, result: 'rejected', error: 'invalid_transition' };
     const actualUpdated = row[16] instanceof Date ? row[16].toISOString() : '';
     if (expectedUpdatedAt && actualUpdated !== expectedUpdatedAt) return { ok: false, result: 'rejected', error: 'conflict' };
-    const now = new Date(), rowNumber = matches.indexOf(row) + 2;
+    const now = new Date(), rowNumber = rows.indexOf(row) + 2;
     sheet.getRange(rowNumber, 7).setValue('EXPIRED'); sheet.getRange(rowNumber, 17).setValue(now); SpreadsheetApp.flush();
     const confirmed = sheet.getRange(rowNumber, 7, 1, 17).getValues()[0];
     // The read starts at column G (status), so Q (updatedAt) is index 10.

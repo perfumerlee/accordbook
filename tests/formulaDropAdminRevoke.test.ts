@@ -14,6 +14,8 @@ describe('Phase 7B-2B close and revoke orchestration', () => {
     expect(gs).toContain("callPaidFormulaRegistryAdmin_('admin-revoke'")
     expect(gs).toContain('expireFormulaDropInternal_')
     expect(gs).toContain("String(confirmed[0]) !== 'EXPIRED'")
+    expect(gs).toContain('rows.indexOf(row) + 2')
+    expect(gs).not.toContain('matches.indexOf(row) + 2')
     expect(gs).toContain('confirmedUpdatedAt')
     expect(gs).toContain('new Date(confirmed[10])')
     expect(gs).toContain('confirmed[10]')
