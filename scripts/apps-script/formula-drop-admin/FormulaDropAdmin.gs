@@ -146,8 +146,8 @@ function getFormulaDropLicenseStatus(dropId) {
   }
 }
 
-// Apps Script editor에서 1회 실행해 UrlFetchApp 외부 요청 권한을 승인합니다.
-// Registry에는 인증정보나 라이선스 정보를 보내지 않고 GET 요청만 수행합니다.
+// Apps Script editor에서 1회 실행해 UrlFetchApp 외부 요청 권한과
+// Registry doPost 접근을 확인합니다. 실제 패키지 ID와 Secret은 보내지 않습니다.
 function authorizeExternalRequestOnce() {
   const endpoint = String(PropertiesService.getScriptProperties().getProperty(PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY) || '').trim();
   if (!/^https:\/\/[^\s]+$/i.test(endpoint)) {
@@ -156,10 +156,18 @@ function authorizeExternalRequestOnce() {
 
   try {
     const response = UrlFetchApp.fetch(endpoint, {
-      method: 'get',
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({
+        action: 'admin-license-status',
+        packageId: '00000000-0000-4000-8000-000000000000',
+        adminSecret: '',
+      }),
       muteHttpExceptions: true,
     });
-    return { ok: true, statusCode: response.getResponseCode() };
+    const code = response.getResponseCode();
+    const body = JSON.parse(response.getContentText() || '{}');
+    return { ok: true, statusCode: code, registryError: body.error || null };
   } catch (_) {
     return { ok: false, error: 'registry_unavailable' };
   }
