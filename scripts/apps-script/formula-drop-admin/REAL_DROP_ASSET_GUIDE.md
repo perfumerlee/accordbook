@@ -36,6 +36,8 @@ A === B === C
 
 `FormulaDrops.licenseId` is only a foreign reference. Do not copy buyerName, phone, PIN verifier, License status, failedAttempts, or lockedUntil into FormulaDrops.
 
+Each `licenseId` must be unique across FormulaDrops. Do not attach one Licensed package to multiple Drops; the public import-resolution API rejects duplicate mappings as ambiguous.
+
 ## 5. Host the encrypted package
 
 For the current Vite/GitHub Pages deployment, the minimal stable convention is:

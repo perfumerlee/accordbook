@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import type { FormulaFile } from '../models/formulaFile'
 import { decryptPaidFormulaPackage, type PaidFormulaPackage } from '../services/paidFormulaPackage'
 import { checkPaidFormulaLock, verifyPaidFormula } from '../services/paidFormulaRegistry'
+import { createFormulaDropEvent, sendFormulaDropEvent } from '../services/formulaDropEvents'
+import { resolveFormulaDropByPackageId } from '../services/formulaDropPublicApi'
 import './paidFormulaExport.css'
 
 export default function PaidFormulaImport({ file, language, onImport, onClose }: {
@@ -56,12 +58,15 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
       const form = event.currentTarget
       const data = new FormData(form)
       running.current = true; setBusy(true); setError('')
+      const dropContext = await resolveFormulaDropByPackageId(file.packageId)
+      if (dropContext) void sendFormulaDropEvent(createFormulaDropEvent(dropContext.dropId, 'import_attempt'))
       try {
         const buyer = { name: String(data.get('name') ?? ''), phoneLast4: String(data.get('phone') ?? ''), pin: String(data.get('pin') ?? '') }
         await verifyPaidFormula(file.packageId, buyer)
         const shared = await decryptPaidFormulaPackage(file, buyer)
         if (!mounted.current) return
         await onImport(shared)
+        if (dropContext) void sendFormulaDropEvent(createFormulaDropEvent(dropContext.dropId, 'import_success'))
         form.reset()
         if (mounted.current) onClose()
       } catch (caught) {
@@ -70,7 +75,7 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
           if (lockMatch) {
             setNow(Date.now())
             setLockedUntil(Date.now() + Number(lockMatch[1]) * 1000)
-          } else setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요. 인증에 5회 실패하면 30분 동안 다시 시도할 수 없습니다.' : 'The file could not be imported. Check your information and try again. Five failed verification attempts prevent another attempt for 30 minutes.')
+          } else { if (dropContext) void sendFormulaDropEvent(createFormulaDropEvent(dropContext.dropId, 'import_failed', { failureReason: caught instanceof Error && caught.message === 'Invalid buyer credentials' ? 'invalid_credentials' : 'import_failed' })); setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요. 인증에 5회 실패하면 30분 동안 다시 시도할 수 없습니다.' : 'The file could not be imported. Check your information and try again. Five failed verification attempts prevent another attempt for 30 minutes.') }
         }
       }
       finally { running.current = false; if (mounted.current) setBusy(false) }

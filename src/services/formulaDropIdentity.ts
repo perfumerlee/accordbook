@@ -1,6 +1,7 @@
 const VISITOR_KEY = 'accordbook.drop.visitor-id'
 const SESSION_KEY = 'accordbook.drop.session-id'
 const SOURCE_KEY = 'accordbook.drop.source-context.v1'
+const IMPORT_KEY = 'accordbook.drop.import-context.v1'
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const SOURCE = /^[a-z0-9_-]{1,64}$/
 const HOST = /^[a-z0-9.-]{1,253}$/i
@@ -40,5 +41,16 @@ export function getFormulaDropAttribution(dropId: string, sourceParam?: string, 
   contexts[dropId] = value
   try { storage('session')?.setItem(SOURCE_KEY, JSON.stringify(contexts)) } catch { /* best effort */ }
   return value
+}
+export function rememberFormulaDropImport(dropId: string): void {
+  if (!/^DROP-\d{4}-\d{3}$/.test(dropId)) return
+  try { storage('session')?.setItem(IMPORT_KEY, JSON.stringify({ dropId, savedAt: Date.now() })) } catch { /* best effort */ }
+}
+export function getRememberedFormulaDropImport(): { dropId: string } | undefined {
+  try {
+    const value = JSON.parse(storage('session')?.getItem(IMPORT_KEY) ?? 'null')
+    if (!value || !/^DROP-\d{4}-\d{3}$/.test(value.dropId) || typeof value.savedAt !== 'number' || Date.now() - value.savedAt > 24 * 60 * 60 * 1000) return undefined
+    return { dropId: value.dropId }
+  } catch { return undefined }
 }
 export function resetFormulaDropIdentityForTests(): void { memoryVisitor = undefined; memorySession = undefined }

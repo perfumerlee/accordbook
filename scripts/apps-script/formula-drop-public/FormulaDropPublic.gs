@@ -44,6 +44,7 @@ function doPost(e) {
     if (input.action === 'list-drops') return json_({ ok: true, drops: publicDrops_() });
     if (input.action === 'get-drop') return readDrop_(input);
     if (input.action === 'get-download') return getDownload_(input);
+    if (input.action === 'resolve-import-drop') return resolveImportDrop_(input);
     if (!validRequest_(input)) return json_({ ok: false, error: 'invalid_request' });
     const ss = spreadsheet_(); const drops = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); const events = ss.getSheetByName(FORMULA_DROP_EVENTS_SHEET_NAME);
     if (!drops || !events) return json_({ ok: false, error: 'unavailable' }); headers_(drops, FORMULA_DROP_HEADERS); headers_(events, FORMULA_DROP_EVENT_HEADERS);
@@ -54,6 +55,14 @@ function doPost(e) {
     SpreadsheetApp.flush(); return json_({ ok: true, accepted: true, duplicate: false });
   } catch (_) { return json_({ ok: false, error: 'unavailable' }); }
   finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+function resolveImportDrop_(input) {
+  if (!input || typeof input.packageId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.packageId)) return json_({ ok: false, error: 'not_found' });
+  const sheet = spreadsheet_().getSheetByName(FORMULA_DROPS_SHEET_NAME); if (!sheet) return json_({ ok: false, error: 'not_found' }); headers_(sheet, FORMULA_DROP_HEADERS);
+  const count = sheet.getLastRow() - 1; if (count <= 0) return json_({ ok: false, error: 'not_found' });
+  const matches = sheet.getRange(2, 1, count, FORMULA_DROP_HEADERS.length).getValues().filter(row => String(row[11] || '').trim() === input.packageId);
+  if (matches.length > 1) return json_({ ok: false, error: 'ambiguous_mapping' });
+  return matches.length === 1 ? json_({ ok: true, dropId: String(matches[0][0]) }) : json_({ ok: false, error: 'not_found' });
 }
 function getDownload_(input) {
   if (!input || !/^DROP-\d{4}-\d{3}$/.test(input.dropId || '') || !/^evt_[0-9a-f-]+$/i.test(input.eventId || '') || !/^v_[0-9a-f-]+$/i.test(input.visitorId || '') || !/^s_[0-9a-f-]+$/i.test(input.sessionId || '') || !/^[a-z0-9_-]{1,64}$/.test(input.source || '') || !/^[a-z0-9.-]{0,253}$/i.test(input.referrerHost || '')) return json_({ ok: false, error: 'invalid_request' });
