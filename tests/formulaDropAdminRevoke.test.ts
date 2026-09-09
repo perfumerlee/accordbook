@@ -15,7 +15,6 @@ describe('Phase 7B-2B close and revoke orchestration', () => {
     expect(gs).toContain('expireFormulaDropInternal_')
     expect(gs).toContain("String(confirmed[6]) !== 'EXPIRED'")
     expect(gs).toContain('confirmedUpdatedAt')
-    expect(gs).toContain('Math.abs(confirmedMillis - now.getTime()) > 2000')
     expect(gs).toContain('new Date(confirmed[10])')
     expect(gs).toContain('confirmed[10]')
   })

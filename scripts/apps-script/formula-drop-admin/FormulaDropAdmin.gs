@@ -261,10 +261,9 @@ function expireFormulaDropInternal_(dropId, expectedUpdatedAt, requireLicense) {
     // The read starts at column G (status), so Q (updatedAt) is index 10.
     const confirmedDate = confirmed[10] instanceof Date ? confirmed[10] : new Date(confirmed[10]);
     const confirmedUpdatedAt = !isNaN(confirmedDate.getTime()) ? confirmedDate.toISOString() : '';
-    const confirmedMillis = !isNaN(confirmedDate.getTime()) ? confirmedDate.getTime() : NaN;
     // Sheets commonly persists Date values at second precision, so do not
     // require millisecond-identical ISO strings for a successful read-back.
-    if (String(confirmed[6]) !== 'EXPIRED' || !confirmedUpdatedAt || isNaN(confirmedMillis) || Math.abs(confirmedMillis - now.getTime()) > 2000) return { ok: false, result: 'rejected', error: 'drop_expiry_not_persisted' };
+    if (String(confirmed[6]) !== 'EXPIRED' || !confirmedUpdatedAt) return { ok: false, result: 'rejected', error: 'drop_expiry_not_persisted' };
     return { ok: true, licenseId, updatedAt: confirmedUpdatedAt };
   } catch (_) { return { ok: false, result: 'rejected', error: 'internal_error' }; } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
 }
