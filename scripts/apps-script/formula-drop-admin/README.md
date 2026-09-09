@@ -52,3 +52,11 @@ PAID_FORMULA_ADMIN_SECRET=<GENERATE_A_HIGH_ENTROPY_SECRET>
 Use the exact same high-entropy secret in the Paid Formula Registry project. Generate at least 32 random bytes locally or with an operator-approved password generator. Never commit or paste the secret into browser code, a Sheet, a URL, or this repository. HMAC signing is intentionally deferred in v0.01; the bridge uses the shared secret over HTTPS.
 
 The browser receives only `active`, `revoked`, or a normalized unavailable/configuration result. It never receives the Registry URL, packageId, or Admin Secret. The Dashboard Home does not perform Registry calls; status is loaded only when Drop Detail opens or when the operator clicks `상태 새로고침`.
+
+## Phase 7B-2B — Close & Revoke
+
+`CLOSE & REVOKE`는 ACTIVE Drop에서만 사용할 수 있습니다. 확인 창에 Drop ID를 정확히 입력하면 Admin 서버가 먼저 Drop을 EXPIRED로 확정하고, Script Lock을 해제한 뒤 Paid Formula Registry의 `admin-revoke`를 호출합니다. Registry 호출 중에는 Lock을 점유하지 않습니다.
+
+Drop 종료가 성공한 뒤 Registry revoke가 실패하면 상태를 되돌리지 않습니다. 화면에는 partial 상태를 표시하고, EXPIRED Drop에 표시되는 `REVOKE LICENSE`로 재시도할 수 있습니다. DRAFT/SCHEDULED에는 revoke 동작이 없습니다.
+
+브라우저는 licenseId나 Secret을 보내지 않고 dropId와 확인용 Drop ID만 보냅니다. Registry Secret은 Apps Script Script Properties에만 있습니다. revoke는 되돌릴 수 없으며, 이미 정상 Import된 로컬 Formula를 삭제하지 않습니다. 기존 `END DROP`은 계속 Drop만 종료하고 Licensed Formula를 revoke하지 않습니다.

@@ -35,8 +35,9 @@ describe('Phase 7B-2A private Registry status bridge', () => {
   it('keeps the UI read-only and detail-scoped', () => {
     expect(html).toContain('getFormulaDropLicenseStatus(dropId)')
     expect(html).toContain('상태 새로고침')
-    expect(html).not.toContain('admin-revoke')
-    expect(html).not.toContain('CLOSE & REVOKE')
+    expect(html).not.toContain('adminSecret')
+    expect(html).toContain('CLOSE & REVOKE')
+    expect(html).toContain('closeAndRevokeFormulaDrop')
     expect(gs).toContain('getFormulaDropDashboardData()')
   })
 

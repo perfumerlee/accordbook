@@ -174,22 +174,86 @@ function authorizeExternalRequestOnce() {
 }
 
 function callPaidFormulaRegistryAdminStatus_(packageId) {
+  return callPaidFormulaRegistryAdmin_('admin-license-status', packageId);
+}
+
+function callPaidFormulaRegistryAdminRevoke_(packageId) {
+  return callPaidFormulaRegistryAdmin_('admin-revoke', packageId);
+}
+
+function callPaidFormulaRegistryAdmin_(action, packageId) {
   const props = PropertiesService.getScriptProperties();
   const endpoint = String(props.getProperty(PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY) || '').trim();
   const secret = String(props.getProperty(PAID_FORMULA_ADMIN_SECRET_PROPERTY) || '').trim();
   if (!endpoint || !/^https:\/\/[^\s]+$/i.test(endpoint) || !secret) return { ok: false, error: 'registry_not_configured' };
   try {
-    const response = UrlFetchApp.fetch(endpoint, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ action: 'admin-license-status', packageId, adminSecret: secret }), muteHttpExceptions: true });
+    const response = UrlFetchApp.fetch(endpoint, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ action, packageId, adminSecret: secret }), muteHttpExceptions: true });
     if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return { ok: false, error: 'registry_unavailable' };
     const body = JSON.parse(response.getContentText());
-    if (!body || body.ok !== true || (body.status !== 'active' && body.status !== 'revoked')) {
-      const errors = { not_found: 'registry_not_found', ambiguous: 'registry_ambiguous', unauthorized: 'registry_unauthorized' };
+    if (!body || body.ok !== true || (body.status !== 'active' && body.status !== 'revoked' && body.status !== 'already_revoked')) {
+      const errors = { not_found: 'license_not_found', ambiguous: 'ambiguous_license', unauthorized: 'authorization_failed', invalid_request: 'invalid_request', invalid_license_state: 'invalid_license_state', internal_error: 'registry_unavailable', registry_not_found: 'registry_not_found', registry_ambiguous: 'registry_ambiguous', registry_unauthorized: 'registry_unauthorized' };
       return { ok: false, error: errors[body && body.error] || 'registry_invalid_response' };
     }
     return { ok: true, status: body.status };
   } catch (_) {
     return { ok: false, error: 'registry_unavailable' };
   }
+}
+
+function closeAndRevokeFormulaDrop(dropId, expectedUpdatedAt, confirmationDropId) {
+  if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '') || confirmationDropId !== dropId) return { ok: false, result: 'rejected', error: 'invalid_request' };
+  const closed = expireDropForRevoke_(dropId, expectedUpdatedAt);
+  if (!closed.ok) return closed;
+  const remote = callPaidFormulaRegistryAdminRevoke_(closed.licenseId);
+  if (!remote.ok) return { ok: false, result: 'partial', dropStatus: 'EXPIRED', licenseStatus: 'unknown', error: remote.error, updatedAt: closed.updatedAt };
+  return { ok: true, result: 'complete', dropStatus: 'EXPIRED', licenseStatus: remote.status === 'already_revoked' ? 'already_revoked' : 'revoked', updatedAt: closed.updatedAt };
+}
+
+function retryFormulaDropLicenseRevoke(dropId, confirmationDropId) {
+  if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '') || confirmationDropId !== dropId) return { ok: false, result: 'rejected', error: 'invalid_request' };
+  const context = getDropLicenseContext_(dropId);
+  if (!context.ok) return context;
+  if (context.status !== 'EXPIRED') return { ok: false, result: 'rejected', error: 'invalid_transition' };
+  const remote = callPaidFormulaRegistryAdminRevoke_(context.licenseId);
+  if (!remote.ok) return { ok: false, result: 'partial', dropStatus: 'EXPIRED', licenseStatus: 'unknown', error: remote.error };
+  return { ok: true, result: 'complete', dropStatus: 'EXPIRED', licenseStatus: remote.status === 'already_revoked' ? 'already_revoked' : 'revoked' };
+}
+
+function getDropLicenseContext_(dropId) {
+  const ss = formulaDropSpreadsheet_(), sheet = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME);
+  if (!sheet) return { ok: false, result: 'rejected', error: 'not_found' };
+  checkFormulaDropHeaders_(sheet, FORMULA_DROPS_SHEET_NAME, FORMULA_DROPS_HEADERS);
+  const count = sheet.getLastRow() - 1;
+  if (count <= 0) return { ok: false, result: 'rejected', error: 'not_found' };
+  const rows = sheet.getRange(2, 1, count, FORMULA_DROPS_HEADERS.length).getValues();
+  const matches = rows.filter(row => String(row[0]) === dropId);
+  if (matches.length !== 1) return { ok: false, result: 'rejected', error: matches.length ? 'ambiguous' : 'not_found' };
+  const licenseId = String(matches[0][11] || '').trim();
+  if (!licenseId) return { ok: false, result: 'rejected', error: 'missing_license_id' };
+  if (rows.some(row => String(row[11] || '').trim() === licenseId && String(row[0]) !== dropId)) return { ok: false, result: 'rejected', error: 'ambiguous_drop_license_mapping' };
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(licenseId)) return { ok: false, result: 'rejected', error: 'invalid_request' };
+  return { ok: true, status: String(matches[0][6]), licenseId };
+}
+
+function expireDropForRevoke_(dropId, expectedUpdatedAt) {
+  let lock;
+  try {
+    lock = LockService.getScriptLock(); lock.waitLock(10000);
+    const ss = formulaDropSpreadsheet_(), sheet = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME);
+    if (!sheet) return { ok: false, result: 'rejected', error: 'not_found' };
+    checkFormulaDropHeaders_(sheet, FORMULA_DROPS_SHEET_NAME, FORMULA_DROPS_HEADERS);
+    const count = sheet.getLastRow() - 1, rows = count > 0 ? sheet.getRange(2, 1, count, FORMULA_DROPS_HEADERS.length).getValues() : [];
+    const matches = rows.filter(row => String(row[0]) === dropId);
+    if (matches.length !== 1) return { ok: false, result: 'rejected', error: matches.length ? 'ambiguous' : 'not_found' };
+    const row = matches[0], licenseId = String(row[11] || '').trim(), duplicate = rows.some(other => String(other[11] || '').trim() === licenseId && String(other[0]) !== dropId);
+    if (!licenseId) return { ok: false, result: 'rejected', error: 'missing_license_id' };
+    if (duplicate) return { ok: false, result: 'rejected', error: 'ambiguous_drop_license_mapping' };
+    if (String(row[6]) !== 'ACTIVE') return { ok: false, result: 'rejected', error: 'invalid_transition' };
+    const actualUpdated = row[16] instanceof Date ? row[16].toISOString() : '';
+    if (expectedUpdatedAt && actualUpdated !== expectedUpdatedAt) return { ok: false, result: 'rejected', error: 'conflict' };
+    const now = new Date(); sheet.getRange(matches.indexOf(row) + 2, 7).setValue('EXPIRED'); sheet.getRange(matches.indexOf(row) + 2, 17).setValue(now); SpreadsheetApp.flush();
+    return { ok: true, licenseId, updatedAt: now.toISOString() };
+  } catch (_) { return { ok: false, result: 'rejected', error: 'internal_error' }; } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
 }
 
 function readFormulaDropAdminData_() {
