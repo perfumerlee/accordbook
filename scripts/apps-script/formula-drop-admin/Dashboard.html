@@ -162,17 +162,31 @@
     }
 
     function refreshLicenseStatus(dropId) {
+      refreshLicenseStatusAttempt(dropId, 0);
+    }
+
+    function refreshLicenseStatusAttempt(dropId, retryCount) {
       const statusNode = $('license-status-' + dropId);
       const button = $('license-refresh-' + dropId);
-      if (!statusNode || !button || button.disabled) return;
+      if (!statusNode || !button || (button.disabled && retryCount === 0)) return;
       button.disabled = true;
       statusNode.textContent = 'STATUS · 확인 중…';
       google.script.run.withSuccessHandler((result) => {
+        if (!result.ok && retryCount < 1 && ['registry_unavailable', 'registry_invalid_response'].includes(result.error)) {
+          statusNode.textContent = 'STATUS · 다시 확인 중…';
+          window.setTimeout(() => refreshLicenseStatusAttempt(dropId, retryCount + 1), 800);
+          return;
+        }
         statusNode.textContent = result.ok ? 'STATUS · ' + result.status.toUpperCase() : 'STATUS · ' + licenseStatusLabel(result);
         renderLicenseActions(dropId, result);
         renderLicenseWarning(dropId, result);
         button.disabled = false;
       }).withFailureHandler(() => {
+        if (retryCount < 1) {
+          statusNode.textContent = 'STATUS · 다시 확인 중…';
+          window.setTimeout(() => refreshLicenseStatusAttempt(dropId, retryCount + 1), 800);
+          return;
+        }
         statusNode.textContent = 'STATUS · UNAVAILABLE';
         renderLicenseActions(dropId, { ok: false, error: 'registry_unavailable' });
         renderLicenseWarning(dropId, { ok: false });
