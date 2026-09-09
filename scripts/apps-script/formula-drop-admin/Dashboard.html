@@ -136,7 +136,7 @@
       $('state').textContent = `${data.drop.dropId} · ${statusLabel(data.drop.effectiveStatus, 'effective')}`;
       window.adminDropSummaries = window.adminDropSummaries || {};
       window.adminDropSummaries[data.drop.dropId] = data.drop;
-      const editButton = data.drop.status === 'EXPIRED' ? '' : `<button onclick="openEditor('${esc(data.drop.dropId)}')">Drop 편집</button>`;
+      const editButton = data.drop.status === 'EXPIRED' ? `<button onclick="openConfigViewer('${esc(data.drop.dropId)}')">Drop 설정 보기</button>` : `<button onclick="openEditor('${esc(data.drop.dropId)}')">Drop 편집</button>`;
       const actions = editButton + (data.drop.status === 'DRAFT' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('schedule', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">예약하기</button>` : data.drop.status === 'SCHEDULED' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('draft', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">초안으로 되돌리기</button>` : data.drop.status === 'ACTIVE' ? ` <button onclick="changeStatus('expire', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 종료</button>` : '');
       const statusMessage = statusMismatchMessage(data.drop.status, data.drop.effectiveStatus);
       $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)}</p><div class="status-meta"><div><div class="eyebrow">관리 설정</div><strong>${esc(statusLabel(data.drop.status, 'raw'))}</strong><small>Admin에서 지정한 상태</small></div><div><div class="eyebrow">현재 공개 상태</div><strong>${esc(statusLabel(data.drop.effectiveStatus, 'effective'))}</strong><small>기간을 반영한 실제 공개 상태</small></div></div>${statusMessage ? `<p class="status-note">${esc(statusMessage)}</p>` : ''}<section class="card" style="margin-top:24px"><div class="eyebrow">LICENSE</div><p id="license-status-${esc(data.drop.dropId)}">STATUS · 확인 중…</p><p id="license-warning-${esc(data.drop.dropId)}" class="status-note" hidden></p><button id="license-refresh-${esc(data.drop.dropId)}" onclick="refreshLicenseStatus('${esc(data.drop.dropId)}')">상태 새로고침</button><div id="license-actions-${esc(data.drop.dropId)}"></div></section><div class="cards">
@@ -236,18 +236,29 @@
           alert('편집 데이터를 정상적으로 받지 못했습니다. 저장하지 말고 Admin 서버 코드를 확인해 주세요.');
           return;
         }
-        renderEditor(config);
+        renderEditor(config, false);
       }).withFailureHandler(() => alert('편집 정보를 불러오지 못했습니다.')).getFormulaDropAdminConfig(dropId);
     }
 
-    function renderEditor(config) {
+    function openConfigViewer(dropId) {
+      google.script.run.withSuccessHandler((config) => {
+        if (!config || config.dropId !== dropId || config.status !== 'EXPIRED' || typeof config.title !== 'string') {
+          alert('설정 정보를 정상적으로 받지 못했습니다.');
+          return;
+        }
+        renderEditor(config, true);
+      }).withFailureHandler(() => alert('설정 정보를 불러오지 못했습니다.')).getFormulaDropAdminConfig(dropId);
+    }
+
+    function renderEditor(config, readOnly) {
       window.editValidationErrors = {};
       window.editOperationalError = '';
-      const lockedAssets = config.status !== 'DRAFT';
-      const lockedStart = config.status === 'ACTIVE';
-      const field = (label, name, value, type = 'text', disabled = false) => `<label>${label}<input id="edit-${name}" name="${name}" type="${type}" value="${esc(value || '')}" ${disabled ? 'disabled' : ''} aria-invalid="false" aria-describedby="error-${name}"></label><small id="error-${name}" class="error" hidden></small>`;
-      $('app').innerHTML = `<button onclick="showDetail('${esc(config.dropId)}')">← 상세로 돌아가기</button><h2>Formula Drop 편집</h2><p>${esc(config.dropId)} · ${esc(config.status)}</p><form id="edit-form" onsubmit="saveEditor(event, '${esc(config.dropId)}', '${esc(config.updatedAt)}', '${esc(config.status)}')">${field('제목', 'title', config.title)}${field('부제목', 'subtitle', config.subtitle)}<label>설명<textarea id="edit-description" name="description" aria-invalid="false" aria-describedby="error-description">${esc(config.description || '')}</textarea></label><small id="error-description" class="error" hidden></small>${field('시작 시각', 'startAt', config.startAt, 'datetime-local', lockedStart)}${field('종료 시각', 'expiresAt', config.expiresAt, 'datetime-local')}${field('파일명', 'fileName', config.fileName, 'text', lockedAssets)}${field('파일 URL', 'fileUrl', config.fileUrl, 'url', lockedAssets)}${field('License ID', 'licenseId', config.licenseId, 'text', lockedAssets)}${field('공용 Access Name', 'publicAccessName', config.publicAccessName, 'text', lockedAssets)}${field('공용 전화번호 끝 4자리', 'publicAccessLast4', config.publicAccessLast4, 'text', lockedAssets)}${field('공용 PIN', 'publicAccessPin', config.publicAccessPin, 'text', lockedAssets)}<p id="edit-error" class="error" hidden></p><button type="button" onclick="showDetail('${esc(config.dropId)}')">취소</button> <button id="save-edit" type="submit">변경사항 저장</button></form>`;
-      document.querySelectorAll('#edit-form input:not(:disabled), #edit-form textarea:not(:disabled)').forEach((element) => {
+       const lockedAssets = readOnly || config.status !== 'DRAFT';
+       const lockedStart = readOnly || config.status === 'ACTIVE';
+       const lockedText = readOnly;
+       const field = (label, name, value, type = 'text', disabled = false) => `<label>${label}<input id="edit-${name}" name="${name}" type="${type}" value="${esc(value || '')}" ${disabled ? 'disabled' : ''} aria-invalid="false" aria-describedby="error-${name}"></label><small id="error-${name}" class="error" hidden></small>`;
+       $('app').innerHTML = `<button onclick="showDetail('${esc(config.dropId)}')">← 상세로 돌아가기</button><h2>${readOnly ? 'Formula Drop 설정 보기' : 'Formula Drop 편집'}</h2><p>${esc(config.dropId)} · ${esc(config.status)}</p><form id="edit-form" onsubmit="saveEditor(event, '${esc(config.dropId)}', '${esc(config.updatedAt)}', '${esc(config.status)}')">${field('제목', 'title', config.title, 'text', lockedText)}${field('부제목', 'subtitle', config.subtitle, 'text', lockedText)}<label>설명<textarea id="edit-description" name="description" ${lockedText ? 'disabled' : ''} aria-invalid="false" aria-describedby="error-description">${esc(config.description || '')}</textarea></label><small id="error-description" class="error" hidden></small>${field('시작 시각', 'startAt', config.startAt, 'datetime-local', lockedStart)}${field('종료 시각', 'expiresAt', config.expiresAt, 'datetime-local', lockedText)}${field('파일명', 'fileName', config.fileName, 'text', lockedAssets)}${field('파일 URL', 'fileUrl', config.fileUrl, 'url', lockedAssets)}${field('License ID', 'licenseId', config.licenseId, 'text', lockedAssets)}${field('공용 Access Name', 'publicAccessName', config.publicAccessName, 'text', lockedAssets)}${field('공용 전화번호 끝 4자리', 'publicAccessLast4', config.publicAccessLast4, 'text', lockedAssets)}${field('공용 PIN', 'publicAccessPin', config.publicAccessPin, 'text', lockedAssets)}<p id="edit-error" class="error" hidden></p><button type="button" onclick="showDetail('${esc(config.dropId)}')">돌아가기</button>${readOnly ? '' : ' <button id="save-edit" type="submit">변경사항 저장</button>'}</form>`;
+       document.querySelectorAll('#edit-form input:not(:disabled), #edit-form textarea:not(:disabled)').forEach((element) => {
         element.addEventListener('input', () => validateEditorField(element.name));
         element.addEventListener('change', () => validateEditorField(element.name));
       });

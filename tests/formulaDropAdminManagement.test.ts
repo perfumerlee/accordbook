@@ -21,6 +21,8 @@ describe('Formula Drop Phase 7A management contract', () => {
   })
   it('exposes management controls only through google.script.run', () => {
     expect(html).toContain('createFormulaDropDraft')
+    expect(html).toContain('openConfigViewer')
+    expect(html).toContain('Formula Drop 설정 보기')
     expect(html).toContain('activateFormulaDrop')
     expect(html).toContain('expireFormulaDrop')
     expect(html).not.toContain('fetch(')
