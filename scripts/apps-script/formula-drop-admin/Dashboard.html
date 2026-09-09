@@ -18,6 +18,12 @@
     button:hover, button:focus { background: #e2d8ca; }
     .muted { color: #75695e; }
     .error { color: #8a3428; }
+    label { display: block; margin: 14px 0 6px; font-weight: bold; }
+    input, textarea { box-sizing: border-box; width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #b8aa99; background: #faf7f0; color: #302a26; font: inherit; }
+    textarea { min-height: 120px; resize: vertical; }
+    .edit-form { max-width: 760px; margin-top: 24px; padding: 24px; border: 1px solid #c8bdad; background: #f5f0e7; }
+    .form-actions { margin-top: 22px; }
+    button:disabled { cursor: wait; opacity: .55; }
     @media (max-width: 700px) {
       main { padding: 24px 14px; }
       .cards { grid-template-columns: repeat(2, 1fr); }
@@ -28,7 +34,7 @@
 </head>
 <body>
   <main>
-    <div class="eyebrow">Accordbook Formula Drop Admin</div>
+    <div class="eyebrow">Accordbook Formula Drop Admin · v13</div>
     <h1>Formula Drop 운영 대시보드</h1>
     <p id="state" class="muted">Formula Drop 데이터를 불러오는 중…</p>
     <section id="app"></section>
@@ -71,7 +77,7 @@
       const active = data.active[0];
       const metrics = active?.metrics;
 
-      let html = '';
+      let html = '<button onclick="createDraft()">새 Formula Drop 만들기</button>';
       if (active) {
         html += `<h2>활성 Drop</h2><p><b>${esc(active.dropId)}</b> · ${esc(active.title)} · ${esc(active.effectiveStatus)}</p><div class="cards">
           ${metricCard('고유 방문자', metrics.uniqueVisitors)}
@@ -98,10 +104,27 @@
         .getFormulaDropDetail(dropId);
     }
 
+    function createDraft() {
+      const title = prompt('새 Drop 제목을 입력하세요.');
+      if (title === null) return;
+      if (!title.trim()) {
+        alert('Drop 제목을 입력해야 합니다.');
+        return;
+      }
+      google.script.run
+        .withSuccessHandler((result) => result.ok ? loadDashboard() : alert('생성할 수 없습니다: ' + result.error))
+        .withFailureHandler(() => alert('Drop 생성에 실패했습니다.'))
+        .createFormulaDropDraft({ title });
+    }
+
     function renderDetail(data) {
       const metrics = data.metrics;
       $('state').textContent = `${data.drop.dropId} · ${data.drop.effectiveStatus}`;
-      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button><h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)} · 원본 상태 ${esc(data.drop.status)} · 현재 상태 ${esc(data.drop.effectiveStatus)}</p><div class="cards">
+      window.adminDropSummaries = window.adminDropSummaries || {};
+      window.adminDropSummaries[data.drop.dropId] = data.drop;
+      const editButton = data.drop.status === 'EXPIRED' ? '' : `<button onclick="openEditor('${esc(data.drop.dropId)}')">Drop 편집</button>`;
+      const actions = editButton + (data.drop.status === 'DRAFT' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('schedule', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">예약하기</button>` : data.drop.status === 'SCHEDULED' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('draft', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">초안으로 되돌리기</button>` : data.drop.status === 'ACTIVE' ? ` <button onclick="changeStatus('expire', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 종료</button>` : '');
+      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)} · 원본 상태 ${esc(data.drop.status)} · 현재 상태 ${esc(data.drop.effectiveStatus)}</p><div class="cards">
         ${metricCard('고유 방문자', metrics.uniqueVisitors)}
         ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
         ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
@@ -115,6 +138,93 @@
         ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
+    }
+
+    function changeStatus(action, dropId, updatedAt) {
+      if (!confirm('이 Drop의 상태를 변경하시겠습니까?')) return;
+      const methods = { activate: 'activateFormulaDrop', schedule: 'scheduleFormulaDrop', draft: 'returnFormulaDropToDraft', expire: 'expireFormulaDrop' };
+      google.script.run
+        .withSuccessHandler((result) => result.ok ? showDetail(dropId) : alert('상태를 변경할 수 없습니다: ' + result.error))
+        .withFailureHandler(() => alert('상태 변경에 실패했습니다.'))[methods[action]](dropId, updatedAt);
+    }
+
+    function openEditor(dropId) {
+      google.script.run.withSuccessHandler((config) => {
+        if (!config || config.dropId !== dropId || !['DRAFT', 'SCHEDULED', 'ACTIVE'].includes(config.status) || typeof config.title !== 'string') {
+          alert('편집 데이터를 정상적으로 받지 못했습니다. 저장하지 말고 Admin 서버 코드를 확인해 주세요.');
+          return;
+        }
+        renderEditor(config);
+      }).withFailureHandler(() => alert('편집 정보를 불러오지 못했습니다.')).getFormulaDropAdminConfig(dropId);
+    }
+
+    function renderEditor(config) {
+      window.editValidationErrors = {};
+      window.editOperationalError = '';
+      const lockedAssets = config.status !== 'DRAFT';
+      const lockedStart = config.status === 'ACTIVE';
+      const field = (label, name, value, type = 'text', disabled = false) => `<label>${label}<input id="edit-${name}" name="${name}" type="${type}" value="${esc(value || '')}" ${disabled ? 'disabled' : ''} aria-invalid="false" aria-describedby="error-${name}"></label><small id="error-${name}" class="error" hidden></small>`;
+      $('app').innerHTML = `<button onclick="showDetail('${esc(config.dropId)}')">← 상세로 돌아가기</button><h2>Formula Drop 편집</h2><p>${esc(config.dropId)} · ${esc(config.status)}</p><form id="edit-form" onsubmit="saveEditor(event, '${esc(config.dropId)}', '${esc(config.updatedAt)}', '${esc(config.status)}')">${field('제목', 'title', config.title)}${field('부제목', 'subtitle', config.subtitle)}<label>설명<textarea id="edit-description" name="description" aria-invalid="false" aria-describedby="error-description">${esc(config.description || '')}</textarea></label><small id="error-description" class="error" hidden></small>${field('시작 시각', 'startAt', config.startAt, 'datetime-local', lockedStart)}${field('종료 시각', 'expiresAt', config.expiresAt, 'datetime-local')}${field('파일명', 'fileName', config.fileName, 'text', lockedAssets)}${field('파일 URL', 'fileUrl', config.fileUrl, 'url', lockedAssets)}${field('License ID', 'licenseId', config.licenseId, 'text', lockedAssets)}${field('공용 Access Name', 'publicAccessName', config.publicAccessName, 'text', lockedAssets)}${field('공용 전화번호 끝 4자리', 'publicAccessLast4', config.publicAccessLast4, 'text', lockedAssets)}${field('공용 PIN', 'publicAccessPin', config.publicAccessPin, 'text', lockedAssets)}<p id="edit-error" class="error" hidden></p><button type="button" onclick="showDetail('${esc(config.dropId)}')">취소</button> <button id="save-edit" type="submit">변경사항 저장</button></form>`;
+      document.querySelectorAll('#edit-form input:not(:disabled), #edit-form textarea:not(:disabled)').forEach((element) => {
+        element.addEventListener('input', () => validateEditorField(element.name));
+        element.addEventListener('change', () => validateEditorField(element.name));
+      });
+    }
+
+    function getEditorFieldValue(name) {
+      return document.querySelector(`#edit-form [name="${name}"]`)?.value ?? '';
+    }
+
+    function validateEditorField(name) {
+      const value = getEditorFieldValue(name);
+      let message = '';
+      if (name === 'title' && !value.trim()) message = '제목은 필수입니다.';
+      if (name === 'publicAccessLast4' && value && !/^\d{4}$/.test(value)) message = '정확히 4자리 숫자여야 합니다.';
+      if (name === 'publicAccessPin' && value && !/^\d{6}$/.test(value)) message = '정확히 6자리 숫자여야 합니다.';
+      if (name === 'licenseId' && value && !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) message = '유효한 UUID가 아닙니다.';
+      if (name === 'fileUrl' && value && !/^https:\/\/[^\s]+$/i.test(value)) message = 'HTTPS URL만 사용할 수 있습니다.';
+      if (name === 'fileName' && value && !/\.accordbook$/i.test(value)) message = '.accordbook 파일명이어야 합니다.';
+      if (name === 'expiresAt' && getEditorFieldValue('startAt') && value && new Date(value) <= new Date(getEditorFieldValue('startAt'))) message = '종료 시각은 시작 시각보다 늦어야 합니다.';
+      if (message) window.editValidationErrors[name] = message;
+      else delete window.editValidationErrors[name];
+      renderEditorErrors();
+      return message;
+    }
+
+    function renderEditorErrors() {
+      const errors = window.editValidationErrors || {};
+      document.querySelectorAll('[id^="error-"]').forEach((node) => {
+        const name = node.id.slice('error-'.length);
+        const message = errors[name] || '';
+        node.textContent = message;
+        node.hidden = !message;
+      });
+      Object.keys(errors).forEach((name) => {
+        const field = document.querySelector(`#edit-form [name="${name}"]`);
+        if (field) field.setAttribute('aria-invalid', 'true');
+      });
+      document.querySelectorAll('#edit-form [name]').forEach((field) => {
+        if (!errors[field.name]) field.setAttribute('aria-invalid', 'false');
+      });
+      const general = $('edit-error');
+      if (general) {
+        general.textContent = window.editOperationalError || '';
+        general.hidden = !window.editOperationalError;
+      }
+    }
+
+    function saveEditor(event, dropId, expectedUpdatedAt, status) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const value = name => form.elements[name]?.value ?? '';
+      window.editValidationErrors = {};
+      window.editOperationalError = '';
+      ['title', 'publicAccessLast4', 'publicAccessPin', 'licenseId', 'fileUrl', 'fileName', 'expiresAt'].forEach(validateEditorField);
+      if (Object.keys(window.editValidationErrors).length) return;
+      renderEditorErrors();
+      const button = $('save-edit'); button.disabled = true; button.textContent = '저장 중…';
+      const patch = {}; ['title', 'subtitle', 'description', 'startAt', 'expiresAt', 'fileName', 'fileUrl', 'licenseId', 'publicAccessName', 'publicAccessLast4', 'publicAccessPin'].forEach(name => { const element = form.elements[name]; if (element && !element.disabled) patch[name] = element.value; });
+      google.script.run.withSuccessHandler(result => { if (result.ok) { window.editValidationErrors = {}; window.editOperationalError = ''; showDetail(dropId); } else { button.disabled = false; button.textContent = '변경사항 저장'; window.editValidationErrors = result.fields || {}; window.editOperationalError = result.error === 'conflict' ? '이 Drop이 다른 창에서 변경되었습니다. 최신 내용을 다시 불러오세요.' : result.fields ? '' : '저장할 수 없습니다: ' + result.error; renderEditorErrors(); } }).withFailureHandler(() => { button.disabled = false; button.textContent = '변경사항 저장'; window.editOperationalError = '저장에 실패했습니다.'; renderEditorErrors(); }).updateFormulaDrop(dropId, expectedUpdatedAt, patch);
     }
 
     function renderTable(rows, columns) {

@@ -33,3 +33,7 @@ The initializer is fail-safe for non-empty sheets with mismatched headers. It do
 ## Phase 6 — private read-only dashboard
 
 `FormulaDropAdmin.gs` and `Dashboard.html` also provide a read-only HtmlService Web App. Deploy it as a Web App restricted to the owner/operator or explicitly authorized Google accounts. Anonymous access must not be enabled. The dashboard reads only `FormulaDrops` and `FormulaDropEvents`, aggregates metrics server-side, and never returns PINs, file URLs, license IDs, or visitor/session/event ID lists. It has no write, status, revoke, export, or scheduler actions. Verify the restriction with an incognito/logged-out browser before production use.
+
+## Phase 7A — private Drop management
+
+The private Admin Web App can create DRAFT Drops, edit permitted fields, schedule, activate, return SCHEDULED Drops to DRAFT, and mark ACTIVE Drops EXPIRED. These actions use `google.script.run`, server-side validation, Script Lock, and `updatedAt` conflict checks. They only modify `FormulaDrops`; they never modify `FormulaDropEvents`, `PaidFormulaLicenses`, or the Licensed Formula Registry. `END DROP` changes only the Drop status and does not revoke the underlying License. Before activation, the operator must manually confirm that the packageId, asset, public credentials, and Paid Formula License are correct.
