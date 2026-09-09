@@ -60,6 +60,8 @@ function doPost(e) {
     const props = PropertiesService.getScriptProperties();
     const sellerToken = configValue_('SELLER_TOKEN') || props.getProperty('SELLER_TOKEN');
     const pepper = configValue_('PIN_PEPPER') || props.getProperty('PIN_PEPPER');
+    if (input.action === 'admin-revoke') return adminRevoke_(input, props);
+    if (input.action === 'admin-license-status') return adminLicenseStatus_(input, props);
     if (input.action === 'lock-status') return lockStatus_(input);
     if (input.action === 'verify') return verifyLicense_(input, pepper);
     if (!sellerToken || sellerToken.length < 32 || !pepper || pepper.length < 32 || input.sellerToken !== sellerToken || input.action !== 'register') return reply_({ ok: false });
@@ -91,6 +93,65 @@ function doPost(e) {
   } catch (_) {
     // Never echo or log credentials / request bodies.
     return reply_({ ok: false });
+  } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+
+function adminSecret_(props) {
+  const secret = props.getProperty('PAID_FORMULA_ADMIN_SECRET');
+  return typeof secret === 'string' ? secret.trim() : '';
+}
+function validPackageId_(packageId) {
+  return typeof packageId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(packageId);
+}
+function authorizeAdmin_(input, props) {
+  const expected = adminSecret_(props);
+  return expected && typeof input.adminSecret === 'string' && input.adminSecret === expected;
+}
+function adminRows_(sheet, packageId) {
+  const count = sheet.getLastRow() - 1;
+  if (count <= 0) return [];
+  return sheet.getRange(2, 1, count, HEADERS.length).getValues()
+    .map((row, index) => ({ row, rowNumber: index + 2 }))
+    .filter(item => item.row[0] === packageId);
+}
+function adminLicenseStatus_(input, props) {
+  try {
+    if (!authorizeAdmin_(input, props)) return reply_({ ok: false, error: 'unauthorized' });
+    if (!validPackageId_(input.packageId)) return reply_({ ok: false, error: 'invalid_request' });
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+    if (!sheet) return reply_({ ok: false, error: 'not_found' });
+    checkHeaders_(sheet);
+    const matches = adminRows_(sheet, input.packageId);
+    if (matches.length === 0) return reply_({ ok: false, error: 'not_found' });
+    if (matches.length > 1) return reply_({ ok: false, error: 'ambiguous' });
+    const status = String(matches[0].row[6] || '');
+    if (status !== 'active' && status !== 'revoked') return reply_({ ok: false, error: 'invalid_license_state' });
+    return reply_({ ok: true, status });
+  } catch (_) {
+    return reply_({ ok: false, error: 'internal_error' });
+  }
+}
+function adminRevoke_(input, props) {
+  let lock;
+  try {
+    if (!authorizeAdmin_(input, props)) return reply_({ ok: false, error: 'unauthorized' });
+    if (!validPackageId_(input.packageId)) return reply_({ ok: false, error: 'invalid_request' });
+    lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+    if (!sheet) return reply_({ ok: false, error: 'not_found' });
+    checkHeaders_(sheet);
+    const matches = adminRows_(sheet, input.packageId);
+    if (matches.length === 0) return reply_({ ok: false, error: 'not_found' });
+    if (matches.length > 1) return reply_({ ok: false, error: 'ambiguous' });
+    const item = matches[0], status = String(item.row[6] || '');
+    if (status === 'revoked') return reply_({ ok: true, status: 'already_revoked' });
+    if (status !== 'active') return reply_({ ok: false, error: 'invalid_license_state' });
+    sheet.getRange(item.rowNumber, 7).setValue('revoked');
+    SpreadsheetApp.flush();
+    return reply_({ ok: true, status: 'revoked' });
+  } catch (_) {
+    return reply_({ ok: false, error: 'internal_error' });
   } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
 }
 

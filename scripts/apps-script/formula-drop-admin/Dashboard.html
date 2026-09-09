@@ -124,7 +124,7 @@
       window.adminDropSummaries[data.drop.dropId] = data.drop;
       const editButton = data.drop.status === 'EXPIRED' ? '' : `<button onclick="openEditor('${esc(data.drop.dropId)}')">Drop 편집</button>`;
       const actions = editButton + (data.drop.status === 'DRAFT' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('schedule', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">예약하기</button>` : data.drop.status === 'SCHEDULED' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('draft', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">초안으로 되돌리기</button>` : data.drop.status === 'ACTIVE' ? ` <button onclick="changeStatus('expire', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 종료</button>` : '');
-      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)} · 원본 상태 ${esc(data.drop.status)} · 현재 상태 ${esc(data.drop.effectiveStatus)}</p><div class="cards">
+      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)} · 원본 상태 ${esc(data.drop.status)} · 현재 상태 ${esc(data.drop.effectiveStatus)}</p><section class="card" style="margin-top:24px"><div class="eyebrow">LICENSE</div><p id="license-status-${esc(data.drop.dropId)}">STATUS · 확인 중…</p><button id="license-refresh-${esc(data.drop.dropId)}" onclick="refreshLicenseStatus('${esc(data.drop.dropId)}')">상태 새로고침</button></section><div class="cards">
         ${metricCard('고유 방문자', metrics.uniqueVisitors)}
         ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
         ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
@@ -138,6 +138,27 @@
         ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
+      refreshLicenseStatus(data.drop.dropId);
+    }
+
+    function licenseStatusLabel(result) {
+      const labels = { active: 'ACTIVE', revoked: 'REVOKED', missing_license_id: 'NOT CONNECTED', not_found: 'NOT FOUND', registry_not_found: 'NOT FOUND', ambiguous_drop_license_mapping: 'CONFIGURATION ISSUE', registry_ambiguous: 'CONFIGURATION ISSUE', registry_not_configured: 'NOT CONFIGURED', registry_unavailable: 'UNAVAILABLE', registry_invalid_response: 'UNAVAILABLE', registry_unauthorized: 'AUTHORIZATION ERROR', invalid_request: 'CONFIGURATION ISSUE' };
+      return labels[result.error] || 'UNAVAILABLE';
+    }
+
+    function refreshLicenseStatus(dropId) {
+      const statusNode = $('license-status-' + dropId);
+      const button = $('license-refresh-' + dropId);
+      if (!statusNode || !button || button.disabled) return;
+      button.disabled = true;
+      statusNode.textContent = 'STATUS · 확인 중…';
+      google.script.run.withSuccessHandler((result) => {
+        statusNode.textContent = result.ok ? 'STATUS · ' + result.status.toUpperCase() : 'STATUS · ' + licenseStatusLabel(result);
+        button.disabled = false;
+      }).withFailureHandler(() => {
+        statusNode.textContent = 'STATUS · UNAVAILABLE';
+        button.disabled = false;
+      }).getFormulaDropLicenseStatus(dropId);
     }
 
     function changeStatus(action, dropId, updatedAt) {

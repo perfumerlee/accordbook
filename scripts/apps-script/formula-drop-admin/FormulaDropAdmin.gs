@@ -2,6 +2,8 @@
 // Phase 1 only: safe schema initialization for a separate Formula Drop workbook.
 
 const FORMULA_DROP_SPREADSHEET_ID_PROPERTY = 'FORMULA_DROP_SPREADSHEET_ID';
+const PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY = 'PAID_FORMULA_REGISTRY_ADMIN_URL';
+const PAID_FORMULA_ADMIN_SECRET_PROPERTY = 'PAID_FORMULA_ADMIN_SECRET';
 const FORMULA_DROPS_SHEET_NAME = 'FormulaDrops';
 const FORMULA_DROP_EVENTS_SHEET_NAME = 'FormulaDropEvents';
 const FORMULA_DROPS_HEADERS = [
@@ -121,6 +123,48 @@ function getFormulaDropDetail(dropId) {
   const metrics = aggregateDrop_(dropId, data.events); return { drop: dropSummary_(drop, metrics.metrics), metrics: metrics.metrics, sources: metrics.sources, failures: metrics.failures };
 }
 
+function getFormulaDropLicenseStatus(dropId) {
+  if (typeof dropId !== 'string' || !/^DROP-\d{4}-\d{3}$/.test(dropId)) return { ok: false, error: 'invalid_request' };
+  try {
+    const ss = formulaDropSpreadsheet_();
+    const sheet = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME);
+    if (!sheet) return { ok: false, error: 'not_found' };
+    checkFormulaDropHeaders_(sheet, FORMULA_DROPS_SHEET_NAME, FORMULA_DROPS_HEADERS);
+    const count = sheet.getLastRow() - 1;
+    if (count <= 0) return { ok: false, error: 'not_found' };
+    const rows = sheet.getRange(2, 1, count, FORMULA_DROPS_HEADERS.length).getValues();
+    const matching = rows.filter(row => String(row[0]) === dropId);
+    if (matching.length === 0) return { ok: false, error: 'not_found' };
+    const licenseId = String(matching[0][11] || '').trim();
+    if (!licenseId) return { ok: false, error: 'missing_license_id' };
+    const duplicate = rows.some(row => String(row[11] || '').trim() === licenseId && String(row[0]) !== dropId);
+    if (duplicate) return { ok: false, error: 'ambiguous_drop_license_mapping' };
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(licenseId)) return { ok: false, error: 'invalid_request' };
+    return callPaidFormulaRegistryAdminStatus_(licenseId);
+  } catch (_) {
+    return { ok: false, error: 'registry_unavailable' };
+  }
+}
+
+function callPaidFormulaRegistryAdminStatus_(packageId) {
+  const props = PropertiesService.getScriptProperties();
+  const endpoint = String(props.getProperty(PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY) || '').trim();
+  const secret = String(props.getProperty(PAID_FORMULA_ADMIN_SECRET_PROPERTY) || '').trim();
+  if (!endpoint || !/^https:\/\/[^\s]+$/i.test(endpoint) || !secret) return { ok: false, error: 'registry_not_configured' };
+  try {
+    const response = UrlFetchApp.fetch(endpoint, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ action: 'admin-license-status', packageId, adminSecret: secret }), muteHttpExceptions: true });
+    if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return { ok: false, error: 'registry_unavailable' };
+    const body = JSON.parse(response.getContentText());
+    if (!body || body.ok !== true || (body.status !== 'active' && body.status !== 'revoked')) {
+      const errors = { not_found: 'registry_not_found', ambiguous: 'registry_ambiguous', unauthorized: 'registry_unauthorized' };
+      return { ok: false, error: errors[body && body.error] || 'registry_invalid_response' };
+    }
+    return { ok: true, status: body.status };
+  } catch (_) {
+    return { ok: false, error: 'registry_unavailable' };
+  }
+}
+
 function readFormulaDropAdminData_() {
   const ss = formulaDropSpreadsheet_(); const dropsSheet = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); const eventsSheet = ss.getSheetByName(FORMULA_DROP_EVENTS_SHEET_NAME);
   if (!dropsSheet || !eventsSheet) throw new Error('Formula Drop sheets unavailable');
@@ -156,10 +200,10 @@ function createFormulaDropDraft(payload) {
 }
 function getFormulaDropAdminConfig(dropId) { if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '')) throw new Error('invalid_request'); const ss = formulaDropSpreadsheet_(), sheet = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); if (!sheet) throw new Error('not_found'); checkFormulaDropHeaders_(sheet, FORMULA_DROPS_SHEET_NAME, FORMULA_DROPS_HEADERS); const found = findAdminDropRow_(sheet, dropId); if (!found) throw new Error('not_found'); const row = found.row; return { dropId, status: String(row[6]), updatedAt: row[16] instanceof Date ? row[16].toISOString() : '', title: String(row[3] || ''), subtitle: String(row[4] || ''), description: String(row[5] || ''), startAt: toAdminDate_(row[7]), expiresAt: toAdminDate_(row[8]), fileName: String(row[9] || ''), fileUrl: String(row[10] || ''), licenseId: String(row[11] || ''), publicAccessName: String(row[12] || ''), publicAccessLast4: String(row[13] || ''), publicAccessPin: String(row[14] || '') }; }
 function updateFormulaDrop(dropId, expectedUpdatedAt, patch) { if (patch && ['dropId', 'year', 'sequence', 'status', 'createdAt', 'updatedAt'].some(key => Object.prototype.hasOwnProperty.call(patch, key))) return { ok: false, error: 'invalid_request' }; return mutateDrop(dropId, expectedUpdatedAt, patch, 'edit'); }
-function scheduleFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop_(dropId, expectedUpdatedAt, {}, 'schedule'); }
-function activateFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop_(dropId, expectedUpdatedAt, {}, 'activate'); }
-function returnFormulaDropToDraft(dropId, expectedUpdatedAt) { return mutateDrop_(dropId, expectedUpdatedAt, {}, 'draft'); }
-function expireFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop_(dropId, expectedUpdatedAt, {}, 'expire'); }
+function scheduleFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'schedule'); }
+function activateFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'activate'); }
+function returnFormulaDropToDraft(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'draft'); }
+function expireFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'expire'); }
 function findAdminDropRow_(sheet, dropId) { const count = sheet.getLastRow() - 1; if (count <= 0) return null; const rows = sheet.getRange(2, 1, count, FORMULA_DROPS_HEADERS.length).getValues(); const index = rows.findIndex(row => String(row[0]) === dropId); return index < 0 ? null : { row: rows[index], rowNumber: index + 2 }; }
 function toAdminDate_(value) { return value instanceof Date && !isNaN(value.getTime()) ? Utilities.formatDate(value, 'Asia/Seoul', "yyyy-MM-dd'T'HH:mm") : ''; }
 function normalizeDropPatch_(input) { const value = input || {}; return { title: String(value.title || '').trim(), subtitle: String(value.subtitle || '').trim(), description: String(value.description || '').trim(), startAt: value.startAt ? new Date(value.startAt) : '', expiresAt: value.expiresAt ? new Date(value.expiresAt) : '', fileName: String(value.fileName || '').trim(), fileUrl: String(value.fileUrl || '').trim(), licenseId: String(value.licenseId || '').trim(), publicAccessName: String(value.publicAccessName || '').trim(), publicAccessLast4: String(value.publicAccessLast4 || ''), publicAccessPin: String(value.publicAccessPin || '') }; }

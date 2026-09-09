@@ -37,3 +37,18 @@ The initializer is fail-safe for non-empty sheets with mismatched headers. It do
 ## Phase 7A — private Drop management
 
 The private Admin Web App can create DRAFT Drops, edit permitted fields, schedule, activate, return SCHEDULED Drops to DRAFT, and mark ACTIVE Drops EXPIRED. These actions use `google.script.run`, server-side validation, Script Lock, and `updatedAt` conflict checks. They only modify `FormulaDrops`; they never modify `FormulaDropEvents`, `PaidFormulaLicenses`, or the Licensed Formula Registry. `END DROP` changes only the Drop status and does not revoke the underlying License. Before activation, the operator must manually confirm that the packageId, asset, public credentials, and Paid Formula License are correct.
+
+## Phase 7B-2A — private License status bridge
+
+Drop Detail can read the connected Licensed Formula status through a server-to-server request to the Paid Formula Registry. The Admin project reads `FormulaDrops.licenseId` and calls only `admin-license-status`; it never opens the Paid Formula Spreadsheet directly and never calls `admin-revoke`.
+
+Configure these Script Properties in the Formula Drop Admin project only after the code has been deployed and reviewed:
+
+```text
+PAID_FORMULA_REGISTRY_ADMIN_URL=<deployed-registry-web-app-url>
+PAID_FORMULA_ADMIN_SECRET=<GENERATE_A_HIGH_ENTROPY_SECRET>
+```
+
+Use the exact same high-entropy secret in the Paid Formula Registry project. Generate at least 32 random bytes locally or with an operator-approved password generator. Never commit or paste the secret into browser code, a Sheet, a URL, or this repository. HMAC signing is intentionally deferred in v0.01; the bridge uses the shared secret over HTTPS.
+
+The browser receives only `active`, `revoked`, or a normalized unavailable/configuration result. It never receives the Registry URL, packageId, or Admin Secret. The Dashboard Home does not perform Registry calls; status is loaded only when Drop Detail opens or when the operator clicks `상태 새로고침`.
