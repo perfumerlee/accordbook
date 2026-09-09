@@ -146,6 +146,25 @@ function getFormulaDropLicenseStatus(dropId) {
   }
 }
 
+// Apps Script editor에서 1회 실행해 UrlFetchApp 외부 요청 권한을 승인합니다.
+// Registry에는 인증정보나 라이선스 정보를 보내지 않고 GET 요청만 수행합니다.
+function authorizeExternalRequestOnce() {
+  const endpoint = String(PropertiesService.getScriptProperties().getProperty(PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY) || '').trim();
+  if (!/^https:\/\/[^\s]+$/i.test(endpoint)) {
+    return { ok: false, error: 'registry_not_configured' };
+  }
+
+  try {
+    const response = UrlFetchApp.fetch(endpoint, {
+      method: 'get',
+      muteHttpExceptions: true,
+    });
+    return { ok: true, statusCode: response.getResponseCode() };
+  } catch (_) {
+    return { ok: false, error: 'registry_unavailable' };
+  }
+}
+
 function callPaidFormulaRegistryAdminStatus_(packageId) {
   const props = PropertiesService.getScriptProperties();
   const endpoint = String(props.getProperty(PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY) || '').trim();
