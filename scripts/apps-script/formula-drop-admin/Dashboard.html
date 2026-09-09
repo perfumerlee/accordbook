@@ -139,7 +139,7 @@
       const editButton = data.drop.status === 'EXPIRED' ? '' : `<button onclick="openEditor('${esc(data.drop.dropId)}')">Drop 편집</button>`;
       const actions = editButton + (data.drop.status === 'DRAFT' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('schedule', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">예약하기</button>` : data.drop.status === 'SCHEDULED' ? ` <button onclick="changeStatus('activate', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 활성화</button> <button onclick="changeStatus('draft', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">초안으로 되돌리기</button>` : data.drop.status === 'ACTIVE' ? ` <button onclick="changeStatus('expire', '${esc(data.drop.dropId)}', '${esc(data.drop.updatedAt)}')">Drop 종료</button>` : '');
       const statusMessage = statusMismatchMessage(data.drop.status, data.drop.effectiveStatus);
-      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)}</p><div class="status-meta"><div><div class="eyebrow">관리 설정</div><strong>${esc(statusLabel(data.drop.status, 'raw'))}</strong><small>Admin에서 지정한 상태</small></div><div><div class="eyebrow">현재 공개 상태</div><strong>${esc(statusLabel(data.drop.effectiveStatus, 'effective'))}</strong><small>기간을 반영한 실제 공개 상태</small></div></div>${statusMessage ? `<p class="status-note">${esc(statusMessage)}</p>` : ''}<section class="card" style="margin-top:24px"><div class="eyebrow">LICENSE</div><p id="license-status-${esc(data.drop.dropId)}">STATUS · 확인 중…</p><button id="license-refresh-${esc(data.drop.dropId)}" onclick="refreshLicenseStatus('${esc(data.drop.dropId)}')">상태 새로고침</button><div id="license-actions-${esc(data.drop.dropId)}"></div></section><div class="cards">
+      $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)}</p><div class="status-meta"><div><div class="eyebrow">관리 설정</div><strong>${esc(statusLabel(data.drop.status, 'raw'))}</strong><small>Admin에서 지정한 상태</small></div><div><div class="eyebrow">현재 공개 상태</div><strong>${esc(statusLabel(data.drop.effectiveStatus, 'effective'))}</strong><small>기간을 반영한 실제 공개 상태</small></div></div>${statusMessage ? `<p class="status-note">${esc(statusMessage)}</p>` : ''}<section class="card" style="margin-top:24px"><div class="eyebrow">LICENSE</div><p id="license-status-${esc(data.drop.dropId)}">STATUS · 확인 중…</p><p id="license-warning-${esc(data.drop.dropId)}" class="status-note" hidden></p><button id="license-refresh-${esc(data.drop.dropId)}" onclick="refreshLicenseStatus('${esc(data.drop.dropId)}')">상태 새로고침</button><div id="license-actions-${esc(data.drop.dropId)}"></div></section><div class="cards">
         ${metricCard('고유 방문자', metrics.uniqueVisitors)}
         ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
         ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
@@ -170,12 +170,21 @@
       google.script.run.withSuccessHandler((result) => {
         statusNode.textContent = result.ok ? 'STATUS · ' + result.status.toUpperCase() : 'STATUS · ' + licenseStatusLabel(result);
         renderLicenseActions(dropId, result);
+        renderLicenseWarning(dropId, result);
         button.disabled = false;
       }).withFailureHandler(() => {
         statusNode.textContent = 'STATUS · UNAVAILABLE';
         renderLicenseActions(dropId, { ok: false, error: 'registry_unavailable' });
+        renderLicenseWarning(dropId, { ok: false });
         button.disabled = false;
       }).getFormulaDropLicenseStatus(dropId);
+    }
+
+    function renderLicenseWarning(dropId, result) {
+      const node = $('license-warning-' + dropId); const drop = window.adminDropSummaries && window.adminDropSummaries[dropId];
+      if (!node || !drop || !result || !result.ok || drop.status !== 'ACTIVE' || result.status !== 'revoked') { if (node) { node.textContent = ''; node.hidden = true; } return; }
+      node.textContent = '운영 상태 확인 필요: 현재 Formula Drop은 공개 중이지만 연결된 라이선스는 폐기되었습니다. 사용자는 파일을 다운로드할 수 있지만 새 Import는 실패할 수 있습니다. Drop 종료를 진행하세요.';
+      node.hidden = false;
     }
 
     function renderLicenseActions(dropId, result) {

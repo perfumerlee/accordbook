@@ -12,6 +12,10 @@ describe('Phase 7B-2B close and revoke orchestration', () => {
     expect(gs).toContain("result: 'partial'")
     expect(gs).toContain("action, packageId, adminSecret: secret")
     expect(gs).toContain("callPaidFormulaRegistryAdmin_('admin-revoke'")
+    expect(gs).toContain('expireFormulaDropInternal_')
+    expect(gs).toContain("String(confirmed[6]) !== 'EXPIRED'")
+    expect(gs).toContain('confirmedUpdatedAt')
+    expect(gs).toContain('Math.abs(confirmedMillis - now.getTime()) > 2000')
   })
 
   it('keeps retry revoke separate from Drop mutation', () => {
@@ -29,7 +33,9 @@ describe('Phase 7B-2B close and revoke orchestration', () => {
   })
 
   it('keeps the existing non-revoking END DROP path', () => {
-    expect(gs).toContain("function expireFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'expire'); }")
+    expect(gs).toContain('function expireFormulaDrop(dropId, expectedUpdatedAt)')
+    expect(gs).toContain('expireFormulaDropInternal_(dropId, expectedUpdatedAt, false)')
     expect(html).toContain("expire: 'expireFormulaDrop'")
+    expect(html).toContain('운영 상태 확인 필요')
   })
 })

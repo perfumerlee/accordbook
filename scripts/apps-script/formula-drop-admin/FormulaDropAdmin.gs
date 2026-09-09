@@ -236,6 +236,10 @@ function getDropLicenseContext_(dropId) {
 }
 
 function expireDropForRevoke_(dropId, expectedUpdatedAt) {
+  return expireFormulaDropInternal_(dropId, expectedUpdatedAt, true);
+}
+
+function expireFormulaDropInternal_(dropId, expectedUpdatedAt, requireLicense) {
   let lock;
   try {
     lock = LockService.getScriptLock(); lock.waitLock(10000);
@@ -246,13 +250,20 @@ function expireDropForRevoke_(dropId, expectedUpdatedAt) {
     const matches = rows.filter(row => String(row[0]) === dropId);
     if (matches.length !== 1) return { ok: false, result: 'rejected', error: matches.length ? 'ambiguous' : 'not_found' };
     const row = matches[0], licenseId = String(row[11] || '').trim(), duplicate = rows.some(other => String(other[11] || '').trim() === licenseId && String(other[0]) !== dropId);
-    if (!licenseId) return { ok: false, result: 'rejected', error: 'missing_license_id' };
-    if (duplicate) return { ok: false, result: 'rejected', error: 'ambiguous_drop_license_mapping' };
+    if (requireLicense && !licenseId) return { ok: false, result: 'rejected', error: 'missing_license_id' };
+    if (requireLicense && duplicate) return { ok: false, result: 'rejected', error: 'ambiguous_drop_license_mapping' };
     if (String(row[6]) !== 'ACTIVE') return { ok: false, result: 'rejected', error: 'invalid_transition' };
     const actualUpdated = row[16] instanceof Date ? row[16].toISOString() : '';
     if (expectedUpdatedAt && actualUpdated !== expectedUpdatedAt) return { ok: false, result: 'rejected', error: 'conflict' };
-    const now = new Date(); sheet.getRange(matches.indexOf(row) + 2, 7).setValue('EXPIRED'); sheet.getRange(matches.indexOf(row) + 2, 17).setValue(now); SpreadsheetApp.flush();
-    return { ok: true, licenseId, updatedAt: now.toISOString() };
+    const now = new Date(), rowNumber = matches.indexOf(row) + 2;
+    sheet.getRange(rowNumber, 7).setValue('EXPIRED'); sheet.getRange(rowNumber, 17).setValue(now); SpreadsheetApp.flush();
+    const confirmed = sheet.getRange(rowNumber, 7, 1, 17).getValues()[0];
+    const confirmedUpdatedAt = confirmed[16] instanceof Date ? confirmed[16].toISOString() : '';
+    const confirmedMillis = confirmed[16] instanceof Date ? confirmed[16].getTime() : NaN;
+    // Sheets commonly persists Date values at second precision, so do not
+    // require millisecond-identical ISO strings for a successful read-back.
+    if (String(confirmed[6]) !== 'EXPIRED' || !confirmedUpdatedAt || isNaN(confirmedMillis) || Math.abs(confirmedMillis - now.getTime()) > 2000) return { ok: false, result: 'rejected', error: 'drop_expiry_not_persisted' };
+    return { ok: true, licenseId, updatedAt: confirmedUpdatedAt };
   } catch (_) { return { ok: false, result: 'rejected', error: 'internal_error' }; } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
 }
 
@@ -294,7 +305,10 @@ function updateFormulaDrop(dropId, expectedUpdatedAt, patch) { if (patch && ['dr
 function scheduleFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'schedule'); }
 function activateFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'activate'); }
 function returnFormulaDropToDraft(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'draft'); }
-function expireFormulaDrop(dropId, expectedUpdatedAt) { return mutateDrop(dropId, expectedUpdatedAt, {}, 'expire'); }
+function expireFormulaDrop(dropId, expectedUpdatedAt) {
+  const result = expireFormulaDropInternal_(dropId, expectedUpdatedAt, false);
+  return result.ok ? { ok: true, dropId, status: 'EXPIRED', updatedAt: result.updatedAt } : { ok: false, error: result.error };
+}
 function findAdminDropRow_(sheet, dropId) { const count = sheet.getLastRow() - 1; if (count <= 0) return null; const rows = sheet.getRange(2, 1, count, FORMULA_DROPS_HEADERS.length).getValues(); const index = rows.findIndex(row => String(row[0]) === dropId); return index < 0 ? null : { row: rows[index], rowNumber: index + 2 }; }
 function toAdminDate_(value) { return value instanceof Date && !isNaN(value.getTime()) ? Utilities.formatDate(value, 'Asia/Seoul', "yyyy-MM-dd'T'HH:mm") : ''; }
 function normalizeDropPatch_(input) { const value = input || {}; return { title: String(value.title || '').trim(), subtitle: String(value.subtitle || '').trim(), description: String(value.description || '').trim(), startAt: value.startAt ? new Date(value.startAt) : '', expiresAt: value.expiresAt ? new Date(value.expiresAt) : '', fileName: String(value.fileName || '').trim(), fileUrl: String(value.fileUrl || '').trim(), licenseId: String(value.licenseId || '').trim(), publicAccessName: String(value.publicAccessName || '').trim(), publicAccessLast4: String(value.publicAccessLast4 || ''), publicAccessPin: String(value.publicAccessPin || '') }; }
