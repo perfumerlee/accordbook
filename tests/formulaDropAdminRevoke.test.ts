@@ -13,10 +13,11 @@ describe('Phase 7B-2B close and revoke orchestration', () => {
     expect(gs).toContain("action, packageId, adminSecret: secret")
     expect(gs).toContain("callPaidFormulaRegistryAdmin_('admin-revoke'")
     expect(gs).toContain('expireFormulaDropInternal_')
-    expect(gs).toContain("String(confirmed[6]) !== 'EXPIRED'")
+    expect(gs).toContain("String(confirmed[0]) !== 'EXPIRED'")
     expect(gs).toContain('confirmedUpdatedAt')
     expect(gs).toContain('new Date(confirmed[10])')
     expect(gs).toContain('confirmed[10]')
+    expect(gs).toContain("String(confirmed[0]) !== 'EXPIRED'")
   })
 
   it('keeps retry revoke separate from Drop mutation', () => {
