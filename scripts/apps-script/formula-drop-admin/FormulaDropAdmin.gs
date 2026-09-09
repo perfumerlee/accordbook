@@ -258,8 +258,10 @@ function expireFormulaDropInternal_(dropId, expectedUpdatedAt, requireLicense) {
     const now = new Date(), rowNumber = matches.indexOf(row) + 2;
     sheet.getRange(rowNumber, 7).setValue('EXPIRED'); sheet.getRange(rowNumber, 17).setValue(now); SpreadsheetApp.flush();
     const confirmed = sheet.getRange(rowNumber, 7, 1, 17).getValues()[0];
-    const confirmedUpdatedAt = confirmed[16] instanceof Date ? confirmed[16].toISOString() : '';
-    const confirmedMillis = confirmed[16] instanceof Date ? confirmed[16].getTime() : NaN;
+    // The read starts at column G (status), so Q (updatedAt) is index 10.
+    const confirmedDate = confirmed[10] instanceof Date ? confirmed[10] : new Date(confirmed[10]);
+    const confirmedUpdatedAt = !isNaN(confirmedDate.getTime()) ? confirmedDate.toISOString() : '';
+    const confirmedMillis = !isNaN(confirmedDate.getTime()) ? confirmedDate.getTime() : NaN;
     // Sheets commonly persists Date values at second precision, so do not
     // require millisecond-identical ISO strings for a successful read-back.
     if (String(confirmed[6]) !== 'EXPIRED' || !confirmedUpdatedAt || isNaN(confirmedMillis) || Math.abs(confirmedMillis - now.getTime()) > 2000) return { ok: false, result: 'rejected', error: 'drop_expiry_not_persisted' };
