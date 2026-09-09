@@ -1,0 +1,106 @@
+// Apps Script V8 runtime.
+// Phase 1 only: safe schema initialization for a separate Formula Drop workbook.
+
+const FORMULA_DROP_SPREADSHEET_ID_PROPERTY = 'FORMULA_DROP_SPREADSHEET_ID';
+const FORMULA_DROPS_SHEET_NAME = 'FormulaDrops';
+const FORMULA_DROP_EVENTS_SHEET_NAME = 'FormulaDropEvents';
+const FORMULA_DROPS_HEADERS = [
+  'dropId', 'year', 'sequence', 'title', 'subtitle', 'description', 'status',
+  'startAt', 'expiresAt', 'fileName', 'fileUrl', 'licenseId',
+  'publicAccessName', 'publicAccessLast4', 'publicAccessPin', 'createdAt', 'updatedAt',
+];
+const FORMULA_DROP_EVENTS_HEADERS = [
+  'eventId', 'timestamp', 'dropId', 'visitorId', 'sessionId', 'eventType',
+  'source', 'referrerHost', 'failureReason',
+];
+const FORMULA_DROP_STATUSES = ['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED'];
+const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'];
+
+const FORMULA_DROPS_HEADER_NOTES = [
+  '역할:\nFormula Drop의 영구 고유 식별자\n\n형식:\nDROP-YYYY-NNN\n\n예:\nDROP-2026-001\n\n필수:\nYES\n\n기록 주체:\nAdmin / Apps Script\n\n변경 규칙:\n생성 후 변경 금지.\n연도별 sequence는 001부터 증가.\n재사용 금지.\nPaid Formula packageId와 혼동하지 않음.',
+  '역할:\nFormula Drop이 속한 연도\n\n형식:\n4자리 연도 숫자\n\n예:\n2026\n\n필수:\nYES\n\n기록 주체:\nApps Script\n\n변경 규칙:\ndropId의 연도 부분에서 파생.\ndropId와 불일치하게 수정하지 않음.',
+  '역할:\n해당 연도 내 Formula Drop 순번\n\n형식:\n양의 정수. Sheet에서는 000 형식으로 표시.\n\n예:\n저장값 1 → 표시값 001\n\n필수:\nYES\n\n기록 주체:\nApps Script\n\n변경 규칙:\n연도별 001부터 증가.\n같은 연도에 재사용하지 않음.\ndropId의 sequence 부분과 일치해야 함.',
+  '역할:\nFormula Drop 공개 페이지에 표시하는 제목\n\n형식:\n문자열\n\n예:\nCitrus Structure\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\n공개 전 수정 가능.\n공개 후 수정 시 updatedAt 갱신.',
+  '역할:\nFormula Drop 제목을 보조하는 짧은 설명\n\n형식:\n문자열 또는 빈 값\n\n예:\nA simple citrus structure for study and adaptation\n\n필수:\nNO\n\n기록 주체:\nAdmin\n\n변경 규칙:\n공개 콘텐츠 변경 시 updatedAt 갱신.',
+  '역할:\nFormula Drop의 상세 설명 및 사용 안내\n\n형식:\n일반 텍스트 또는 빈 값\n\n예:\nDownload the licensed formula and open it in Accordbook.\n\n필수:\nNO\n\n기록 주체:\nAdmin\n\n변경 규칙:\nv0.01에서는 실행 가능한 HTML을 저장하지 않음.\n표시 시 안전하게 escape.\n변경 시 updatedAt 갱신.',
+  '역할:\nFormula Drop 자체의 운영 상태\n\n형식:\nDRAFT / SCHEDULED / ACTIVE / EXPIRED\n\n예:\nACTIVE\n\n필수:\nYES\n\n기록 주체:\nAdmin / Apps Script\n\n변경 규칙:\nLicensed Formula의 active/revoked 상태와 별개.\n정의된 상태 값만 사용.',
+  '역할:\nFormula Drop 공개 운영 시작 시각\n\n형식:\ndatetime\n\n예:\n2026-09-12 10:00:00\n\n필수:\nNO\n단, SCHEDULED 또는 ACTIVE 운영 전에는 필수.\n\n기록 주체:\nAdmin\n\n변경 규칙:\n운영 기준 시간대는 Asia/Seoul.\nDRAFT 단계에서는 빈 값 허용.',
+  '역할:\nFormula Drop 공개 배포 종료 시각\n\n형식:\ndatetime\n\n예:\n2026-09-15 23:59:00\n\n필수:\nNO\n단, ACTIVE 운영 전에는 필수.\n\n기록 주체:\nAdmin\n\n변경 규칙:\n운영 기준 시간대는 Asia/Seoul.\n종료 후 역사 페이지는 삭제하지 않음.\n향후 Public API는 이 시각 이후 신규 다운로드를 허용하지 않는 방향으로 사용.',
+  '역할:\n사용자에게 다운로드되는 Licensed Formula 파일명\n\n형식:\n.accordbook 파일명\n\n예:\nDROP-2026-001.accordbook\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\n실제 연결된 Licensed Formula 파일과 일치해야 함.\n변경 시 updatedAt 갱신.',
+  '역할:\nFormula Drop에서 제공할 Licensed Formula 파일의 저장 위치\n\n형식:\nHTTPS URL\n\n예:\nhttps://example.com/formula.accordbook\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\n운영용 내부 참조값.\n향후 Public API가 이 값을 그대로 반환해야 한다는 의미가 아님.\n파일 접근의 최종 통제는 Licensed Formula verification이 담당.\n변경 시 updatedAt 갱신.',
+  '역할:\n이 Formula Drop이 사용하는 기존 Licensed Formula Registry 항목 참조값\n\n형식:\nPaidFormulaLicenses.packageId\n\n예:\nUUID packageId\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\n기존 PaidFormulaLicenses.packageId를 참조.\nbuyerName, phone, phoneLast4, PIN, pinVerifier, status를 복제하지 않음.\nLicensed Formula Registry가 검증 상태의 source of truth.',
+  '역할:\nFormula Drop 공개 페이지에서 사용자에게 안내할 공용 Access Name\n\n형식:\n문자열\n\n예:\naccordbook\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\nFormula Drop용으로 의도적으로 공개되는 캠페인 값.\n일반 고객의 buyerName을 복사하지 않음.\n실제 인증 검증의 source of truth가 아님.',
+  '역할:\nFormula Drop 공개 페이지에서 사용자에게 안내할 공용 전화번호 끝 4자리 값\n\n형식:\n정확히 4자리 문자열\n\n예:\n0000\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\nPlain Text로 저장.\n선행 0을 제거하면 안 됨.\n일반 고객의 phone 또는 phoneLast4를 복사하지 않음.\nFormula Drop용으로 의도적으로 공개되는 캠페인 값.',
+  '역할:\nFormula Drop 공개 페이지에서 사용자에게 안내할 공용 6자리 PIN\n\n형식:\n정확히 6자리 문자열\n\n예:\n012345\n\n필수:\nYES\n\n기록 주체:\nAdmin\n\n변경 규칙:\nPlain Text로 저장.\n선행 0을 제거하면 안 됨.\nFormula Drop용으로 의도적으로 공개되는 캠페인 값.\nPaidFormulaLicenses.pinVerifier를 대체하지 않음.\n실제 인증 검증의 source of truth가 아님.\n\n주의:\n일반 고객에게 발급된 비공개 PIN을 이 열에 기록하지 않음.',
+  '역할:\nFormula Drop row가 최초 생성된 시각\n\n형식:\ndatetime\n\n예:\n2026-09-09 10:30:00\n\n필수:\nYES\n\n기록 주체:\nApps Script\n\n변경 규칙:\n생성 후 변경 금지.',
+  '역할:\nFormula Drop metadata가 마지막으로 변경된 시각\n\n형식:\ndatetime\n\n예:\n2026-09-09 10:35:00\n\n필수:\nYES\n\n기록 주체:\nApps Script\n\n변경 규칙:\n운영 metadata 변경 시 갱신.\ncreatedAt은 변경하지 않음.',
+];
+
+const FORMULA_DROP_EVENTS_HEADER_NOTES = [
+  '역할:\nFormula Drop raw event의 고유 식별자\n\n형식:\n랜덤 UUID 기반 문자열\n\n예:\nevt_8f239...\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client / Licensed Import lifecycle\n\n변경 규칙:\n하나의 실제 행동마다 새로운 eventId 생성.\n동일 네트워크 요청 재시도 시에는 같은 eventId를 재사용할 수 있도록 설계.\n수신 후 변경하지 않음.\n\n주의:\n실제 반복 행동과 전송 재시도를 구분하기 위한 식별자이며 개인 식별자가 아님.',
+  '역할:\nFormula Drop event가 서버에 수신된 시각\n\n형식:\ndatetime\n\n예:\n2026-09-12 12:30:45\n\n필수:\nYES\n\n기록 주체:\nApps Script\n\n변경 규칙:\nApps Script 서버 수신 시각을 source of truth로 사용.\n클라이언트 시각을 그대로 신뢰하지 않음.',
+  '역할:\n이벤트가 연결된 Formula Drop\n\n형식:\nDROP-YYYY-NNN\n\n예:\nDROP-2026-001\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client / Apps Script\n\n변경 규칙:\nFormulaDrops에 존재하는 Drop만 허용하는 방향으로 구현.\nraw event 기록 후 변경하지 않음.',
+  '역할:\n동일 브라우저의 반복 행동을 구분하기 위한 익명 식별자\n\n형식:\n랜덤 UUID 기반 문자열\n\n예:\nv_8f239...\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client\n\n변경 규칙:\n향후 localStorage에 저장.\n개인의 실제 신원을 의미하지 않음.\nIP, browser fingerprint, device fingerprint를 사용하지 않음.\n\n주의:\n같은 사용자가 다른 브라우저나 기기를 사용하면 다른 visitorId가 될 수 있음.',
+  '역할:\n현재 브라우저 방문 세션의 행동을 구분하기 위한 익명 식별자\n\n형식:\n랜덤 UUID 기반 문자열\n\n예:\ns_29ab1...\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client\n\n변경 규칙:\n향후 sessionStorage에 저장.\n새 브라우저 세션마다 새로 생성.\n개인의 실제 신원을 의미하지 않음.',
+  '역할:\nFormula Drop에서 발생한 행동 유형\n\n형식:\nview / download / import_attempt / import_success / import_failed\n\n예:\ndownload\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client / Licensed Import lifecycle\n\n변경 규칙:\n정의된 event type만 허용.\n운영 Dashboard 집계 기준이므로 기존 이름 변경 금지.',
+  '역할:\nFormula Drop으로 유입된 마케팅 또는 커뮤니티 출처\n\n형식:\n짧은 문자열 또는 direct\n\n예:\nthreads\n\n필수:\nYES\n\n기록 주체:\nAccordbook Client\n\n변경 규칙:\n향후 URL source parameter 및 Drop attribution context에서 결정.\n값이 없으면 direct.\n개인정보를 넣지 않음.',
+  '역할:\n브라우저 referrer의 hostname 부분\n\n형식:\nhostname 또는 빈 값\n\n예:\ncafe.naver.com\n\n필수:\nNO\n\n기록 주체:\nAccordbook Client\n\n변경 규칙:\n전체 URL, path, query string을 저장하지 않음.\nhostname만 저장.',
+  '역할:\nimport_failed 이벤트의 분석용 실패 원인\n\n형식:\n정의된 문자열 또는 빈 값\n\n예:\ninvalid_credentials\n\n필수:\nNO\n\n기록 주체:\nLicensed Import lifecycle\n\n변경 규칙:\nimport_failed 외 이벤트에서는 빈 값.\n실제 코드의 실패 경로와 매핑되는 값만 사용.\n사용자 입력값 또는 raw 오류 전문을 저장하지 않음.\n\n주의:\nPhase 1에서는 failure reason enum을 완전히 고정하지 않음.\nPhase 5에서 실제 Licensed Import lifecycle을 기준으로 최종 확정.',
+];
+
+function formulaDropSpreadsheet_() {
+  const id = PropertiesService.getScriptProperties().getProperty(FORMULA_DROP_SPREADSHEET_ID_PROPERTY);
+  if (!id || !id.trim()) throw new Error('Missing Script Property: FORMULA_DROP_SPREADSHEET_ID');
+  const spreadsheet = SpreadsheetApp.openById(id.trim());
+  const timezone = spreadsheet.getSpreadsheetTimeZone && spreadsheet.getSpreadsheetTimeZone();
+  if (timezone && timezone !== 'Asia/Seoul') Logger.log('WARNING: Spreadsheet timezone is %s; expected Asia/Seoul.', timezone);
+  if (typeof Session !== 'undefined' && Session.getScriptTimeZone && Session.getScriptTimeZone() !== 'Asia/Seoul') Logger.log('WARNING: Apps Script timezone is %s; expected Asia/Seoul.', Session.getScriptTimeZone());
+  return spreadsheet;
+}
+
+function initializeFormulaDropSheets() {
+  const spreadsheet = formulaDropSpreadsheet_();
+  initializeFormulaDropSheet_(spreadsheet, FORMULA_DROPS_SHEET_NAME, FORMULA_DROPS_HEADERS, FORMULA_DROPS_HEADER_NOTES, 'drops');
+  initializeFormulaDropSheet_(spreadsheet, FORMULA_DROP_EVENTS_SHEET_NAME, FORMULA_DROP_EVENTS_HEADERS, FORMULA_DROP_EVENTS_HEADER_NOTES, 'events');
+  return { ok: true, sheets: [FORMULA_DROPS_SHEET_NAME, FORMULA_DROP_EVENTS_SHEET_NAME] };
+}
+
+function initializeFormulaDropSheet_(spreadsheet, name, headers, notes, kind) {
+  let sheet = spreadsheet.getSheetByName(name);
+  if (!sheet) sheet = spreadsheet.insertSheet(name);
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  else checkFormulaDropHeaders_(sheet, name, headers);
+  configureFormulaDropSheet_(sheet, headers, notes, kind);
+}
+
+function checkFormulaDropHeaders_(sheet, name, headers) {
+  const width = Math.max(sheet.getLastColumn(), headers.length);
+  const current = sheet.getRange(1, 1, 1, width).getValues()[0].map(value => String(value));
+  if (current.length !== headers.length || current.some((value, index) => value !== headers[index])) {
+    throw new Error('Formula Drop sheet header mismatch: ' + name + '. No data was changed.');
+  }
+}
+
+function configureFormulaDropSheet_(sheet, headers, notes, kind) {
+  sheet.getRange(1, 1, 1, headers.length).setNotes([notes]);
+  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setWrap(true);
+  sheet.setFrozenRows(1);
+  if (!sheet.getFilter()) sheet.getRange(1, 1, Math.max(sheet.getLastRow(), 1), headers.length).createFilter();
+  const rows = Math.max(sheet.getMaxRows() - 1, 1);
+  const index = header => headers.indexOf(header) + 1;
+  const textColumns = kind === 'drops' ? ['dropId', 'licenseId', 'publicAccessLast4', 'publicAccessPin'] : ['eventId', 'dropId', 'visitorId', 'sessionId'];
+  textColumns.forEach(header => sheet.getRange(2, index(header), rows, 1).setNumberFormat('@'));
+  if (kind === 'drops') {
+    sheet.getRange(2, index('year'), rows, 1).setNumberFormat('0000');
+    sheet.getRange(2, index('sequence'), rows, 1).setNumberFormat('000');
+    ['startAt', 'expiresAt', 'createdAt', 'updatedAt'].forEach(header => sheet.getRange(2, index(header), rows, 1).setNumberFormat('yyyy-mm-dd hh:mm:ss'));
+    sheet.getRange(2, index('status'), rows, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(FORMULA_DROP_STATUSES, true).setAllowInvalid(false).build());
+    ['title', 'subtitle', 'description'].forEach(header => sheet.getRange(2, index(header), rows, 1).setWrap(true));
+    [120, 80, 80, 180, 220, 320, 110, 160, 160, 220, 320, 280, 150, 120, 120, 160, 160].forEach((width, offset) => sheet.setColumnWidth(offset + 1, width));
+  } else {
+    sheet.getRange(2, index('timestamp'), rows, 1).setNumberFormat('yyyy-mm-dd hh:mm:ss');
+    sheet.getRange(2, index('eventType'), rows, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(FORMULA_DROP_EVENT_TYPES, true).setAllowInvalid(false).build());
+    [220, 160, 120, 220, 220, 140, 140, 180, 180].forEach((width, offset) => sheet.setColumnWidth(offset + 1, width));
+  }
+}

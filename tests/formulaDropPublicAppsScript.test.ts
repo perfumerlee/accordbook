@@ -1,0 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { describe, expect, it } from 'vitest'
+const source = readFileSync(new URL('../scripts/apps-script/formula-drop-public/FormulaDropPublic.gs', import.meta.url), 'utf8')
+const admin = readFileSync(new URL('../scripts/apps-script/formula-drop-admin/FormulaDropAdmin.gs', import.meta.url), 'utf8')
+const registry = readFileSync(new URL('../scripts/apps-script/PaidFormulaRegistry.gs', import.meta.url), 'utf8')
+describe('Formula Drop public Apps Script', () => {
+  it('uses the Script Property and event action without a hard-coded ID', () => { expect(source).toContain("FORMULA_DROP_SPREADSHEET_ID_PROPERTY = 'FORMULA_DROP_SPREADSHEET_ID'"); expect(source).toContain('function doPost'); expect(source).toContain("input.action === 'event'"); expect(source).not.toMatch(/SPREADSHEET_ID\s*=\s*['"][^'"]+['"]/g) })
+  it('validates the canonical event contract and appends server time in canonical order', () => { expect(source).toContain("const FORMULA_DROP_EVENT_HEADERS = ['eventId', 'timestamp', 'dropId', 'visitorId', 'sessionId', 'eventType', 'source', 'referrerHost', 'failureReason']"); expect(source).toContain('new Date()'); expect(source).toContain('dropExists_'); expect(source).toContain('events.appendRow([input.eventId, new Date(), input.dropId') })
+  it('adds read actions with an allowlisted public projection', () => { expect(source).toContain("input.action === 'list-drops'"); expect(source).toContain("input.action === 'get-drop'"); expect(source).toContain('function publicDrop_'); expect(source).toContain("replace(/^DROP-/, '')"); expect(source).toContain('status === \'ACTIVE\''); expect(source).not.toContain('publicAccessPin:') })
+  it('deduplicates exact event IDs under a Script Lock', () => { expect(source).toContain('eventExists_(events, input.eventId)'); expect(source).toContain('duplicate: true'); expect(source).toContain('LockService.getScriptLock()'); expect(source).toContain('finally { if (lock && lock.hasLock()) lock.releaseLock(); }') })
+  it('keeps admin, registry, and public boundaries separate and non-destructive', () => { expect(admin).toContain('function initializeFormulaDropSheets()'); expect(registry).toContain("const SHEET_NAME = 'PaidFormulaLicenses';"); expect(source).not.toMatch(/\.clear(?:Contents|Format)?\s*\(/); expect(source).not.toMatch(/\.delete(?:Rows|Columns)\s*\(/); expect(source).not.toMatch(/buyerName|phoneLast4|pinVerifier|requestVerifier/) })
+})
