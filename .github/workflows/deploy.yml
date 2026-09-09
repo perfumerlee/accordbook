@@ -35,7 +35,18 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Validate Formula Drop API configuration
+        env:
+          VITE_FORMULA_DROP_PUBLIC_API_URL: ${{ vars.VITE_FORMULA_DROP_PUBLIC_API_URL }}
+        run: |
+          if [ -z "$VITE_FORMULA_DROP_PUBLIC_API_URL" ]; then
+            echo "VITE_FORMULA_DROP_PUBLIC_API_URL is not configured."
+            exit 1
+          fi
+
       - name: Build
+        env:
+          VITE_FORMULA_DROP_PUBLIC_API_URL: ${{ vars.VITE_FORMULA_DROP_PUBLIC_API_URL }}
         run: npm run build
 
       - name: Setup Pages
