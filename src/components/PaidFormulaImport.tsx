@@ -75,7 +75,7 @@ export default function PaidFormulaImport({ file, language, onImport, onClose }:
           if (lockMatch) {
             setNow(Date.now())
             setLockedUntil(Date.now() + Number(lockMatch[1]) * 1000)
-          } else { if (dropContext) void sendFormulaDropEvent(createFormulaDropEvent(dropContext.dropId, 'import_failed', { failureReason: caught instanceof Error && caught.message === 'Invalid buyer credentials' ? 'invalid_credentials' : 'import_failed' })); setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요. 인증에 5회 실패하면 30분 동안 다시 시도할 수 없습니다.' : 'The file could not be imported. Check your information and try again. Five failed verification attempts prevent another attempt for 30 minutes.') }
+          } else { if (dropContext) void sendFormulaDropEvent(createFormulaDropEvent(dropContext.dropId, 'import_failed', { failureReason: caught instanceof Error && caught.message === 'Invalid buyer credentials' ? 'invalid_credentials' : 'import_failed' })); setError(ko ? '파일을 가져오지 못했습니다. 입력한 정보를 확인한 후 다시 시도해주세요. 인증 실패가 누적되면 일시적으로 잠길 수 있으며, 잠금 시 남은 시간이 표시됩니다.' : 'The file could not be imported. Check your information and try again. Repeated verification failures may temporarily lock import; the remaining wait will be shown when locked.') }
         }
       }
       finally { running.current = false; if (mounted.current) setBusy(false) }

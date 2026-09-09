@@ -15,7 +15,7 @@ const HEADER_NOTES = [
   '패키지 인증 방식입니다.',
   '중복 등록 요청 검증용 서버 값입니다. 직접 수정하거나 삭제하지 마세요.',
   '현재까지 누적된 인증 실패 횟수입니다. 정상 인증 성공 시 0으로 초기화됩니다.',
-  '인증 잠금이 해제되는 시각입니다. 5회 실패 시 30분 잠깁니다.',
+  '인증 잠금이 해제되는 시각입니다. 일반: 5회/30분, shared: 10회/5분.',
   '마지막 정상 인증 시각입니다.'
 ];
 
@@ -60,6 +60,7 @@ function doPost(e) {
     const props = PropertiesService.getScriptProperties();
     const sellerToken = configValue_('SELLER_TOKEN') || props.getProperty('SELLER_TOKEN');
     const pepper = configValue_('PIN_PEPPER') || props.getProperty('PIN_PEPPER');
+    if (input.action === 'admin-set-shared') return adminSetShared_(input, props);
     if (input.action === 'admin-revoke') return adminRevoke_(input, props);
     if (input.action === 'admin-license-status') return adminLicenseStatus_(input, props);
     if (input.action === 'lock-status') return lockStatus_(input);
@@ -68,6 +69,8 @@ function doPost(e) {
     if (typeof input.buyerName !== 'string' || typeof input.productName !== 'string' || typeof input.phone !== 'string' || typeof input.pin !== 'string' || typeof input.packageId !== 'string') return reply_({ ok: false });
     const name = input.buyerName.normalize('NFC').trim();
     if (!name || name.length > 100 || input.productName.length > 1000 || !/^010-\d{4}-\d{4}$/.test(input.phone) || !/^\d{6}$/.test(input.pin) || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.packageId)) return reply_({ ok: false });
+    const accessMode = 'standard';
+    if (input.accessMode !== undefined && input.accessMode !== 'standard') return reply_({ ok: false });
     const pinVerifier = hmac_(JSON.stringify([input.packageId, name, input.phone.slice(-4), input.pin]), pepper);
     const requestVerifier = hmac_(JSON.stringify([input.packageId, name, input.phone, input.pin, input.productName]), pepper);
     lock = LockService.getScriptLock();
@@ -81,10 +84,10 @@ function doPost(e) {
       const existing = ids.findIndex(row => row[0] === input.packageId);
       if (existing >= 0) {
         const row = sheet.getRange(existing + 2, 1, 1, HEADERS.length).getValues()[0];
-        return reply_({ ok: row[9] === requestVerifier && row[6] === 'active', packageId: input.packageId });
+        return reply_({ ok: row[9] === requestVerifier && row[6] === 'active' && (row[8] === 'standard' || row[8] === 'shared'), packageId: input.packageId });
       }
     }
-    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date(), 'offline-credentials-v1', requestVerifier, 0, '', ''];
+    const row = [input.packageId, safeCell_(name), input.phone, input.phone.slice(-4), pinVerifier, safeCell_(input.productName), 'active', new Date(), accessMode, requestVerifier, 0, '', ''];
     const range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, HEADERS.length);
     range.setNumberFormat('@');
     range.setValues([row]);
@@ -131,6 +134,33 @@ function adminLicenseStatus_(input, props) {
     return reply_({ ok: false, error: 'internal_error' });
   }
 }
+function adminSetShared_(input, props) {
+  let lock;
+  try {
+    if (!authorizeAdmin_(input, props)) return reply_({ ok: false, error: 'unauthorized' });
+    if (!validPackageId_(input.packageId)) return reply_({ ok: false, error: 'invalid_request' });
+    lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+    if (!sheet) return reply_({ ok: false, error: 'not_found' });
+    checkHeaders_(sheet);
+    const matches = adminRows_(sheet, input.packageId);
+    if (matches.length === 0) return reply_({ ok: false, error: 'not_found' });
+    if (matches.length !== 1) return reply_({ ok: false, error: 'ambiguous' });
+    const item = matches[0];
+    if (item.row[6] !== 'active') return reply_({ ok: false, error: 'invalid_license_state' });
+    if (item.row[8] !== 'standard' && item.row[8] !== 'shared') return reply_({ ok: false, error: 'invalid_request' });
+    if (item.row[8] !== 'shared') {
+      sheet.getRange(item.rowNumber, 9, 1, 1).setValues([['shared']]);
+      SpreadsheetApp.flush();
+      if (sheet.getRange(item.rowNumber, 9, 1, 1).getValues()[0][0] !== 'shared') throw new Error('write_failed');
+    }
+    return reply_({ ok: true, accessMode: 'shared' });
+  } catch (_) {
+    return reply_({ ok: false, error: 'internal_error' });
+  } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+
 function adminRevoke_(input, props) {
   let lock;
   try {
@@ -181,17 +211,20 @@ function verifyLicense_(input, pepper) {
     if (count <= 0) return reply_({ ok: false });
     const row = sheet.getRange(2, 1, count, HEADERS.length).getValues().find(row => row[0] === input.packageId);
     if (!row) return reply_({ ok: false });
-    const attempts = Number(row[10] || 0);
+    if (row[8] !== 'standard' && row[8] !== 'shared') return reply_({ ok: false });
+    const isFormulaDrop = row[8] === 'shared';
     const lockedUntil = row[11] ? new Date(row[11]).getTime() : 0;
+    const attempts = isFormulaDrop && lockedUntil > 0 && lockedUntil <= Date.now() ? 0 : Number(row[10] || 0);
     if (lockedUntil > Date.now()) return reply_({ ok: false, locked: true, retryAfterSeconds: Math.ceil((lockedUntil - Date.now()) / 1000) });
     const expected = hmac_(JSON.stringify([input.packageId, input.buyerName.normalize('NFC').trim(), input.phoneLast4, input.pin]), pepper);
     if (row[6] !== 'active' || row[4] !== expected) {
       const nextAttempts = attempts + 1;
-      const nextLocked = nextAttempts >= 5 ? new Date(Date.now() + 30 * 60 * 1000) : '';
+      const lockSeconds = isFormulaDrop ? 300 : 1800;
+      const nextLocked = nextAttempts >= (isFormulaDrop ? 10 : 5) ? new Date(Date.now() + lockSeconds * 1000) : '';
       const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
       sheet.getRange(rowIndex, 11, 1, 2).setValues([[nextAttempts, nextLocked]]);
       SpreadsheetApp.flush();
-      return nextLocked ? reply_({ ok: false, locked: true, retryAfterSeconds: 1800 }) : reply_({ ok: false });
+      return nextLocked ? reply_({ ok: false, locked: true, retryAfterSeconds: lockSeconds }) : reply_({ ok: false });
     }
     const rowIndex = sheet.getRange(2, 1, count, 1).getValues().findIndex(item => item[0] === input.packageId) + 2;
     sheet.getRange(rowIndex, 11, 1, 3).setValues([[0, '', new Date()]]);

@@ -53,4 +53,47 @@ it('Apps Script authenticates sellers, records verifiers and deduplicates retrie
   rows[1][6] = 'revoked'
   expect(post(verify).ok).toBe(false)
   expect(post(request).ok).toBe(false)
+  const dropRequest = { ...request, packageId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', accessMode: 'standard' }
+  expect(post({ ...dropRequest, sellerToken: 'wrong' }).ok).toBe(false)
+  expect(post({ ...dropRequest, accessMode: 'unknown' }).ok).toBe(false)
+  expect(rows).toHaveLength(2)
+  expect(post(dropRequest).ok).toBe(true)
+  expect(post(dropRequest).ok).toBe(true)
+  expect(post({ ...dropRequest, accessMode: 'shared' }).ok).toBe(false)
+  const sharing = { action: 'admin-set-shared', packageId: dropRequest.packageId, adminSecret: 'pepper-secret-'.repeat(4) }
+  expect(post({ ...sharing, adminSecret: 'wrong' })).toEqual({ ok: false, error: 'unauthorized' })
+  const beforeSharing = rows[2].slice()
+  expect(post(sharing)).toEqual({ ok: true, accessMode: 'shared' })
+  expect(rows[2]).toEqual(beforeSharing.map((value, index) => index === 8 ? 'shared' : value))
+  expect(post(sharing)).toEqual({ ok: true, accessMode: 'shared' })
+  expect(post(dropRequest).ok).toBe(true)
+  expect(rows[2][8]).toBe('shared')
+  rows.push(rows[2].slice())
+  expect(post(sharing)).toEqual({ ok: false, error: 'ambiguous' })
+  rows.pop()
+  expect(rows).toHaveLength(3)
+  expect(rows[2][8]).toBe('shared')
+  const dropVerify = { ...verify, packageId: dropRequest.packageId }
+  const bad = { ...dropVerify, pin: '999999', accessMode: 'standard' }
+  for (let i = 1; i < 10; i++) {
+    expect(post(bad)).toEqual({ ok: false })
+    expect(rows[2][10]).toBe(i)
+  }
+  expect(post(bad)).toEqual({ ok: false, locked: true, retryAfterSeconds: 300 })
+  expect(post({ action: 'lock-status', packageId: dropRequest.packageId }).locked).toBe(true)
+  expect(post(dropVerify).locked).toBe(true)
+  expect(rows[2][10]).toBe(10)
+  rows[2][11] = new Date(Date.now() - 1000)
+  expect(post(bad)).toEqual({ ok: false })
+  expect(rows[2][10]).toBe(1)
+  expect(rows[2][11]).toBe('')
+  expect(post(dropVerify)).toEqual({ ok: true, packageId: dropRequest.packageId })
+  expect(rows[2][10]).toBe(0)
+  rows[2][6] = 'revoked'
+  expect(post(sharing)).toEqual({ ok: false, error: 'invalid_license_state' })
+  expect(post(dropVerify).ok).toBe(false)
+  // A caller cannot opt a standard license into the relaxed policy during verify.
+  rows[1][6] = 'active'
+  rows[1][10] = 4
+  expect(post({ ...verify, pin: '999999', accessMode: 'shared' })).toEqual({ ok: false, locked: true, retryAfterSeconds: 1800 })
 })

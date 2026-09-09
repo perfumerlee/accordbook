@@ -60,3 +60,22 @@ The browser receives only `active`, `revoked`, or a normalized unavailable/confi
 Drop 종료가 성공한 뒤 Registry revoke가 실패하면 상태를 되돌리지 않습니다. 화면에는 partial 상태를 표시하고, EXPIRED Drop에 표시되는 `REVOKE LICENSE`로 재시도할 수 있습니다. DRAFT/SCHEDULED에는 revoke 동작이 없습니다.
 
 브라우저는 licenseId나 Secret을 보내지 않고 dropId와 확인용 Drop ID만 보냅니다. Registry Secret은 Apps Script Script Properties에만 있습니다. revoke는 되돌릴 수 없으며, 이미 정상 Import된 로컬 Formula를 삭제하지 않습니다. 기존 `END DROP`은 계속 Drop만 종료하고 Licensed Formula를 revoke하지 않습니다.
+# Shared license policy on save
+
+Registry `accessMode` values are `standard` (5 failures / 30 minutes) and
+`shared` (10 failures / 5 minutes). Export initially registers standard.
+Saving a Drop with a licenseId, scheduling, or activating confirms shared through
+the server-only `admin-set-shared` Registry action before writing the Drop.
+Blank Drafts require no Registry connection. Existing shared mode is idempotent.
+Policy confirmation failure blocks local save and reports license_policy_not_confirmed.
+The Admin Script Lock covers validation, remote confirmation and local write so
+another Admin save cannot change the mapping during this operation. Slow Registry
+requests can therefore delay other Admin mutations.
+
+The two projects do not share a transaction: a remote timeout or subsequent local
+write failure may leave the License shared even if the Drop was not saved. Reopen
+and retry; there is no automatic rollback to standard. Removing a license mapping
+or ending a Drop does not reset its mode. END DROP and revoke semantics are unchanged.
+Update Registry first, then replace the entire Admin GS/HTML files and deploy.
+The operator migrates old Registry modes to standard; old names are unsupported.
+The encrypted file's accessMode is a separate file-format marker and is unchanged.
