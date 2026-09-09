@@ -6,6 +6,14 @@ Phase 3 read actions are `list-drops` and `get-drop`. Their response is an expli
 
 The Phase 3 detail page sends one `view` event after a public Drop is successfully loaded. The `/drop` index does not send a view event. Download and import events remain future-phase behavior.
 
+## Phase 4 download action
+
+The `get-download` action is the only Phase 4 access action. It rechecks the current Drop status and dates, requires valid `fileName`, HTTPS `fileUrl`, `publicAccessName`, four-digit `publicAccessLast4`, and six-digit `publicAccessPin`, then appends one `download` raw event under a Script Lock. A repeated request with the same `eventId` returns `duplicate: true` without appending another row, while a new event ID remains a genuine repeated download.
+
+The successful response contains only the file download projection and campaign access values. It does not query `PaidFormulaLicenses`, return `licenseId`, or return private buyer credentials. The encrypted `.accordbook` package and the existing Licensed Formula verification remain the actual import gate. `fileUrl` is an operational location, not a credential.
+
+The client treats `download` as “the user initiated a valid download action”; it does not claim that the operating system completed the save. Access details are revealed only after the successful download request. DRAFT, SCHEDULED, EXPIRED, date-invalid, and incomplete Drops fail closed without creating a download event.
+
 ## Setup
 
 1. Create a standalone Apps Script project named `Accordbook Formula Drop Public API`.
