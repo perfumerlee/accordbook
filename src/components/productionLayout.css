@@ -273,10 +273,12 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 .tm-timeline .tm-current>label{grid-column:2;grid-row:1 / 4;display:flex;align-items:center;justify-content:center;font-size:0}
 .tm-timeline .tm-current>label input{margin:0;font-size:initial}
 .tm-timeline>.tm-save{order:2}
-.tm-timeline>div:has(>.tm-item){order:3;display:flex;flex-direction:column}
+.tm-timeline>.tm-save-box{order:3}
+.tm-timeline>.tm-empty{order:4}
+.tm-timeline>div:has(>.tm-item){order:4;display:flex;flex-direction:column}
 .tm-timeline>div:has(>.tm-item)> .tm-item{order:1}
 .tm-timeline>div:has(>.tm-item)>input{order:2;align-self:flex-end;margin:0 8px 0 0}
-.tm-timeline>.tm-restore-action{order:4;justify-content:space-between;align-items:center;margin-top:24px}
+.tm-timeline>.tm-restore-action{order:5;justify-content:space-between;align-items:center;margin-top:24px}
 .tm-timeline>.tm-restore-action .tm-restore-button{margin-left:auto}
 .tm-timeline .tm-current>label input,
 .tm-timeline>div:has(>.tm-item)>input{display:block;align-self:start;accent-color:var(--accent,#c9773c);width:14px;height:14px}
