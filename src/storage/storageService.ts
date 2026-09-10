@@ -6,6 +6,7 @@ import { SettingsRepository } from './settingsRepository'
 import type { Formula } from '../models/formula'
 import type { AccordbookBackupData } from '../models/backup'
 import { VersionRepository } from './versionRepository'
+import { ExperimentRepository } from './experimentRepository'
 
 export type AutosaveStatus = 'saving' | 'saved-locally' | 'session-only'
 
@@ -16,6 +17,7 @@ export interface AccordbookStorage {
   settings: SettingsRepository
   meta: MetaRepository
   versions: VersionRepository
+  experiments: ExperimentRepository
   saveFormula(formula: Formula): Promise<AutosaveStatus>
   exportData(): Promise<AccordbookBackupData>
   importData(data: AccordbookBackupData): Promise<void>
@@ -31,6 +33,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
     settings: new SettingsRepository(database),
     meta: new MetaRepository(database),
     versions: new VersionRepository(database),
+    experiments: new ExperimentRepository(database),
     async saveFormula(formula) {
       try {
         await formulas.save(formula)
@@ -39,7 +42,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
         return 'session-only'
       }
     },
-    async exportData() { return { settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), meta: await (new MetaRepository(database)).getAll() } },
+    async exportData() { return { settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), experiments: await (new ExperimentRepository(database)).list(), meta: await (new MetaRepository(database)).getAll() } },
     async importData(data) { await database.replaceAll(data) },
   }
 }

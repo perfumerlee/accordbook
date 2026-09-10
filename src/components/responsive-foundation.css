@@ -65,17 +65,22 @@
   .note-header { position: relative; }
   .tablet-utility-row { --utility-height: 34px; --utility-radius: 12px; --utility-border: 1px solid rgba(185,168,144,.75); --utility-bg: rgba(255,250,240,.6); grid-column: 1 / -1; display: flex; align-items: center; justify-content: flex-start; column-gap: 16px; min-width: 0; padding-top: 4px; }
   .tablet-utility-row .utility-actions { display: flex; align-items: center; gap: 8px; min-width: 0; margin-left: 0; }
+  .tablet-utility-row .utility-actions .notebook-toggle { order: 0; }
+  .tablet-utility-row .utility-actions .language-toggle { order: 1; }
   .tablet-utility-row .lang-btn { width: 34px; padding: 0; }
   .tablet-utility-row .lang-btn::after { display: none; }
   .tablet-utility-row .notebook-toggle,
   .tablet-utility-row .tm-page-action { box-sizing: border-box; flex: 0 0 auto; min-height: var(--utility-height); height: var(--utility-height); border: var(--utility-border); border-radius: var(--utility-radius); background: var(--utility-bg); color: var(--muted); }
   .tablet-utility-row .notebook-toggle { position: static; display: inline-flex; align-items: center; width: max-content; margin: 0; padding: 5px 8px; }
+  .note-header .tablet-utility-row .notebook-toggle { display: inline-flex !important; }
   .tablet-utility-row .tm-page-action,
   .note-header .tm-page-action { display: inline-flex; align-items: center; justify-content: center; width: max-content; max-width: none; min-height: 34px; height: 34px; margin: 0; padding: 4px 11px; white-space: nowrap; font-size: 0; gap: 3px; letter-spacing: 0; border-radius: 999px !important; overflow: hidden; }
   .tablet-utility-row .tm-page-action::before,
   .note-header .tm-page-action::before { content: ''; display: block; flex: 0 0 15px; width: 15px; height: 15px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M12 3v2M21 12h-2M12 21v-2M3 12h2M12 7v5l3.2 2' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M12 3v2M21 12h-2M12 21v-2M3 12h2M12 7v5l3.2 2' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; color: currentColor; }
   .tablet-utility-row .tm-page-action::after { font-size: 10px; letter-spacing: .04em; }
   .tablet-utility-row > .tm-page-action { margin-left: auto; }
+  .tablet-utility-row > .workspace-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-left: auto; min-width: 0; flex: 0 1 auto; flex-wrap: nowrap; }
+  .tablet-utility-row > .workspace-actions > :is(.experiments-page-action,.tm-page-action) { position: static; flex: 0 1 auto; min-width: 0; width: auto; max-width: none; margin: 0; transform: none; }
   .app .main .notebook .note-header .tablet-utility-row .notebook-toggle { display: inline-flex; position: static; z-index: 2; align-items: center; gap: 7px; min-width: 0; max-height: var(--utility-height); font: 10px ui-monospace, monospace; letter-spacing: .04em; }
   .note-header .tablet-utility-row .notebook-toggle::before { content: ''; display: block; flex: 0 0 15px; width: 15px; height: 15px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='4' width='16' height='16' rx='1.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M9 4v16M12.5 8h4M12.5 12h4M12.5 16h4' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='4' width='16' height='16' rx='1.5' fill='none' stroke='black' stroke-width='1.35'/%3E%3Cpath d='M9 4v16M12.5 8h4M12.5 12h4M12.5 16h4' fill='none' stroke='black' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat; }
   .note-header .tablet-utility-row .notebook-toggle::after { content: 'NOTEBOOK'; }

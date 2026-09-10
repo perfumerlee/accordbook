@@ -1,0 +1,133 @@
+/* Experiment-only presentation: never targets the Formula or Time Machine. */
+.experiment-entry-content .experiment-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line-soft);font:12px/1.4 Inter,Pretendard,sans-serif;color:var(--muted)}
+.experiment-entry-content:has(.experiment-index){display:flex;flex-direction:column}
+.experiment-entry-content .experiment-index{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.experiment-entry-content:has(.experiment-create){overflow:auto}
+.experiment-entry-content .experiment-action{min-height:36px;padding:8px 14px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--ink);font:12px/1.4 Inter,Pretendard,sans-serif;cursor:pointer}
+.experiment-entry-content .experiment-action--primary{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}
+.experiment-entry-content .experiment-action:hover{filter:brightness(.94)}
+.experiment-entry-content :is(button,input):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.experiment-entry-content .experiment-list-item{display:grid;grid-template-columns:minmax(0,1fr) 24px;gap:7px 16px;width:100%;padding:16px 4px;text-align:left;border:0;border-bottom:1px solid var(--line-soft);background:none;color:var(--ink);cursor:pointer}
+.experiment-entry-content .experiment-list-item:hover{background:var(--paper-2)}
+.experiment-entry-content .experiment-list-item__name{font:400 20px/1.3 Georgia,"Noto Serif KR",serif;overflow-wrap:anywhere}
+.experiment-entry-content .experiment-list-item__meta{display:flex;flex-wrap:wrap;gap:6px 20px;font:12px/1.5 Inter,Pretendard,sans-serif;color:var(--muted);font-variant-numeric:tabular-nums}
+.experiment-entry-content .experiment-list-item__arrow{grid-column:2;grid-row:1 / span 2;align-self:center;color:var(--muted);font:19px Georgia,serif}
+.experiment-entry-content .experiment-empty{padding:28px 4px 32px;color:var(--muted);font:14px/1.6 Inter,Pretendard,sans-serif}
+.experiment-entry-content .experiment-empty p{margin:0 0 8px;color:var(--ink);font:22px Georgia,"Noto Serif KR",serif}
+.experiment-entry-content .experiment-create{display:grid;gap:22px}
+.experiment-entry-content .experiment-name-field{display:grid;gap:8px}
+.experiment-entry-content :is(.experiment-name-field>span,.experiment-sources legend){color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.08em}
+.experiment-entry-content .experiment-name-field input{box-sizing:border-box;width:100%;min-width:0;height:44px;padding:6px 4px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--ink);font:22px/1.3 Georgia,"Noto Serif KR",serif}
+.experiment-entry-content .experiment-sources{min-width:0;margin:0;padding:0;border:0}
+.experiment-entry-content .experiment-sources legend{padding:0 0 10px}
+.experiment-entry-content .experiment-source-option{display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:center;gap:12px;padding:13px 8px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.experiment-entry-content .experiment-source-option:has(input:checked){background:var(--paper-2)}
+.experiment-entry-content .experiment-source-option input{width:14px;height:14px;margin:0;accent-color:var(--muted)}
+.experiment-entry-content .experiment-source-option>span{display:grid;gap:4px}
+.experiment-entry-content .experiment-source-option strong{font:500 14px/1.3 Inter,Pretendard,sans-serif;color:var(--ink)}
+.experiment-entry-content .experiment-source-option :is(small,time){color:var(--muted);font:12px/1.4 Inter,Pretendard,sans-serif}
+.experiment-entry-content .experiment-create-actions{display:flex;justify-content:space-between;gap:16px;padding-top:16px;border-top:1px solid var(--border)}
+.experiment-entry-content .create-error{color:var(--danger);font:13px/1.5 Inter,Pretendard,sans-serif}
+.experiment-detail button{cursor:pointer}
+.experiment-detail button:disabled{opacity:.4;cursor:default}
+.experiment-delete-confirm{padding:24px 0 8px;color:var(--ink)}
+.experiment-delete-confirm h2{margin:0 0 14px;font:22px Georgia,"Noto Serif KR",serif}
+.experiment-delete-confirm p{margin:8px 0;color:var(--muted);font:13px/1.6 Inter,Pretendard,sans-serif}
+.experiment-delete-confirm__warning{color:var(--danger)!important;font-size:12px!important}
+.experiment-action--danger{background:var(--ink)!important;color:var(--paper)!important}
+.experiment-delete-confirm .experiment-create-actions{justify-content:flex-end;gap:16px!important;padding-top:20px;margin-top:18px}
+.experiment-delete-confirm .experiment-action{min-height:36px;padding:8px 15px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--ink);font:12px/1.4 Inter,Pretendard,sans-serif;cursor:pointer}
+.experiment-delete-confirm .experiment-action--primary{background:var(--danger);border-color:var(--danger);color:var(--paper-2)}
+.experiment-delete-confirm .experiment-action--danger{margin-left:4px}
+.experiment-delete-confirm .experiment-action:hover{filter:brightness(.94)}
+.wide-workspace__header-actions{display:flex;align-items:center;gap:12px}
+.experiment-delete-action{border:1px solid color-mix(in srgb,var(--danger) 42%,var(--line-soft));border-radius:3px;background:transparent;padding:6px 9px;color:var(--danger);font:10px/1.2 Inter,Pretendard,sans-serif;letter-spacing:.03em;cursor:pointer}
+.experiment-delete-action:hover{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent);color:var(--danger)}
+.experiment-name-edit-action{height:28px;box-sizing:border-box;border:1px solid var(--border);border-radius:3px;background:transparent;padding:0 9px;color:var(--muted);font:10px/1 Inter,Pretendard,sans-serif;letter-spacing:.03em;cursor:pointer;transform:none}
+.experiment-name-edit-action:hover{border-color:var(--ink);color:var(--ink);background:var(--paper-2)}
+.wide-workspace__header-actions .experiment-delete-action{white-space:nowrap;transform:translateY(2px)}
+.wide-workspace__header-actions .experiment-delete-action{height:28px;box-sizing:border-box;display:inline-flex;align-items:center;transform:none}
+.experiment-name-edit-modal{padding:24px 0 8px}.experiment-name-edit-modal label{display:grid;gap:9px;color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.08em}.experiment-name-edit-modal input{box-sizing:border-box;width:100%;height:42px;border:1px solid var(--border);border-radius:4px;background:transparent;padding:8px 10px;color:var(--ink);font:15px Georgia,"Noto Serif KR",serif;letter-spacing:0}.experiment-name-edit-modal .experiment-create-actions{justify-content:flex-end;gap:16px!important;margin-top:20px}.experiment-name-edit-modal .experiment-action{min-height:36px;padding:8px 15px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--ink);font:12px/1.4 Inter,Pretendard,sans-serif;cursor:pointer}.experiment-name-edit-modal .experiment-action--primary{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}.experiment-name-edit-modal .experiment-action:hover{filter:brightness(.94)}
+.experiment-detail :is(button,input,textarea):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.experiment-detail .experiment-navigation{display:flex;justify-content:space-between;gap:20px;align-items:center;border-bottom:1px solid var(--line-soft)}
+.experiment-detail .experiment-tabs{display:flex;flex-wrap:wrap;gap:10px}
+.experiment-detail .experiment-tabs button{border:0;border-bottom:2px solid transparent;background:none;padding:12px 10px;color:var(--muted);font:13px "Courier New",monospace}
+.experiment-detail .experiment-tabs button.active{border-bottom-color:var(--accent);color:var(--ink)}
+.experiment-detail .experiment-navigation-actions{display:flex;gap:8px;flex-shrink:0}
+.experiment-detail :is(.experiment-navigation-actions,.experiment-editor-actions) button{border:1px solid var(--border);border-radius:4px;background:transparent;padding:9px 12px;color:var(--ink);font:11px/1.4 Inter,Pretendard,sans-serif;letter-spacing:.03em}
+.experiment-detail .experiment-navigation-actions button:first-child,.experiment-detail .experiment-editor-actions button{border-color:var(--ink);background:var(--ink);color:var(--paper-2)}
+.experiment-detail .experiment-navigation-actions button:first-child:hover,.experiment-detail .experiment-editor-actions button:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.experiment-detail button:hover{background:var(--paper-2)}
+.experiments-layer{position:fixed;inset:0;z-index:1100;isolation:isolate;overflow:auto;overscroll-behavior:contain;outline:none}
+.experiments-layer .experiment-detail,.experiments-layer .experiment-comparison-sheet{box-sizing:border-box;min-height:100vh;min-height:100dvh;position:relative}
+.experiments-layer .experiment-modal-backdrop{z-index:2}
+.experiment-detail .experiment-state-selector{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line-soft);font:13px "Courier New",monospace}
+.experiment-detail .experiment-selector-caption{display:grid;gap:5px;margin-right:auto}
+.experiment-detail .experiment-selector-caption strong{font-weight:400}
+.experiment-detail .experiment-selector-caption span{font:12px Inter,Pretendard,sans-serif;color:var(--muted)}
+.experiment-detail .experiment-state-selector label{display:flex;align-items:center;gap:6px}
+.experiment-detail .experiment-state-selector input{accent-color:var(--muted)}
+.experiment-detail .experiment-notebook{margin-top:24px}
+.experiment-detail .experiment-variant-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px;color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.06em}
+.experiment-detail .experiment-variant-heading__actions{display:flex;align-items:center;gap:14px}
+.experiment-detail .experiment-read-only-badge{padding:3px 7px;background:rgba(244,205,93,.42);box-shadow:inset 0 -2px 0 rgba(201,119,60,.18);color:var(--ink)}
+.experiment-detail .experiment-delete-cell{text-align:center;color:var(--muted);font:14px "Courier New",monospace}
+.experiment-detail .experiment-save-status{display:inline-flex;align-items:center;gap:6px;color:var(--muted);white-space:nowrap}
+.experiment-detail .experiment-save-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;flex:0 0 6px}
+.experiment-detail .experiment-save-status[data-state="saving"]{color:var(--accent)}
+.experiment-detail .experiment-save-status[data-state="saving"]::before{background:var(--accent)}
+.experiment-detail .experiment-save-status[data-state="failed"]{color:var(--danger)}
+.experiment-detail .experiment-save-status[data-state="failed"]::before{background:var(--danger)}
+.experiment-detail .experiment-delete-variant{border:1px solid color-mix(in srgb,var(--danger) 42%,var(--line-soft));border-radius:3px;background:transparent;padding:6px 9px;color:var(--danger);font:10px/1.2 Inter,Pretendard,sans-serif;letter-spacing:.03em}
+.experiment-detail .experiment-delete-variant:hover{border-color:var(--danger);color:var(--danger);background:transparent}
+.experiment-detail .experiment-material-table{width:100%;table-layout:fixed;border-collapse:collapse}
+.experiment-detail .experiment-material-table :is(th,td){box-sizing:border-box;padding:0 10px}
+.experiment-detail .experiment-material-table th{height:38px;border-bottom:1px solid var(--border);text-align:left;color:var(--muted);font:11px "Courier New",monospace;letter-spacing:.04em}
+.experiment-detail .experiment-material-table th:first-child{width:7%;text-align:right}
+.experiment-detail .experiment-material-table th:nth-child(2){width:32%}
+.experiment-detail .experiment-material-table th:nth-child(3){width:180px}
+.experiment-detail .experiment-material-table th:nth-child(4){width:34%}
+.experiment-detail .experiment-material-table th:last-child{width:36px}
+.experiment-detail .experiment-material-table td{height:46px;border-bottom:1px solid var(--line-soft);vertical-align:middle;overflow-wrap:anywhere}
+.experiment-detail .experiment-material-table input{box-sizing:border-box;width:100%;min-width:0;height:44px;padding:4px 0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit}
+.experiment-detail .experiment-parts{text-align:right;font:15px "Courier New",monospace;font-variant-numeric:tabular-nums}
+.experiment-detail .experiment-parts input{text-align:right}
+.experiment-detail .experiment-material{font:italic 18px Georgia,"Noto Serif KR",serif}
+.experiment-detail .experiment-material-dilution{display:inline-block;margin-left:10px;color:var(--muted);font:11px/1.3 "Courier New",monospace;font-style:normal;white-space:nowrap}
+.experiment-detail .experiment-row-memo{color:var(--muted);font:12px/1.35 Inter,Pretendard,sans-serif;overflow-wrap:anywhere}
+.experiment-detail .experiment-row-memo input{height:34px;font:12px/1.35 Inter,Pretendard,sans-serif;border-bottom:1px dashed var(--line-soft)}
+.experiment-detail .experiment-row--marked{background:rgba(116,196,178,.33)}
+.experiment-detail .experiment-material input:disabled{color:var(--ink);opacity:.9;cursor:default}
+.experiment-detail .experiment-cas{font:12px "Courier New",monospace;color:var(--muted)}
+.experiment-detail .experiment-dilution{font:11px "Courier New",monospace;color:var(--muted)}
+.experiment-detail div.experiment-dilution{display:flex;align-items:center;gap:7px}
+.experiment-detail .experiment-dilution-value{color:var(--muted);font:11px/1.3 "Courier New",monospace;white-space:nowrap}
+.experiment-detail .experiment-dilution>button:disabled + .experiment-dilution-fields{pointer-events:none;opacity:.65}
+.experiment-detail .experiment-dilution>button{font:10px "Courier New",monospace;border:1px solid var(--border);border-radius:3px;background:none;padding:5px;color:var(--muted)}
+.experiment-detail .experiment-dilution>button[aria-pressed=true]{border-color:var(--accent);color:var(--ink)}
+.experiment-detail .experiment-dilution>button[aria-pressed=true]{background:rgba(244,205,93,.42);box-shadow:inset 0 -2px 0 rgba(201,119,60,.22)}
+.experiment-detail .experiment-dilution-badge--active{background:rgba(244,205,93,.42)!important;border-color:var(--accent)!important;box-shadow:inset 0 -2px 0 rgba(201,119,60,.22);color:var(--ink);opacity:1}
+.experiment-detail td.experiment-dilution .experiment-dilution-badge--active{margin-right:7px}
+.experiment-detail .experiment-dilution-fields{display:flex;align-items:center;gap:3px;min-width:0;white-space:nowrap}
+.experiment-detail .experiment-dilution-fields input{width:36px;height:32px;border-bottom:1px solid var(--border);font:12px "Courier New",monospace}
+.experiment-detail .experiment-dilution-fields input:last-child{width:42px}
+.experiment-detail .experiment-remove{border:0;background:none;padding:4px;color:var(--muted);font:20px Georgia,serif}
+.experiment-detail .experiment-editor-actions{display:flex;justify-content:flex-end;padding:16px 0}
+.experiment-detail .experiment-summary{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;border-top:1px solid var(--border);padding-top:20px;margin-top:24px}
+.experiment-detail .wide-workspace__header-actions{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.experiment-detail .wide-workspace__content{min-width:0}
+@media(max-width:1100px){.experiment-detail{padding-left:20px;padding-right:20px}.experiment-detail .wide-workspace__header{gap:16px}.experiment-detail .wide-workspace__header-actions{gap:6px}.experiment-detail .wide-workspace__header-actions .experiment-delete-action,.experiment-detail .wide-workspace__header-actions .experiment-name-edit-action{padding-left:7px;padding-right:7px}.experiment-detail .experiment-material-table{min-width:680px}.experiment-detail .experiment-notebook{overflow-x:auto;padding-bottom:4px}.experiment-detail .experiment-summary{grid-template-columns:1fr;gap:20px}.experiment-detail .experiment-metrics{border-left:0;border-top:1px solid var(--line-soft);padding:18px 0 0}}
+@media(max-width:767px){.experiment-detail{padding-left:14px;padding-right:14px}.experiment-detail .wide-workspace__header{align-items:flex-start}.experiment-detail .wide-workspace__header-actions{max-width:50%;gap:5px}.experiment-detail .experiment-navigation{align-items:flex-start;flex-direction:column}.experiment-detail .experiment-navigation-actions{width:100%;flex-wrap:wrap}.experiment-detail .experiment-state-selector{align-items:flex-start;gap:10px}.experiment-detail .experiment-variant-heading{align-items:flex-start;flex-wrap:wrap}}
+.experiment-detail .experiment-summary-title{display:block;margin-bottom:8px;font:italic 17px Georgia,"Noto Serif KR",serif}
+.experiment-detail :is(.experiment-summary textarea,.experiment-fixed-note){box-sizing:border-box;width:100%;min-height:128px;margin:0;padding:5px 4px 0;border:0;border-radius:0;resize:vertical;white-space:pre-wrap;font:15px/32px Georgia,"Noto Serif KR",serif;color:var(--ink);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--line-soft) 31px,var(--line-soft) 32px)}
+.experiment-detail .experiment-metrics{border-left:1px solid var(--line-soft);padding-left:24px}
+.experiment-detail .experiment-total-panel{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.experiment-detail .experiment-total-panel>span{font:11px "Courier New",monospace;color:var(--muted)}
+.experiment-detail .experiment-total-panel strong{font:26px Georgia,serif;font-variant-numeric:tabular-nums}
+.experiment-detail .experiment-total-panel small{font:14px "Courier New",monospace;color:var(--muted)}
+.experiment-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.experiments-viewport-gate{min-height:100vh;padding:32px;box-sizing:border-box;display:grid;place-items:center;text-align:center;background:var(--paper);color:var(--ink);position:relative}
+.experiments-viewport-gate .experiments-close{position:absolute;right:28px;top:28px;border:0;background:none;font-size:26px;cursor:pointer}
+@media(max-width:1100px){.experiment-detail .experiment-material-table :is(th,td){padding:0 7px}.experiment-detail .experiment-material-table th:first-child{width:8%}.experiment-detail .experiment-material-table th:nth-child(2){width:30%}.experiment-detail .experiment-material-table th:nth-child(3){width:160px}.experiment-detail .experiment-material-table th:nth-child(4){width:32%}.experiment-detail .experiment-navigation{gap:12px}}
+.experiment-name-edit-modal .experiment-action--back{margin-right:8px!important}
+.experiment-detail .experiment-read-only-badge{padding:1px 3px;background:rgba(244,205,93,.24);box-shadow:inset 0 -1px 0 rgba(201,119,60,.12);color:var(--muted);font-size:10px}

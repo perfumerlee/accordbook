@@ -97,7 +97,7 @@ describe('Released version metadata', () => {
     const target = await createStorage()
     await importBackup(target, backup)
     expect((await (archived ? target.archive : target.formulas).get(formula.id))?.releasedVersionId).toBe(v1.versionId)
-    expect(backup.formatVersion).toBe(2)
+    expect(backup.formatVersion).toBe(3)
   })
   it('imports old backup and rejects malformed release references', async () => {
     const { storage } = await setup()

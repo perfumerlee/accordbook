@@ -1,15 +1,16 @@
 import type { Formula, FormulaVersion } from '../models/formula'
+import type { Experiment } from '../models/experiment'
 import type { AccordbookSettings } from '../models/settings'
 
-export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta'
+export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments'
 export type StorageMode = 'indexeddb' | 'memory'
 
-type StoreValue = Formula | FormulaVersion | AccordbookSettings | number
+type StoreValue = Formula | FormulaVersion | Experiment | AccordbookSettings | number
 type StoreMap = Map<string, StoreValue>
 
 const DB_NAME = 'accordbook'
-const DB_VERSION = 2
-const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta']
+const DB_VERSION = 3
+const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments']
 
 export interface StorageDatabase {
   readonly mode: StorageMode
@@ -19,7 +20,7 @@ export interface StorageDatabase {
   put(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
   clear(): Promise<void>
-  replaceAll(data: { formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
+  replaceAll(data: { formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
 }
 
 function createMemoryDatabase(): StorageDatabase {
@@ -32,7 +33,7 @@ function createMemoryDatabase(): StorageDatabase {
     async put(store: StoreName, key: string, value: StoreValue) { stores.get(store)!.set(key, value) },
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
     async clear() { stores.forEach((store) => store.clear()) },
-    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); for (const item of data.versions ?? []) await this.put('versions', item.versionId, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
+    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); for (const item of data.versions ?? []) await this.put('versions', item.versionId, item); for (const item of data.experiments ?? []) await this.put('experiments', item.experimentId, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
   }
 }
 
@@ -64,6 +65,7 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
         for (const item of data.formulas) transaction.objectStore('formulas').put(item, item.id)
         for (const item of data.archive) transaction.objectStore('archive').put(item, item.id)
         for (const item of data.versions ?? []) transaction.objectStore('versions').put(item, item.versionId)
+        for (const item of data.experiments ?? []) transaction.objectStore('experiments').put(item, item.experimentId)
         if (data.settings) transaction.objectStore('settings').put(data.settings, 'current')
         for (const [key, value] of Object.entries(data.meta)) transaction.objectStore('meta').put(value, key)
       })
@@ -79,7 +81,7 @@ export async function openDatabase(): Promise<StorageDatabase> {
       openRequest.onupgradeneeded = () => {
         for (const name of STORE_NAMES) if (!openRequest.result.objectStoreNames.contains(name)) openRequest.result.createObjectStore(name)
       }
-      openRequest.onsuccess = () => resolve(openRequest.result)
+      openRequest.onsuccess = () => { openRequest.result.onversionchange = () => openRequest.result.close(); resolve(openRequest.result) }
       openRequest.onerror = () => reject(openRequest.error)
       openRequest.onblocked = () => reject(new Error('IndexedDB open blocked'))
     })

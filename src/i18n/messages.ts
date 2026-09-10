@@ -10,6 +10,29 @@ export type MessageSet = {
     : string
 } & { interpretation?: string }
 
+export const experimentMessages = {
+  en: {
+    title: 'EXPERIMENTS', createTitle: 'CREATE EXPERIMENT', name: 'EXPERIMENT NAME', source: 'BASE SOURCE',
+    empty: 'No experiments yet.', emptyHint: 'Start with CURRENT or a saved version of this formula.',
+    currentHint: 'Current working formula', saved: 'Saved version', back: 'BACK', create: 'CREATE',
+    creating: 'CREATING…', count: (n: number) => n + (n === 1 ? ' trial' : ' trials'),
+    index: (n: number) => n + (n === 1 ? ' experiment' : ' experiments'),
+    close: 'Close Experiments', backList: 'Back to Experiments', untitled: 'Untitled experiment',
+    addVariant: '+ ADD VARIANT', sheet: 'VIEW AS SHEET', compare: 'COMPARE',
+      compareHint: 'BASE is included · choose up to 4 trials', detail: 'EXPERIMENT', deleteExperiment: 'DELETE EXPERIMENT', deleteExperimentTitle: 'Delete this Experiment?', deleteExperimentMessage: 'All variants and notes will be removed.', deleteExperimentWarning: 'This action cannot be undone.', cancel: 'CANCEL', confirmDelete: 'DELETE', deleting: 'DELETING…', deleteExperimentAria: 'Delete Experiment',
+  },
+  ko: {
+    title: '실험', createTitle: '실험 만들기', name: '실험 이름', source: 'BASE 기준',
+    empty: '아직 실험이 없습니다.', emptyHint: '이 포뮬러의 CURRENT 또는 저장된 버전으로 시작하세요.',
+    currentHint: '현재 작업 중인 포뮬러', saved: '저장된 버전', back: '뒤로', create: '만들기',
+    creating: '만드는 중…', count: (n: number) => '시안 ' + n + '개',
+    index: (n: number) => '실험 ' + n + '개',
+    close: '실험 닫기', backList: '실험 목록으로', untitled: '이름 없는 실험',
+    addVariant: '+ 시안 추가', sheet: '시트로 보기', compare: '비교',
+      compareHint: 'BASE 포함 · 시안을 최대 4개 선택하세요', detail: '실험', deleteExperiment: '실험 삭제', deleteExperimentTitle: '이 실험을 삭제할까요?', deleteExperimentMessage: '모든 시안과 메모가 삭제됩니다.', deleteExperimentWarning: '이 작업은 되돌릴 수 없습니다.', cancel: '취소', confirmDelete: '삭제', deleting: '삭제 중…', deleteExperimentAria: '실험 삭제',
+  },
+} as const
+
 
 
 

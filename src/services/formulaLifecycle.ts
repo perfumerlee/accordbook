@@ -35,4 +35,4 @@ export async function createFormulaFromVersion(storage: AccordbookStorage, versi
 export function resetMaterials(formula: Formula): Formula { return { ...formula, rows: [emptyRow()], updatedAt: timestamp() } }
 export function archiveFormula(storage: AccordbookStorage, formula: Formula): Promise<void> { return storage.formulas.moveToArchive(formula) }
 export function restoreFormula(storage: AccordbookStorage, formula: Formula): Promise<void> { return storage.archive.restore(formula) }
-export async function deleteArchivedFormula(storage: AccordbookStorage, id: string): Promise<void> { await storage.archive.deletePermanently(id); await storage.versions.deleteByParentFormulaId(id) }
+export async function deleteArchivedFormula(storage: AccordbookStorage, id: string): Promise<void> { await storage.archive.deletePermanently(id); await storage.versions.deleteByParentFormulaId(id); await storage.experiments.deleteByParentFormulaId(id) }

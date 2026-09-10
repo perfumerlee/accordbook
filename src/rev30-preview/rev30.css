@@ -405,7 +405,7 @@ input:focus, textarea:focus{
   color:var(--muted);
   text-transform:uppercase;
   letter-spacing:.1em;
-  margin:0 0 4px;
+  margin:0 0 7px;
 }
 .formula-name{
   width:100%;

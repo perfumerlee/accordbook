@@ -1,0 +1,3 @@
+/* Shared comparison geometry lives in wideWorkspaceShell.css. */
+.experiment-comparison-sheet tbody th small { margin-left:6px; white-space:normal; }
+.experiment-comparison-sheet tbody td small { display:none; }
