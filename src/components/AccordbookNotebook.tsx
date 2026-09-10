@@ -46,7 +46,7 @@ import TimeMachinePanel from './TimeMachinePanel'
 import { restoreFormulaVersion } from '../services/formulaVersionLifecycle'
 
 const ACTIVE_KEY = 'accordbook.activeFormulaId'
-const DISPLAY_VERSION = 'v1.06'
+const DISPLAY_VERSION = 'v1.07'
 const blankRow = (): FormulaMaterial => ({ id: crypto.randomUUID(), parts: '', material: '' })
 const fmtDate = (v: string) => v.replace(/-/g, ' / ')
 type PendingMaterialFocus = { formulaId: string; rowId: string; reason: 'new-row' | 'entry-complete' }
