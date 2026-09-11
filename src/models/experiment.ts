@@ -14,6 +14,7 @@ export interface ExperimentVariant {
   label: string
   createdAt: string
   updatedAt: string
+  nextChildOrdinal?: number
   snapshot: ExperimentContent
   note: string
 }

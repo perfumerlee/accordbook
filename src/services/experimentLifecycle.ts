@@ -1,5 +1,6 @@
 import type { Formula, FormulaSnapshotRow, FormulaVersion, FormulaVersionSnapshot } from '../models/formula'
 import type { Experiment, ExperimentContent, ExperimentVariant } from '../models/experiment'
+import { canCreateBranchFrom } from './experimentGenealogy'
 
 const clone = <T>(value: T): T => structuredClone(value)
 const newId = () => crypto.randomUUID()
@@ -59,8 +60,21 @@ function createVariant(experiment: Experiment, parentVariantId: string | null, r
   const parent = parentVariantId ? experiment.variants.find((variant) => variant.variantId === parentVariantId) : undefined
   if (parentVariantId && !parent) throw new Error('Parent Variant does not exist.')
   const now = timestamp()
-  const variant: ExperimentVariant = { variantId: newId(), parentVariantId, label: ordinalToVariantLabel(experiment.nextVariantOrdinal), createdAt: now, updatedAt: now, snapshot: contentFromRows(rows), note: '' }
-  return { ...clone(experiment), variants: [...experiment.variants.map(clone), variant], nextVariantOrdinal: experiment.nextVariantOrdinal + 1, updatedAt: now }
+  const topLevelLabel = ordinalToVariantLabel(experiment.nextVariantOrdinal)
+  const childOrdinal = parentVariantId ? (parent!.nextChildOrdinal ?? inferNextChildOrdinal(experiment, parent!)) : undefined
+  const label = parentVariantId ? `${parent!.label}${childOrdinal}` : topLevelLabel
+  const variant: ExperimentVariant = { variantId: newId(), parentVariantId, label, createdAt: now, updatedAt: now, ...(parentVariantId ? { nextChildOrdinal: 1 } : {}), snapshot: contentFromRows(rows), note: '' }
+  const variants = experiment.variants.map((item) => item.variantId === parentVariantId ? { ...clone(item), nextChildOrdinal: (childOrdinal ?? 1) + 1 } : clone(item))
+  return { ...clone(experiment), variants: [...variants, variant], nextVariantOrdinal: parentVariantId ? experiment.nextVariantOrdinal : experiment.nextVariantOrdinal + 1, updatedAt: now }
+}
+
+function inferNextChildOrdinal(experiment: Experiment, parent: ExperimentVariant): number {
+  const prefix = parent.label
+  const max = experiment.variants.filter((item) => item.parentVariantId === parent.variantId).reduce((value, item) => {
+    const match = item.label.startsWith(prefix) ? Number(item.label.slice(prefix.length)) : 0
+    return Number.isInteger(match) && match > value ? match : value
+  }, 0)
+  return max + 1
 }
 
 export function addVariantFromBase(experiment: Experiment): Experiment {
@@ -70,6 +84,7 @@ export function addVariantFromBase(experiment: Experiment): Experiment {
 export function addVariantFromVariant(experiment: Experiment, parentVariantId: string): Experiment {
   const parent = experiment.variants.find((variant) => variant.variantId === parentVariantId)
   if (!parent) throw new Error('Parent Variant does not exist.')
+  if (!canCreateBranchFrom(experiment, parentVariantId)) throw new Error('Branch depth is limited to one level in v1.08.')
   return createVariant(experiment, parentVariantId, parent.snapshot.rows)
 }
 

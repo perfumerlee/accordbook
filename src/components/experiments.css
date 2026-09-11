@@ -49,11 +49,22 @@
 .wide-workspace__header-actions .experiment-delete-action{height:28px;box-sizing:border-box;display:inline-flex;align-items:center;transform:none}
 .experiment-name-edit-modal{padding:24px 0 8px}.experiment-name-edit-modal label{display:grid;gap:9px;color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.08em}.experiment-name-edit-modal input{box-sizing:border-box;width:100%;height:42px;border:1px solid var(--border);border-radius:4px;background:transparent;padding:8px 10px;color:var(--ink);font:15px Georgia,"Noto Serif KR",serif;letter-spacing:0}.experiment-name-edit-modal .experiment-create-actions{justify-content:flex-end;gap:16px!important;margin-top:20px}.experiment-name-edit-modal .experiment-action{min-height:36px;padding:8px 15px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--ink);font:12px/1.4 Inter,Pretendard,sans-serif;cursor:pointer}.experiment-name-edit-modal .experiment-action--primary{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}.experiment-name-edit-modal .experiment-action:hover{filter:brightness(.94)}
 .experiment-detail :is(button,input,textarea):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
-.experiment-detail .experiment-navigation{display:flex;justify-content:space-between;gap:20px;align-items:center;border-bottom:1px solid var(--line-soft)}
+.experiment-detail .experiment-navigation{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start;min-width:0;border-bottom:1px solid var(--line-soft)}
 .experiment-detail .experiment-tabs{display:flex;flex-wrap:wrap;gap:10px}
 .experiment-detail .experiment-tabs button{border:0;border-bottom:2px solid transparent;background:none;padding:12px 10px;color:var(--muted);font:13px "Courier New",monospace}
 .experiment-detail .experiment-tabs button.active{border-bottom-color:var(--accent);color:var(--ink)}
-.experiment-detail .experiment-navigation-actions{display:flex;gap:8px;flex-shrink:0}
+.experiment-detail .experiment-branch-count{font-size:10px;color:var(--muted)}
+.experiment-detail .experiment-navigation-levels{min-width:0;flex:1}
+.experiment-detail .experiment-tabs button.active-family{color:var(--ink);border-bottom-color:var(--border)}
+.experiment-detail .experiment-branch-tabs{margin-left:18px;gap:6px;align-items:center;border-top:1px solid var(--line-soft)}
+.experiment-detail .experiment-branch-tabs button{padding:8px 10px}
+.experiment-detail .experiment-branch-context{color:var(--muted);font:10px/1.4 "Courier New",monospace;margin-right:8px}
+.experiment-detail .experiment-primary-tabs{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start}
+.experiment-detail .experiment-variant-strip{display:flex;flex-wrap:nowrap;min-width:0;overflow-x:auto;gap:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding:3px;margin-top:-3px}
+.experiment-detail .experiment-variant-strip button{flex:0 0 auto;white-space:nowrap}
+.experiment-detail .experiment-navigation-actions{display:flex;flex-wrap:nowrap;justify-content:flex-end;align-items:center;gap:8px;min-width:0;padding:3px 0 8px 16px;border-left:1px solid var(--line-soft)}
+.experiment-detail .experiment-navigation-actions button{flex:0 0 auto;white-space:nowrap;min-height:36px;box-sizing:border-box}
+.experiment-detail .experiment-compare-context{display:flex;flex-wrap:wrap;gap:6px 18px;padding:6px 0 10px;color:var(--muted);font:11px/1.4 "Courier New",monospace}
 .experiment-detail :is(.experiment-navigation-actions,.experiment-editor-actions) button{border:1px solid var(--border);border-radius:4px;background:transparent;padding:9px 12px;color:var(--ink);font:11px/1.4 Inter,Pretendard,sans-serif;letter-spacing:.03em}
 .experiment-detail .experiment-navigation-actions button:first-child,.experiment-detail .experiment-editor-actions button{border-color:var(--ink);background:var(--ink);color:var(--paper-2)}
 .experiment-detail .experiment-navigation-actions button:first-child:hover,.experiment-detail .experiment-editor-actions button:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
@@ -61,12 +72,9 @@
 .experiments-layer{position:fixed;inset:0;z-index:1100;isolation:isolate;overflow:auto;overscroll-behavior:contain;outline:none}
 .experiments-layer .experiment-detail,.experiments-layer .experiment-comparison-sheet{box-sizing:border-box;min-height:100vh;min-height:100dvh;position:relative}
 .experiments-layer .experiment-modal-backdrop{z-index:2}
-.experiment-detail .experiment-state-selector{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line-soft);font:13px "Courier New",monospace}
-.experiment-detail .experiment-selector-caption{display:grid;gap:5px;margin-right:auto}
-.experiment-detail .experiment-selector-caption strong{font-weight:400}
-.experiment-detail .experiment-selector-caption span{font:12px Inter,Pretendard,sans-serif;color:var(--muted)}
-.experiment-detail .experiment-state-selector label{display:flex;align-items:center;gap:6px}
-.experiment-detail .experiment-state-selector input{accent-color:var(--muted)}
+.experiments-error-boundary{min-height:100dvh;display:grid;place-items:center;padding:32px;box-sizing:border-box;background:var(--paper);color:var(--ink);text-align:center}.experiments-error-boundary h1{max-width:520px;font:400 26px Georgia,serif}.experiments-error-boundary button{margin-top:18px;padding:10px 16px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:var(--paper);cursor:pointer}
+.experiment-create-branch{font:inherit}
+.experiment-delete-blocked{display:block;max-width:240px;margin-top:4px;color:var(--muted);font:11px/1.35 Georgia,serif;white-space:pre-line}
 .experiment-detail .experiment-notebook{margin-top:24px}
 .experiment-detail .experiment-variant-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px;color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.06em}
 .experiment-detail .experiment-variant-heading__actions{display:flex;align-items:center;gap:14px}
@@ -78,8 +86,15 @@
 .experiment-detail .experiment-save-status[data-state="saving"]::before{background:var(--accent)}
 .experiment-detail .experiment-save-status[data-state="failed"]{color:var(--danger)}
 .experiment-detail .experiment-save-status[data-state="failed"]::before{background:var(--danger)}
+.experiment-detail .experiment-variant-title-group{display:flex;align-items:center;gap:12px;min-width:0}
 .experiment-detail .experiment-delete-variant{border:1px solid color-mix(in srgb,var(--danger) 42%,var(--line-soft));border-radius:3px;background:transparent;padding:6px 9px;color:var(--danger);font:10px/1.2 Inter,Pretendard,sans-serif;letter-spacing:.03em}
 .experiment-detail .experiment-delete-variant:hover{border-color:var(--danger);color:var(--danger);background:transparent}
+.experiment-detail .experiment-variant-heading{flex-wrap:wrap}
+.experiment-detail .experiment-variant-heading__actions{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.experiment-detail .experiment-delete-group{display:flex;align-items:center;gap:12px;max-width:100%}
+.experiment-detail .experiment-delete-group .experiment-delete-blocked{margin:0;max-width:none;letter-spacing:normal;white-space:pre}
+.experiment-detail :is(.experiment-create-branch,.experiment-delete-variant){box-sizing:border-box;min-height:30px;white-space:nowrap;padding:6px 9px;border-radius:3px;font:10px/1.2 Inter,Pretendard,sans-serif;letter-spacing:.03em}
+.experiment-detail .experiment-create-branch,.experiment-detail .experiment-create-branch:hover{border:1px solid var(--ink);background:var(--ink);color:var(--paper-2)}
 .experiment-detail .experiment-material-table{width:100%;table-layout:fixed;border-collapse:collapse}
 .experiment-detail .experiment-material-table :is(th,td){box-sizing:border-box;padding:0 10px}
 .experiment-detail .experiment-material-table th{height:38px;border-bottom:1px solid var(--border);text-align:left;color:var(--muted);font:11px "Courier New",monospace;letter-spacing:.04em}
@@ -113,14 +128,14 @@
 .experiment-detail .experiment-dilution-fields input:last-child{width:42px}
 .experiment-detail .experiment-remove{border:0;background:none;padding:4px;color:var(--muted);font:20px Georgia,serif}
 .experiment-detail .experiment-editor-actions{display:flex;justify-content:flex-end;padding:16px 0}
-.experiment-detail .experiment-summary{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;border-top:1px solid var(--border);padding-top:20px;margin-top:24px}
+.experiment-detail .experiment-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;border-top:1px solid var(--border);padding-top:14px;margin-top:16px}
 .experiment-detail .wide-workspace__header-actions{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .experiment-detail .wide-workspace__content{min-width:0}
 @media(max-width:1100px){.experiment-detail{padding-left:20px;padding-right:20px}.experiment-detail .wide-workspace__header{gap:16px}.experiment-detail .wide-workspace__header-actions{gap:6px}.experiment-detail .wide-workspace__header-actions .experiment-delete-action,.experiment-detail .wide-workspace__header-actions .experiment-name-edit-action{padding-left:7px;padding-right:7px}.experiment-detail .experiment-material-table{min-width:680px}.experiment-detail .experiment-notebook{overflow-x:auto;padding-bottom:4px}.experiment-detail .experiment-summary{grid-template-columns:1fr;gap:20px}.experiment-detail .experiment-metrics{border-left:0;border-top:1px solid var(--line-soft);padding:18px 0 0}}
 @media(max-width:767px){.experiment-detail{padding-left:14px;padding-right:14px}.experiment-detail .wide-workspace__header{align-items:flex-start}.experiment-detail .wide-workspace__header-actions{max-width:50%;gap:5px}.experiment-detail .experiment-navigation{align-items:flex-start;flex-direction:column}.experiment-detail .experiment-navigation-actions{width:100%;flex-wrap:wrap}.experiment-detail .experiment-state-selector{align-items:flex-start;gap:10px}.experiment-detail .experiment-variant-heading{align-items:flex-start;flex-wrap:wrap}}
 .experiment-detail .experiment-summary-title{display:block;margin-bottom:8px;font:italic 17px Georgia,"Noto Serif KR",serif}
 .experiment-detail :is(.experiment-summary textarea,.experiment-fixed-note){box-sizing:border-box;width:100%;min-height:128px;margin:0;padding:5px 4px 0;border:0;border-radius:0;resize:vertical;white-space:pre-wrap;font:15px/32px Georgia,"Noto Serif KR",serif;color:var(--ink);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--line-soft) 31px,var(--line-soft) 32px)}
-.experiment-detail .experiment-metrics{border-left:1px solid var(--line-soft);padding-left:24px}
+.experiment-detail .experiment-summary .experiment-metrics{border:0;padding:0}
 .experiment-detail .experiment-total-panel{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
 .experiment-detail .experiment-total-panel>span{font:11px "Courier New",monospace;color:var(--muted)}
 .experiment-detail .experiment-total-panel strong{font:26px Georgia,serif;font-variant-numeric:tabular-nums}
@@ -128,6 +143,7 @@
 .experiment-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .experiments-viewport-gate{min-height:100vh;padding:32px;box-sizing:border-box;display:grid;place-items:center;text-align:center;background:var(--paper);color:var(--ink);position:relative}
 .experiments-viewport-gate .experiments-close{position:absolute;right:28px;top:28px;border:0;background:none;font-size:26px;cursor:pointer}
-@media(max-width:1100px){.experiment-detail .experiment-material-table :is(th,td){padding:0 7px}.experiment-detail .experiment-material-table th:first-child{width:8%}.experiment-detail .experiment-material-table th:nth-child(2){width:30%}.experiment-detail .experiment-material-table th:nth-child(3){width:160px}.experiment-detail .experiment-material-table th:nth-child(4){width:32%}.experiment-detail .experiment-navigation{gap:12px}}
+@media(max-width:1100px){.experiment-detail .experiment-material-table :is(th,td){padding:0 7px}.experiment-detail .experiment-material-table th:first-child{width:8%}.experiment-detail .experiment-material-table th:nth-child(2){width:30%}.experiment-detail .experiment-material-table th:nth-child(3){width:160px}.experiment-detail .experiment-material-table th:nth-child(4){width:32%}.experiment-detail .experiment-navigation{gap:12px}.experiment-detail .experiment-navigation-actions{padding-left:12px}}
+@media(max-width:767px){.experiment-detail .experiment-navigation{grid-template-columns:minmax(0,1fr)}.experiment-detail .experiment-navigation-actions{border-left:0;padding-left:0}}
 .experiment-name-edit-modal .experiment-action--back{margin-right:8px!important}
 .experiment-detail .experiment-read-only-badge{padding:1px 3px;background:rgba(244,205,93,.24);box-shadow:inset 0 -1px 0 rgba(201,119,60,.12);color:var(--muted);font-size:10px}

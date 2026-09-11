@@ -1,0 +1,34 @@
+.experiment-genealogy-rail{display:grid;grid-template-columns:auto minmax(0,1fr);min-width:0;max-width:100%;gap:10px;align-items:start}
+.experiment-genealogy-rail button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);font:13px/1.4 "Courier New",monospace;padding:7px 9px;white-space:nowrap;cursor:pointer}
+.experiment-genealogy-rail button[aria-pressed=true]{border-bottom-color:var(--accent);background:var(--paper-2);color:var(--ink)}
+.experiment-genealogy-rail .rail-parent--context{color:var(--ink)}
+.experiment-genealogy-rail .rail-count{font-size:10px;color:var(--muted)}
+.experiment-genealogy-rail .rail-viewport{position:relative;min-width:0}
+.experiment-genealogy-rail .rail-overflow{position:absolute;top:0;bottom:12px;width:48px;display:flex;align-items:center;pointer-events:none}
+.experiment-genealogy-rail .rail-overflow--right{justify-content:flex-end}
+.experiment-genealogy-rail .rail-scroll-button{position:relative;display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:0;background:transparent;color:var(--muted);pointer-events:auto;transition:color 160ms ease}
+.experiment-genealogy-rail .rail-scroll-button span{display:block;width:7px;height:7px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;font-size:0;transform:rotate(45deg)}
+.experiment-genealogy-rail .rail-overflow--left .rail-scroll-button span{transform:rotate(-135deg)}
+.experiment-genealogy-rail .rail-scroll-button::after{content:"";position:absolute;bottom:3px;left:9px;right:9px;height:1px;background:currentColor;opacity:0;transition:opacity 160ms ease}
+.experiment-genealogy-rail .rail-scroll-button:hover{color:var(--ink);background:transparent}
+.experiment-genealogy-rail .rail-scroll-button:hover::after{opacity:.45}
+.experiment-genealogy-rail .rail-scroll-button:focus-visible{color:var(--ink);background:transparent;outline:none}
+.experiment-genealogy-rail .rail-scroll-button:focus-visible::after{height:2px;opacity:1}
+@media(prefers-reduced-motion:reduce){.experiment-genealogy-rail .rail-scroll-button,.experiment-genealogy-rail .rail-scroll-button::after{transition:none}}
+.experiment-genealogy-rail .rail-overflow--right{right:0;background:linear-gradient(to right,transparent,var(--paper) 95%)}
+.experiment-genealogy-rail .rail-overflow--left{left:0;background:linear-gradient(to left,transparent,var(--paper) 95%)}
+.experiment-genealogy-rail .rail-scroller{display:flex;align-items:flex-start;gap:18px;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scroll-padding-inline:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;border-left:1px solid var(--line-soft);padding:3px 5px 8px;margin-top:-3px}
+.experiment-genealogy-rail .rail-family{flex:0 0 auto;min-width:36px;width:max-content;max-width:240px}
+.experiment-genealogy-rail .rail-children{display:flex;flex-wrap:wrap;gap:0 3px;margin-left:9px;padding-left:7px;border-left:1px solid var(--line-soft)}
+.experiment-genealogy-rail .rail-children button{padding:5px 6px}
+.experiment-genealogy-rail .rail-legacy{flex:0 0 auto;max-width:240px;padding-left:12px;border-left:1px solid var(--line-soft)}
+.experiment-genealogy-rail .rail-legacy-label{font:10px/1.4 "Courier New",monospace;color:var(--muted)}
+.experiment-genealogy-rail .rail-legacy-controls{display:flex;flex-wrap:wrap}
+.experiment-genealogy-rail button:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
+.experiment-genealogy-rail .rail-check{display:inline-flex;align-items:center;gap:5px;padding:7px 9px;border-bottom:2px solid transparent;font:13px/1.4 "Courier New",monospace;color:var(--muted);white-space:nowrap;cursor:pointer}
+.experiment-genealogy-rail .rail-check input{width:13px;height:13px;margin:0;accent-color:var(--muted)}
+.experiment-genealogy-rail .rail-children .rail-check{padding:5px 6px}
+.experiment-genealogy-rail .rail-family button::before,.experiment-genealogy-rail .rail-legacy-controls button::before{content:"";display:inline-block;width:18px}
+.experiment-genealogy-rail .rail-base-included{padding:7px 9px;font:13px/1.4 "Courier New",monospace;color:var(--muted)}
+.experiment-genealogy-rail .rail-node{display:inline-flex}
+.experiment-genealogy-rail .rail-check:has(input:disabled){opacity:.5;cursor:default}

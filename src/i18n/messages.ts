@@ -33,6 +33,16 @@ export const experimentMessages = {
   },
 } as const
 
+export const railCompareMessages = {
+  en: { scrollLeft: 'Scroll Rail left', scrollRight: 'Scroll Rail right', openSheet: 'OPEN SHEET', baseIncluded: 'BASE, included in comparison', select: (name: string) => `Select ${name} for comparison` },
+  ko: { scrollLeft: '레일 왼쪽으로 이동', scrollRight: '레일 오른쪽으로 이동', openSheet: '시트 열기', baseIncluded: 'BASE, 비교에 항상 포함', select: (name: string) => `${name} 비교 대상으로 선택` },
+} as const
+
+export const branchMessages = {
+  en: { addBranch: '+ ADD BRANCH', createBranchFrom: (label: string) => `Create Branch from ${label}`, deleteBlocked: 'This Variant has Branches.\nDelete its child Branches first.' },
+  ko: { addBranch: '+ ADD BRANCH', createBranchFrom: (label: string) => `${label}에서 Branch 생성`, deleteBlocked: '이 Variant에는 Branch가 있습니다.\n먼저 하위 Branch를 삭제해주세요.' },
+} as const
+
 
 
 
