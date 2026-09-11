@@ -23,6 +23,7 @@ export default function ExperimentsWorkspace({formula,storage,language,onClose,o
  const entryBusy=useRef(false)
  useEffect(()=>()=>{experimentLoadGeneration.current++},[])
  const [viewport,setViewport]=useState<ExperimentViewportMode>(()=>typeof window==='undefined'?'full':classifyExperimentViewport(window.innerWidth,window.innerHeight));useEffect(()=>{const update=()=>setViewport(classifyExperimentViewport(window.innerWidth,window.innerHeight));window.addEventListener('resize',update);window.addEventListener('orientationchange',update);return()=>{window.removeEventListener('resize',update);window.removeEventListener('orientationchange',update)}},[])
+ const [isSmartphone,setIsSmartphone]=useState(()=>typeof window!=='undefined'&&window.innerWidth<768);useEffect(()=>{const update=()=>setIsSmartphone(window.innerWidth<768);window.addEventListener('resize',update);window.addEventListener('orientationchange',update);return()=>{window.removeEventListener('resize',update);window.removeEventListener('orientationchange',update)}},[])
  const [list,setList]=useState<Experiment[]>([]);const [versions,setVersions]=useState<FormulaVersion[]>([]);const [experiment,setExperiment]=useState<Experiment | undefined>(undefined);const [state,setState]=useState('base');const [sheet,setSheet]=useState(false);const [selectedVariantIds,setSelectedVariantIds]=useState<string[]>([]);const [creating,setCreating]=useState(false);const [createError,setCreateError]=useState('');const [loadingExperiment,setLoadingExperiment]=useState(false);const [source,setSource]=useState('current');const [name,setName]=useState('Experiment');const [saving,setSaving]=useState('SAVED');const localRevision=useRef(0);const persistedRevision=useRef(0);const pending=useRef<{value:Experiment;revision:number} | undefined>(undefined);const timer=useRef<number | undefined>(undefined);const chain=useRef(Promise.resolve());const load=async()=>{setList(await storage.experiments.listByParentFormulaId(formula.id));setVersions(await storage.versions.listByParentFormulaId(formula.id))};useEffect(()=>{void load().catch(error=>setCreateError(String(error)))},[formula.id]);useEffect(()=>{setSelectedVariantIds(experiment&&experiment.variants.length>4?experiment.variants.slice(0,4).map(v=>v.variantId):experiment?.variants.map(v=>v.variantId)??[])},[experiment?.experimentId,experiment?.variants.length]);
  const queue=(next:Experiment)=>{const revision=++localRevision.current;pending.current={value:next,revision};setExperiment(next);setSaving('SAVING…');if(timer.current)clearTimeout(timer.current);timer.current=window.setTimeout(()=>{const queued=pending.current?.revision===revision?pending.current:undefined;chain.current=chain.current.catch(()=>undefined).then(()=>storage.experiments.save(next)).then(()=>{persistedRevision.current=Math.max(persistedRevision.current,revision);if(pending.current?.revision===revision&&localRevision.current===revision){pending.current=undefined;setSaving('SAVED')}else setSaving('SAVING…')}).catch(()=>setSaving('SAVE FAILED'))},250)};
  const flush=async()=>{if(timer.current){clearTimeout(timer.current);timer.current=undefined}const target=localRevision.current;const queued=pending.current;if(queued){await(chain.current=chain.current.catch(()=>undefined).then(()=>storage.experiments.save(queued.value)));persistedRevision.current=Math.max(persistedRevision.current,queued.revision);if(pending.current?.revision===queued.revision)pending.current=undefined}await chain.current.catch(()=>undefined);if(persistedRevision.current<target)throw new Error('Latest Experiment revision was not persisted.');setSaving(persistedRevision.current===localRevision.current?'SAVED':'SAVING…')};
@@ -121,6 +122,17 @@ export default function ExperimentsWorkspace({formula,storage,language,onClose,o
  useEffect(()=>{
    if(experiment&&!editOpen&&!deleteOpen)layerRef.current?.focus({preventScroll:true})
  },[experiment?.experimentId,sheet,editOpen,deleteOpen,viewport])
+ useEffect(()=>{
+   const root=layerRef.current
+   if(!root)return
+   const ko=language==='ko'
+   root.querySelectorAll<HTMLElement>('.experiment-name-edit-action').forEach(el=>{el.textContent=ko?'제목 수정':'EDIT NAME'})
+   root.querySelectorAll<HTMLElement>('.experiment-delete-action').forEach(el=>{el.textContent=ko?'실험 삭제':'DELETE EXPERIMENT'})
+   root.querySelectorAll<HTMLElement>('.experiment-read-only-badge').forEach(el=>{el.textContent=ko?'읽기 전용':'READ ONLY'})
+   root.querySelectorAll<HTMLElement>('.experiment-delete-variant').forEach(el=>{el.textContent=ko?'시안 삭제':'DELETE VARIANT'})
+   root.querySelectorAll<HTMLInputElement>('.experiment-row-memo input').forEach(el=>{el.placeholder=ko?'메모':'MEMO'})
+ },[language,experiment?.experimentId,state])
+ const mobileUnavailable=isSmartphone||viewport==='unsupported'
  return createPortal(<div className="experiments-layer" ref={layerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={language==='ko'?'실험':'Experiments'} onKeyDown={event=>{
    if(event.key==='Escape'&&!editOpen&&!deleteOpen){
      event.preventDefault();event.stopPropagation()
@@ -133,17 +145,19 @@ export default function ExperimentsWorkspace({formula,storage,language,onClose,o
      if(event.shiftKey&&(document.activeElement===first||document.activeElement===event.currentTarget)){event.preventDefault();last.focus()}
      else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===event.currentTarget)){event.preventDefault();first.focus()}
    }
- }}><div inert={editOpen||deleteOpen}>{experiment?(sheet?renderSheet():renderDetail()):renderEntryModal()}</div>{renderDeleteModal()}{renderEditModal()}</div>,document.body)
+ }}><div inert={editOpen||deleteOpen}>{mobileUnavailable?<ExperimentViewportGate mode="unsupported" onClose={closeEntry}/>:experiment?(sheet?renderSheet():renderDetail()):renderEntryModal()}</div>{renderDeleteModal()}{renderEditModal()}</div>,document.body)
 }
-function NotebookHead(){return <thead><tr><th>PARTS</th><th>MATERIAL NAME</th><th>DILUTION</th><th>MEMO</th><th>DELETE</th></tr></thead>}
+function NotebookHead({labels}:{labels?:{parts:string;materialName:string;dilution:string;memo:string;deleteLabel:string}}){const resolved=labels??(typeof document!=='undefined'&&document.documentElement.lang==='ko'?{parts:'배합량',materialName:'원료명',dilution:'희석',memo:'메모',deleteLabel:'삭제'}:{parts:'PARTS',materialName:'MATERIAL NAME',dilution:'DILUTION',memo:'MEMO',deleteLabel:'DELETE'});return <thead><tr><th>{resolved.parts}</th><th>{resolved.materialName}</th><th>{resolved.dilution}</th><th>{resolved.memo}</th><th>{resolved.deleteLabel}</th></tr></thead>}
 function NotebookSummary({rows,note,onNote}:{rows:FormulaSnapshotRow[];note:string;onNote?:(value:string)=>void}){
+ const ko=typeof document!=='undefined'&&document.documentElement.lang==='ko'
  const total=calculateFormulaTotals(rows.map(row=>({...row,id:row.rowId}))).totalParts
- return <div className="experiment-summary"><div><label className="experiment-summary-title" htmlFor={onNote?'variant-note':undefined}>Notes</label>{onNote?<textarea id="variant-note" aria-label="Variant note" value={note} onChange={e=>onNote(e.target.value)}/>:<p className="experiment-fixed-note">{note||'—'}</p>}</div><div className="experiment-metrics"><div className="experiment-summary-title">Total</div><div className="experiment-total-panel"><span>PARTS</span><strong>{total.toLocaleString()} <small>/ 1,000</small></strong></div></div></div>
+ return <div className="experiment-summary"><div><label className="experiment-summary-title" htmlFor={onNote?'variant-note':undefined}>{ko?'노트':'Notes'}</label>{onNote?<textarea id="variant-note" aria-label={ko?'시안 노트':'Variant note'} value={note} onChange={e=>onNote(e.target.value)}/>:<p className="experiment-fixed-note">{note||'—'}</p>}</div><div className="experiment-metrics"><div className="experiment-summary-title">{ko?'합계':'Total'}</div><div className="experiment-total-panel"><span>{ko?'배합량':'PARTS'}</span><strong>{total.toLocaleString()} <small>/ 1,000</small></strong></div></div></div>
 }
 function BaseNotebook({experiment,sourceLabel}:{experiment:Experiment;sourceLabel:string}){
  return <section className="experiment-notebook"><div className="experiment-variant-heading"><span>BASE · {sourceLabel}</span><span className="experiment-read-only-badge">READ ONLY</span></div><table className="experiment-material-table"><NotebookHead/><tbody>{experiment.baseSnapshot.rows.map(row=><tr key={row.rowId}><td className="experiment-parts">{row.parts}</td><td className="experiment-material"><span>{row.material}</span></td><td className="experiment-dilution">{row.dilution?.enabled?<><button className="experiment-dilution-badge--active" type="button" aria-label="DIL" disabled>DIL</button><span className="experiment-dilution-value">@{row.dilution.percent}% in {row.dilution.solvent}</span></>:'—'}</td><td className="experiment-row-memo">{row.memo||'—'}</td><td className="experiment-delete-cell">—</td></tr>)}</tbody></table><NotebookSummary rows={experiment.baseSnapshot.rows} note={experiment.baseSnapshot.notes}/></section>
 }
 function VariantEditor({experiment,variant,onChange,onDelete,saving}:{experiment:Experiment;variant:import('../models/experiment').ExperimentVariant;onChange:(e:Experiment)=>void;onDelete:()=>void;saving:string}){
+ const addMaterialLabel=typeof document!=='undefined'&&document.documentElement.lang==='ko'?'+ 원료 추가':'+ ADD MATERIAL'
  const baseRowIds=new Set(experiment.baseSnapshot.rows.map(row=>row.rowId))
  const baseRowsById=new Map(experiment.baseSnapshot.rows.map(row=>[row.rowId,row]))
  const isChangedFromBase=(row:FormulaSnapshotRow)=>{const base=baseRowsById.get(row.rowId);return !base||row.parts!==base.parts}
@@ -157,7 +171,7 @@ function VariantEditor({experiment,variant,onChange,onDelete,saving}:{experiment
    <td className="experiment-row-memo"><input aria-label={`Memo for ${row.material||'material'}`} placeholder="MEMO" value={row.memo??''} onChange={e=>update(row.rowId,{memo:e.target.value})}/></td>
    <td><button className="experiment-remove" type="button" aria-label="Remove material" onClick={()=>onChange(removeVariantRow(experiment,variant.variantId,row.rowId))}>×</button></td>
   </tr>)}</tbody></table>
-  <div className="experiment-editor-actions"><button type="button" onClick={()=>onChange(addVariantRow(experiment,variant.variantId,{material:'',cas:'',parts:''}))}>+ ADD MATERIAL</button></div>
+  <div className="experiment-editor-actions"><button type="button" onClick={()=>onChange(addVariantRow(experiment,variant.variantId,{material:'',cas:'',parts:''}))}>{addMaterialLabel}</button></div>
   <NotebookSummary rows={variant.snapshot.rows} note={variant.note} onNote={value=>onChange(updateVariantNote(experiment,variant.variantId,value))}/>
  </section>
 }

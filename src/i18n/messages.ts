@@ -19,7 +19,7 @@ export const experimentMessages = {
     index: (n: number) => n + (n === 1 ? ' experiment' : ' experiments'),
     close: 'Close Experiments', backList: 'Back to Experiments', untitled: 'Untitled experiment',
     addVariant: '+ ADD VARIANT', sheet: 'VIEW AS SHEET', compare: 'COMPARE',
-      compareHint: 'BASE is included · choose up to 4 trials', detail: 'EXPERIMENT', deleteExperiment: 'DELETE EXPERIMENT', deleteExperimentTitle: 'Delete this Experiment?', deleteExperimentMessage: 'All variants and notes will be removed.', deleteExperimentWarning: 'This action cannot be undone.', cancel: 'CANCEL', confirmDelete: 'DELETE', deleting: 'DELETING…', deleteExperimentAria: 'Delete Experiment',
+      compareHint: 'BASE is included · choose up to 4 trials', detail: 'EXPERIMENT', editName: 'EDIT NAME', deleteExperiment: 'DELETE EXPERIMENT', deleteExperimentTitle: 'Delete this Experiment?', deleteExperimentMessage: 'All variants and notes will be removed.', deleteExperimentWarning: 'This action cannot be undone.', cancel: 'CANCEL', confirmDelete: 'DELETE', deleting: 'DELETING…', deleteExperimentAria: 'Delete Experiment', parts: 'PARTS', materialName: 'MATERIAL NAME', dilution: 'DILUTION', memo: 'MEMO', deleteLabel: 'DELETE', readOnly: 'READ ONLY', total: 'TOTAL', ok: 'OK', editSaveFailed: 'Unable to save Experiment. Please try closing again to retry.', variantLabel: 'VARIANT', unnamedMaterial: 'UNNAMED MATERIAL', removeVariantQuestion: 'Delete this Variant?',
   },
   ko: {
     title: '실험', createTitle: '실험 만들기', name: '실험 이름', source: 'BASE 기준',
@@ -29,7 +29,7 @@ export const experimentMessages = {
     index: (n: number) => '실험 ' + n + '개',
     close: '실험 닫기', backList: '실험 목록으로', untitled: '이름 없는 실험',
     addVariant: '+ 시안 추가', sheet: '시트로 보기', compare: '비교',
-      compareHint: 'BASE 포함 · 시안을 최대 4개 선택하세요', detail: '실험', deleteExperiment: '실험 삭제', deleteExperimentTitle: '이 실험을 삭제할까요?', deleteExperimentMessage: '모든 시안과 메모가 삭제됩니다.', deleteExperimentWarning: '이 작업은 되돌릴 수 없습니다.', cancel: '취소', confirmDelete: '삭제', deleting: '삭제 중…', deleteExperimentAria: '실험 삭제',
+      compareHint: 'BASE 포함 · 시안을 최대 4개 선택하세요', detail: '실험', editName: '제목 수정', deleteExperiment: '실험 삭제', deleteExperimentTitle: '이 실험을 삭제할까요?', deleteExperimentMessage: '모든 시안과 메모가 삭제됩니다.', deleteExperimentWarning: '이 작업은 되돌릴 수 없습니다.', cancel: '취소', confirmDelete: '삭제', deleting: '삭제 중…', deleteExperimentAria: '실험 삭제', parts: '배합량', materialName: '원료명', dilution: '희석', memo: '메모', deleteLabel: '삭제', readOnly: '읽기 전용', total: '합계', ok: '확인', editSaveFailed: '실험을 저장하지 못했습니다. 닫은 후 다시 시도해주세요.', variantLabel: '시안', unnamedMaterial: '이름 없는 원료', removeVariantQuestion: '이 시안을 삭제할까요?',
   },
 } as const
 

@@ -297,3 +297,5 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
   /* Contain the drawer's translated bounds while it opens and closes. */
   .time-machine-stage > .tm-backdrop { overflow: hidden; }
 }
+.note-header .workspace-actions .experiments-page-action{display:inline-flex}
+@media(max-width:767px){.note-header .workspace-actions .experiments-page-action{display:none!important}}
