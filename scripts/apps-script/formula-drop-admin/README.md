@@ -1,6 +1,10 @@
 # Accordbook Formula Drop Admin — Phase 1
 
-This standalone Apps Script project initializes the separate operational workbook for Formula Drops. It does not contain a Web App UI or `doGet`/`doPost` endpoint yet.
+This standalone Apps Script project initializes the separate operational workbook for Formula Drops. The later phases below add the private Web App dashboard and administration actions.
+
+Public archive publishing / AUTO-CUSTOM social preview: see [PUBLISHING.md](PUBLISHING.md).
+Install `FormulaDropPublisher.gs` alongside the existing server and updated Dashboard;
+publishing is an explicit action, separate from ordinary Save/status changes.
 
 ## Operator setup
 

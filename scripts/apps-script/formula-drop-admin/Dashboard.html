@@ -29,6 +29,18 @@
     .status-note { color: #895437; margin: 14px 0 0; }
     .form-actions { margin-top: 22px; }
     button:disabled { cursor: wait; opacity: .55; }
+    .publication { margin: 30px 0; padding-bottom: 28px; border-bottom: 1px solid #c8bdad; }
+    .publication-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .publication-controls label { font-weight: normal; }
+    .publication-controls input { width: auto; }
+    .og-preview { aspect-ratio: 1200 / 630; max-width: 720px; box-sizing: border-box; padding: 5%; background: #eee8dc; border: 1px solid #c8bdad; display: flex; flex-direction: column; overflow: hidden; margin: 18px 0; }
+    .og-preview header, .og-preview footer { display: flex; justify-content: space-between; gap: 12px; font: 11px monospace; letter-spacing: .1em; }
+    .og-preview header { padding-bottom: 14px; border-bottom: 1px solid #c8bdad; }
+    .og-preview strong { display: block; font-size: clamp(22px, 3vw, 36px); font-weight: normal; margin-top: auto; overflow-wrap: anywhere; }
+    .og-preview p { margin: 12px 0 auto; overflow-wrap: anywhere; }
+    .og-preview footer { padding-top: 14px; border-top: 1px solid #c8bdad; }
+    .og-custom { max-width: 720px; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; margin: 18px 0; }
+    .publication-message { min-height: 1.5em; overflow-wrap: anywhere; }
     @media (max-width: 700px) {
       main { padding: 24px 14px; }
       .cards { grid-template-columns: repeat(2, 1fr); }
@@ -163,6 +175,8 @@
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
       $('app').insertAdjacentHTML('afterbegin', `<button onclick="resetMetrics('${esc(data.drop.dropId)}')">이 DROP 수치 초기화</button>`);
       refreshLicenseStatus(data.drop.dropId);
+      $('license-status-' + data.drop.dropId).closest('section').insertAdjacentHTML('afterend', '<section class="publication" id="publication"><h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2><p role="status">저장소 상태 확인 중…</p></section>');
+      loadPublication(data.drop.dropId);
     }
 
     function licenseStatusLabel(result) {
@@ -332,6 +346,114 @@
     function renderTable(rows, columns) {
       if (!rows.length) return '<p class="muted">데이터가 없습니다.</p>';
       return `<table><tr>${columns.map((column) => `<th>${labels[column]}</th>`).join('')}</tr>${rows.map((row) => `<tr>${columns.map((column) => `<td>${esc(row[column])}</td>`).join('')}</tr>`).join('')}</table>`;
+    }
+
+    let publication = null;
+    function publicationMessage(error) {
+      return ({ github_not_configured: 'GitHub 발행 설정이 필요합니다. 일반 저장은 계속 사용할 수 있습니다.',
+        conflict: 'Drop 또는 저장소가 변경되었습니다. 상태를 다시 확인한 뒤 발행하세요.',
+        github_auth: 'GitHub 권한 또는 브랜치 보호 설정을 확인하세요.',
+        invalid_png: 'PNG를 확인하세요: 최대 5 MiB, 최소 600 × 315, 최대 40 MP, 애니메이션 불가.',
+        image_required: 'CUSTOM 모드에는 PNG가 필요합니다.', not_publishable: '공개 중 또는 종료된 Drop만 발행할 수 있습니다. 제목과 설명도 필요합니다.',
+        repository_content_invalid: '저장소의 공개 JSON/이미지 형식을 확인하세요.' })[error] || '발행 상태를 확인할 수 없습니다. 변경사항은 저장소에 반영되지 않았을 수 있으므로 상태를 다시 확인하세요.';
+    }
+    function autoOgPreview(snapshot) {
+      return `<div class="og-preview" role="img" aria-label="AUTO social preview 근사 예시"><header><span>FORMULA DROP</span><span>NO.${esc(snapshot.slug)}</span></header><strong>${esc(snapshot.title)}</strong><p>${esc(snapshot.subtitle)}</p><footer><span>ACCORD BOOK</span><span>A PUBLIC FORMULA STUDY</span></footer></div>`;
+    }
+    function loadPublication(dropId) {
+      const host = $('publication');
+      if (!host) return;
+      if (publication?.objectUrl) URL.revokeObjectURL(publication.objectUrl);
+      const state = { dropId, host, busy: false, file: null, objectUrl: null };
+      publication = state;
+      const receive = result => {
+        if (publication !== state || !host.isConnected) return;
+        state.data = result; state.mode = result.mode || 'AUTO'; renderPublication();
+      };
+      google.script.run.withSuccessHandler(receive).withFailureHandler(() => receive({ ok: false })).getFormulaDropPublication(dropId);
+    }
+    function renderPublication() {
+      const state = publication, data = state.data, host = state.host;
+      if (!host.isConnected) return;
+      if (!data.ok) {
+        host.innerHTML = `<h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2><p role="status">ERROR · ${esc(publicationMessage(data.error))}</p><button onclick="loadPublication('${esc(state.dropId)}')">상태 다시 확인</button>`;
+        return;
+      }
+      host.innerHTML = `<h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2>
+        <p class="eyebrow" id="publication-status" role="status">${esc(data.status)}</p>
+        <p>영구 공개 주소: <a href="https://accordbook.org/drop/${esc(data.snapshot.slug)}" target="_blank" rel="noopener">accordbook.org/drop/${esc(data.snapshot.slug)}</a></p>
+        <p class="muted">저장·활성화와 별개로 명시적으로 발행합니다. 발행된 아카이브는 배포 기간이 끝나도 남습니다. SYNCED는 저장소 기준이며 실제 배포 완료를 뜻하지 않습니다.</p>
+        <div class="publication-controls"><label><input type="radio" name="og-mode" value="AUTO" ${state.mode === 'AUTO' ? 'checked' : ''} onchange="changePublicationMode('AUTO')"> AUTO</label>
+        <label><input type="radio" name="og-mode" value="CUSTOM" ${state.mode === 'CUSTOM' ? 'checked' : ''} onchange="changePublicationMode('CUSTOM')"> CUSTOM</label></div>
+        <div id="publication-preview"></div>
+        <div id="publication-upload"><label for="og-file">CUSTOM PNG · 최대 5 MiB</label><input id="og-file" type="file" accept="image/png" onchange="selectPublicationPng(this)"><p class="muted">최소 600 × 315, 최대 40 MP. 발행할 때만 업로드하며 빌드가 중앙 크롭하여 1200 × 630 PNG로 만듭니다.</p></div>
+        <p class="muted">AUTO는 HTML/CSS 근사 미리보기입니다. 최종 PNG는 빌드 시 생성합니다. 공개 문구를 수정하려면 먼저 일반 편집에서 저장한 후 돌아오세요.</p>
+        <p id="publication-message" class="publication-message" role="status" aria-live="polite">${!data.configured ? esc(publicationMessage('github_not_configured')) : !data.eligible ? esc(publicationMessage('not_publishable')) : ''}</p>
+        <button id="publication-publish" onclick="publishArchive()">PUBLISH PUBLIC ARCHIVE</button>
+        <button id="publication-refresh" onclick="loadPublication('${esc(state.dropId)}')">저장소 상태 다시 확인</button>`;
+      updatePublicationPreview();
+    }
+    function updatePublicationPreview() {
+      const s = publication;
+      if (!s.host.isConnected) return;
+      $('publication-upload').hidden = s.mode !== 'CUSTOM';
+      const imageUrl = s.objectUrl || s.data.imageUrl;
+      $('publication-preview').innerHTML = s.mode === 'AUTO' ? autoOgPreview(s.data.snapshot) : imageUrl ? `<img class="og-custom" src="${esc(imageUrl)}" alt="CUSTOM social preview — 중앙 크롭 근사 예시">` : '<p>미리볼 PNG를 선택하세요.</p>';
+      $('publication-status').textContent = s.busy ? 'PUBLISHING' : s.data.status === 'ERROR' ? 'ERROR' : (s.file || s.mode !== s.data.mode) && s.data.configured ? 'CHANGES NOT PUBLISHED' : s.data.status;
+      $('publication-publish').disabled = s.busy || s.validating || !s.data.configured || !s.data.eligible || (s.mode === 'CUSTOM' && !imageUrl);
+      $('publication-refresh').disabled = s.busy;
+      s.host.querySelectorAll('input').forEach(input => { input.disabled = s.busy; });
+    }
+    function changePublicationMode(mode) {
+      if (publication.busy) return;
+      publication.mode = mode;
+      if (mode === 'AUTO') {
+        if (publication.objectUrl) URL.revokeObjectURL(publication.objectUrl);
+        publication.objectUrl = null; publication.file = null; $('og-file').value = '';
+      }
+      updatePublicationPreview();
+    }
+    async function selectPublicationPng(input) {
+      const s = publication, file = input.files[0];
+      if (!file || s.busy) return;
+      const selection = {}; s.selection = selection; s.validating = true; updatePublicationPreview();
+      let url;
+      try {
+        if (file.type !== 'image/png' || file.size > 5 * 1024 * 1024) throw new Error('invalid_png');
+        url = URL.createObjectURL(file);
+        const img = new Image(); img.src = url; await img.decode();
+        if (img.naturalWidth < 600 || img.naturalHeight < 315 || img.naturalWidth * img.naturalHeight > 40000000) throw new Error('invalid_png');
+        if (s !== publication || s.selection !== selection || !s.host.isConnected || s.mode !== 'CUSTOM') { URL.revokeObjectURL(url); return; }
+        if (s.objectUrl) URL.revokeObjectURL(s.objectUrl);
+        s.objectUrl = url; s.file = file; $('publication-message').textContent = 'PNG 선택됨 — 아직 업로드하지 않았습니다.';
+      } catch (_) {
+        if (url) URL.revokeObjectURL(url);
+        if (s === publication && s.selection === selection && s.host.isConnected) { input.value = ''; $('publication-message').textContent = publicationMessage('invalid_png'); }
+      } finally { if (s === publication && s.selection === selection && s.host.isConnected) { s.validating = false; updatePublicationPreview(); } }
+    }
+    async function publishArchive() {
+      const s = publication;
+      if (s.busy || s.validating || !s.data.configured || !s.data.eligible) return;
+      if (!confirm('저장된 제목·설명·공개 기간을 영구 공개 아카이브로 발행할까요? GitHub 소스와 소셜 이미지가 한 커밋으로 변경됩니다. CUSTOM → AUTO는 기존 소스 PNG를 삭제합니다. 배포 완료는 별도로 확인해야 합니다.')) return;
+      s.busy = true; updatePublicationPreview();
+      const finish = result => {
+        if (s !== publication || !s.host.isConnected) return;
+        s.busy = false;
+        if (result.ok) {
+          s.data.status = result.status; s.data.mode = s.mode;
+          s.file = null; s.data.eligible = false; // Refresh required before another request.
+          $('publication-message').innerHTML = result.commitUrl ? `배포 요청됨. <a href="${esc(result.commitUrl)}" target="_blank" rel="noopener">커밋 확인</a> · Actions/실제 페이지에서 배포 완료를 확인하세요.` : '저장소 내용이 이미 동일합니다.';
+        } else { s.data.status = 'ERROR'; $('publication-message').textContent = publicationMessage(result.error); }
+        updatePublicationPreview();
+      };
+      try {
+        const pngBase64 = s.mode === 'CUSTOM' && s.file ? await new Promise((resolve, reject) => {
+          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(s.file);
+        }) : undefined;
+        if (s !== publication || !s.host.isConnected) return;
+        google.script.run.withSuccessHandler(finish).withFailureHandler(() => finish({ ok: false })).publishFormulaDropArchive(s.dropId, {
+          mode: s.mode, head: s.data.head, updatedAt: s.data.updatedAt, ...(pngBase64 ? { pngBase64 } : {}) });
+      } catch (_) { finish({ ok: false, error: 'invalid_png' }); }
     }
 
     loadDashboard();
