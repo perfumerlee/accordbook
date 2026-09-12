@@ -11,6 +11,12 @@ export function classifyRepositoryState({ ahead = 0, behind = 0, isDirty = false
   return 'UP_TO_DATE'
 }
 
+export function devServerCommand(platform = process.platform, comspec = process.env.ComSpec || 'cmd.exe') {
+  return platform === 'win32'
+    ? { command: comspec, args: ['/d', '/s', '/c', 'npm.cmd run dev'] }
+    : { command: 'npm', args: ['run', 'dev'] }
+}
+
 const git = args => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
 const fail = (message, error) => { console.error(`[dev:safe] ${message}`); if (error?.stderr) console.error(String(error.stderr).trim()); process.exitCode = 1 }
 
@@ -40,8 +46,11 @@ function run() {
     console.log('[dev:safe] Local repository synchronized.')
   } else console.log('[dev:safe] Repository is already up to date.')
   console.log('[dev:safe] Starting Accordbook dev server...')
-  const child = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'dev'], { stdio: 'inherit' })
-  child.on('error', error => fail('Could not start the existing dev server.', error))
+  const launch = devServerCommand()
+  let child
+  try { child = spawn(launch.command, launch.args, { stdio: 'inherit' }) }
+  catch (error) { return fail('Failed to start the development server.', error) }
+  child.on('error', error => fail('Failed to start the development server.', error))
   child.on('exit', (code, signal) => { if (signal) process.exitCode = 1; else process.exitCode = code ?? 1 })
 }
 
