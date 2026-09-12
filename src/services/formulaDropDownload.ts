@@ -1,5 +1,6 @@
 import { createFormulaDropEventId, getFormulaDropAttribution, getOrCreateFormulaDropSessionId, getOrCreateFormulaDropVisitorId, rememberFormulaDropImport } from './formulaDropIdentity'
 import { requestFormulaDropDownload, type FormulaDropDownload } from './formulaDropPublicApi'
+import { rememberFormulaDropAccess } from './formulaDropAccess'
 async function triggerFileDownload(download: FormulaDropDownload): Promise<void> {
   try {
     const response = await fetch(download.fileUrl, { credentials: 'omit' });
@@ -22,4 +23,4 @@ async function triggerFileDownload(download: FormulaDropDownload): Promise<void>
   }
 }
 
-export async function startFormulaDropDownload(dropId: string, options: { source?: string; referrer?: string } = {}): Promise<FormulaDropDownload> { const attribution = getFormulaDropAttribution(dropId, options.source, options.referrer); const result = await requestFormulaDropDownload({ dropId, eventId: createFormulaDropEventId(), visitorId: getOrCreateFormulaDropVisitorId(), sessionId: getOrCreateFormulaDropSessionId(), source: attribution.source, referrerHost: attribution.referrerHost }); rememberFormulaDropImport(dropId); await triggerFileDownload(result.download); return result.download }
+export async function startFormulaDropDownload(dropId: string, options: { source?: string; referrer?: string } = {}): Promise<FormulaDropDownload> { const attribution = getFormulaDropAttribution(dropId, options.source, options.referrer); const result = await requestFormulaDropDownload({ dropId, eventId: createFormulaDropEventId(), visitorId: getOrCreateFormulaDropVisitorId(), sessionId: getOrCreateFormulaDropSessionId(), source: attribution.source, referrerHost: attribution.referrerHost }); rememberFormulaDropAccess(result.download, dropId.replace(/^DROP-/, '')); rememberFormulaDropImport(dropId); await triggerFileDownload(result.download); return result.download }

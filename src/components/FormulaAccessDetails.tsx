@@ -1,0 +1,5 @@
+import { useState } from 'react'
+import type { FormulaDropDownload } from '../services/formulaDropPublicApi'
+import { formatFormulaDropAccessDetails } from '../services/formulaDropAccess'
+import './formulaDropPage.css'
+export default function FormulaAccessDetails({download}:{download:FormulaDropDownload}){const[copied,setCopied]=useState(false);const copy=async()=>{try{await navigator.clipboard.writeText(formatFormulaDropAccessDetails(download));setCopied(true)}catch{setCopied(false)}};return <section className="formula-access-details" aria-labelledby="access-details-heading"><h3 id="access-details-heading">ACCESS DETAILS</h3><dl><dt>NAME</dt><dd>{download.accessName}</dd><dt>LAST 4 DIGITS</dt><dd>{download.accessLast4}</dd><dt>PIN</dt><dd>{download.accessPin}</dd></dl><button type="button" className="formula-access-copy" onClick={()=>void copy()}>COPY ACCESS DETAILS</button><span className="formula-access-feedback" aria-live="polite">{copied?'ACCESS DETAILS COPIED':''}</span></section>}

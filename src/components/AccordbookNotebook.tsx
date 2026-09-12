@@ -18,6 +18,7 @@ import { BackupImportError, importBackup, parseBackup } from '../services/import
 import { printCurrentFormula } from '../services/printFormula'
 import { trackBackupExported, trackDilutionApplied, trackFormulaCompleted, trackFormulaCreated, trackPrintOpened } from '../services/analytics'
 import { downloadFormulaFile, FormulaFileError, importFormula, parseFormulaFile } from '../services/formulaFile'
+import { clearFormulaDropAccess, formatFormulaDropAccessDetails, readFormulaDropAccess } from '../services/formulaDropAccess'
 import type { FormulaFile } from '../models/formulaFile'
 import { parsePaidFormulaPackage, type PaidFormulaPackage } from '../services/paidFormulaPackage'
 import PaidFormulaImport from './PaidFormulaImport'
@@ -61,6 +62,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   const [hydrationComplete, setHydrationComplete] = useState(false)
   const [welcomeClosed, setWelcomeClosed] = useState(false)
   const [welcomeReady, setWelcomeReady] = useState(false)
+  const [dropInboundDismissed, setDropInboundDismissed] = useState(false)
   const [starterCasHint, setStarterCasHint] = useState(false)
   const [starterOpen, setStarterOpen] = useState(false)
   const formulaActionHandlers = useRef<{ 'time-machine'?: () => void; experiments?: () => void; duplicate?: () => void; reset?: () => void; archive?: () => void; pin?: () => void }>({})
@@ -176,6 +178,29 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   useEffect(() => { const savedLocale = localStorage.getItem('accordbook.locale'); if ((savedLocale === 'en' || savedLocale === 'ko') && savedLocale !== language) setLanguage(savedLocale) }, [formulas])
   useEffect(() => { if (storage) void ensureTimeMachineIntegrity(storage) }, [storage])
   useEffect(() => { if (!introComplete || !hydrationComplete || welcomeClosed || formulas.length !== 1 || archive.length !== 0) { setWelcomeReady(false); return } const timer = window.setTimeout(() => setWelcomeReady(true), 260); return () => window.clearTimeout(timer) }, [introComplete, hydrationComplete, welcomeClosed, formulas.length, archive.length])
+  const dropParams = new URLSearchParams(window.location.search)
+  const dropSlug = dropParams.get('drop') ?? ''
+  const dropInbound = dropParams.get('from') === 'drop' && /^\d{4}-\d{3}$/.test(dropSlug)
+  const dropHandoff = dropInbound ? readFormulaDropAccess() : undefined
+  const validDropInbound = Boolean(dropHandoff && dropHandoff.dropSlug === dropSlug)
+  useEffect(() => {
+    if (!dropInbound || !hydrationComplete) return
+    if (!dropHandoff || dropHandoff.dropSlug !== dropSlug) {
+      if (dropHandoff) clearFormulaDropAccess()
+      const cleanUrl = window.location.pathname + window.location.hash
+      window.history.replaceState({}, document.title, cleanUrl)
+      setDropInboundDismissed(true)
+      return
+    }
+    if (dropInboundDismissed) return
+    const banner = document.createElement('aside'); banner.className = 'drop-inbound-guidance'; banner.setAttribute('role', 'status')
+    const handoff = dropHandoff; banner.innerHTML = '<strong>YOU DOWNLOADED A FORMULA DROP</strong>' + (handoff.title ? `<b class="drop-inbound-title">${handoff.title}</b>` : '') + '<span>Open the downloaded .accordbook file using the access details below.</span><div class="drop-inbound-access"><b>ACCESS DETAILS</b><span>NAME: ' + handoff.download.accessName + '</span><span>LAST 4 DIGITS: ' + handoff.download.accessLast4 + '</span><span>PIN: ' + handoff.download.accessPin + '</span></div>'
+    const open = document.createElement('button'); open.type = 'button'; open.textContent = 'OPEN .ACCORDBOOK FILE'; open.addEventListener('click', () => formulaFileRef.current?.click())
+    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'COPY ACCESS DETAILS'; copy.addEventListener('click', () => { if (handoff) void navigator.clipboard.writeText(formatFormulaDropAccessDetails(handoff.download)).then(() => { copy.textContent = 'ACCESS DETAILS COPIED' }) })
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'drop-inbound-dismiss'; close.textContent = 'Dismiss'; close.addEventListener('click', () => { clearFormulaDropAccess(); setDropInboundDismissed(true); banner.remove() })
+    banner.append(copy, open, close); document.body.append(banner)
+    return () => banner.remove()
+  }, [dropInbound, validDropInbound, dropHandoff, dropInboundDismissed, hydrationComplete])
   useEffect(() => { setNotebookOpen((open) => reconcileAccordionOpen(open, formulas.length, formulas.length > 0 && formulas.length === 1)) }, [formulas.length, formulas.length])
   useEffect(() => { setArchiveOpen((open) => reconcileAccordionOpen(open, archive.length)) }, [archive.length])
   const previousArchiveOpen = useRef(archiveOpen)
@@ -278,7 +303,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   const finishFormulaImport = async (shared: FormulaFile) => {
     if (!storage) throw new Error('Storage unavailable')
     const imported = await importFormula(storage, shared, prefix)
-    clearPendingMaterialFocus(); newOriginFlowId.current = undefined; setOriginPromptId(undefined)
+    clearPendingMaterialFocus(); clearFormulaDropAccess(); newOriginFlowId.current = undefined; setOriginPromptId(undefined); setDropInboundDismissed(true)
     setFormulas(all => [...all, imported]); setActive(imported); setWelcomeClosed(true)
     setNotebookOpen(true); setArchiveOpen(false); setImportOpen(false); setFormulaSearchQuery('')
     localStorage.setItem(ACTIVE_KEY, imported.id)
@@ -311,7 +336,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   if (initializing) return <main className="loading-fallback" role="status" aria-live="polite" aria-label="Loading" />
   if (initializationError) return <main className="loading-fallback" role="alert">{initializationError}</main>
   const isDefaultBlankFormula = formulas.length === 1 && formulas[0].name.trim() === '' && formulas[0].notes.trim() === '' && formulas[0].rows.length === 1 && formulas[0].rows[0].material.trim() === '' && formulas[0].rows[0].parts === ''
-  const shouldWelcome = hydrationComplete && welcomeReady && archive.length === 0 && isDefaultBlankFormula && !welcomeClosed
+  const shouldWelcome = hydrationComplete && welcomeReady && archive.length === 0 && isDefaultBlankFormula && !welcomeClosed && !dropInbound
   if (!active) return <main className="loading-fallback" role="alert">{language === 'ko' ? '활성 노트를 찾을 수 없습니다.' : 'No active notebook'}</main>
   const mobileViewport = typeof window !== 'undefined' && window.innerWidth < 768
   if (multiVersionStates && !mobileViewport) return <MultiVersionSheet formula={active} states={multiVersionStates} language={language} onClose={() => { setMultiVersionStates(undefined); setTimeMachineOpen(false) }} />

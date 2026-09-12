@@ -1,9 +1,10 @@
 import { createFormulaDropEventId, getFormulaDropAttribution, getOrCreateFormulaDropSessionId, getOrCreateFormulaDropVisitorId } from './formulaDropIdentity'
+import { getFormulaDropApiEndpoint } from './formulaDropEndpoint'
 export const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'] as const
 export type FormulaDropEventType = typeof FORMULA_DROP_EVENT_TYPES[number]
 export type FormulaDropEventPayload = { eventId: string; dropId: string; visitorId: string; sessionId: string; eventType: FormulaDropEventType; source: string; referrerHost: string; failureReason?: string }
 type Result = { ok: true; accepted: boolean; duplicate: boolean } | { ok: false; error: string }
-const endpoint = () => (import.meta.env.VITE_FORMULA_DROP_PUBLIC_API_URL ?? '').trim()
+const endpoint = getFormulaDropApiEndpoint
 export function createFormulaDropEvent(dropId: string, eventType: FormulaDropEventType, options: { source?: string; referrer?: string; failureReason?: string; eventId?: string } = {}): FormulaDropEventPayload {
   const attribution = getFormulaDropAttribution(dropId, options.source, options.referrer)
   return { eventId: options.eventId ?? createFormulaDropEventId(), dropId, visitorId: getOrCreateFormulaDropVisitorId(), sessionId: getOrCreateFormulaDropSessionId(), eventType, source: attribution.source, referrerHost: attribution.referrerHost, ...(options.failureReason ? { failureReason: options.failureReason } : {}) }

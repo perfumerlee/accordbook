@@ -124,6 +124,14 @@
         .getFormulaDropDetail(dropId);
     }
 
+    function resetMetrics(dropId) {
+      if (!confirm('이 DROP의 수치를 지금부터 새로 집계할까요? 기존 이벤트 원본은 삭제되지 않습니다.')) return;
+      google.script.run
+        .withSuccessHandler((result) => result.ok ? showDetail(dropId) : alert('수치를 초기화할 수 없습니다: ' + result.error))
+        .withFailureHandler(() => alert('수치 초기화에 실패했습니다.'))
+        .resetFormulaDropMetrics(dropId);
+    }
+
     function createDraft() {
       google.script.run
         .withSuccessHandler((result) => result.ok ? openEditor(result.dropId) : alert('생성할 수 없습니다: ' + result.error))
@@ -153,6 +161,7 @@
         ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
+      $('app').insertAdjacentHTML('afterbegin', `<button onclick="resetMetrics('${esc(data.drop.dropId)}')">이 DROP 수치 초기화</button>`);
       refreshLicenseStatus(data.drop.dropId);
     }
 

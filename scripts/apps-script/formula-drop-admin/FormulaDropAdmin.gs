@@ -4,6 +4,7 @@
 const FORMULA_DROP_SPREADSHEET_ID_PROPERTY = 'FORMULA_DROP_SPREADSHEET_ID';
 const PAID_FORMULA_REGISTRY_ADMIN_URL_PROPERTY = 'PAID_FORMULA_REGISTRY_ADMIN_URL';
 const PAID_FORMULA_ADMIN_SECRET_PROPERTY = 'PAID_FORMULA_ADMIN_SECRET';
+const FORMULA_DROP_METRICS_RESET_PREFIX = 'FORMULA_DROP_METRICS_RESET_';
 const FORMULA_DROPS_SHEET_NAME = 'FormulaDrops';
 const FORMULA_DROP_EVENTS_SHEET_NAME = 'FormulaDropEvents';
 const FORMULA_DROPS_HEADERS = [
@@ -113,14 +114,27 @@ function doGet() {
 
 function getFormulaDropDashboardData() {
   const data = readFormulaDropAdminData_();
-  return { drops: data.drops.map(drop => dropSummary_(drop, aggregateDrop_(drop.dropId, data.events).metrics)), active: data.drops.filter(drop => drop.effectiveStatus === 'ACTIVE').sort(dropSort_).map(drop => dropSummary_(drop, aggregateDrop_(drop.dropId, data.events).metrics)), generatedAt: new Date().toISOString() };
+  return { drops: data.drops.map(drop => dropSummary_(drop, aggregateDrop_(drop.dropId, data.events, getFormulaDropMetricsResetAt_(drop.dropId)).metrics)), active: data.drops.filter(drop => drop.effectiveStatus === 'ACTIVE').sort(dropSort_).map(drop => dropSummary_(drop, aggregateDrop_(drop.dropId, data.events, getFormulaDropMetricsResetAt_(drop.dropId)).metrics)), generatedAt: new Date().toISOString() };
 }
 
 function getFormulaDropDetail(dropId) {
   if (typeof dropId !== 'string' || !/^DROP-\d{4}-\d{3}$/.test(dropId)) throw new Error('Invalid Drop ID');
   const data = readFormulaDropAdminData_(); const drop = data.drops.find(item => item.dropId === dropId);
   if (!drop) throw new Error('Drop not found');
-  const metrics = aggregateDrop_(dropId, data.events); return { drop: dropSummary_(drop, metrics.metrics), metrics: metrics.metrics, sources: metrics.sources, failures: metrics.failures };
+  const resetAt = getFormulaDropMetricsResetAt_(dropId); const metrics = aggregateDrop_(dropId, data.events, resetAt); return { drop: dropSummary_(drop, metrics.metrics), metrics: metrics.metrics, sources: metrics.sources, failures: metrics.failures, metricsResetAt: resetAt };
+}
+
+function resetFormulaDropMetrics(dropId) {
+  if (typeof dropId !== 'string' || !/^DROP-\d{4}-\d{3}$/.test(dropId)) return { ok: false, error: 'invalid_request' };
+  const data = readFormulaDropAdminData_();
+  if (!data.drops.some(drop => drop.dropId === dropId)) return { ok: false, error: 'not_found' };
+  const resetAt = new Date().toISOString();
+  PropertiesService.getScriptProperties().setProperty(FORMULA_DROP_METRICS_RESET_PREFIX + dropId, resetAt);
+  return { ok: true, dropId, metricsResetAt: resetAt };
+}
+
+function getFormulaDropMetricsResetAt_(dropId) {
+  return String(PropertiesService.getScriptProperties().getProperty(FORMULA_DROP_METRICS_RESET_PREFIX + dropId) || '').trim() || null;
 }
 
 function getFormulaDropLicenseStatus(dropId) {
@@ -292,11 +306,12 @@ function adminDrop_(row) {
   if (raw === 'SCHEDULED' && (!start || now >= start)) effective = start ? (end && now < end ? 'ACTIVE' : 'EXPIRED') : 'INVALID';
   return { dropId: String(row[0]), year: Number(row[1]), sequence: Number(row[2]), title: String(row[3] || ''), subtitle: String(row[4] || ''), status: raw, effectiveStatus: effective, startAt: start ? start.toISOString() : null, expiresAt: end ? end.toISOString() : null, createdAt: row[15] instanceof Date ? row[15].toISOString() : null, updatedAt: row[16] instanceof Date ? row[16].toISOString() : null };
 }
-function adminEvent_(row) { return { dropId: String(row[2] || ''), visitorId: String(row[3] || ''), eventType: String(row[5] || ''), source: String(row[6] || '').trim() || 'unknown', failureReason: String(row[8] || '').trim() || 'unknown' }; }
+function adminEvent_(row) { return { timestamp: row[1] instanceof Date ? row[1].getTime() : Date.parse(String(row[1] || '')), dropId: String(row[2] || ''), visitorId: String(row[3] || ''), eventType: String(row[5] || ''), source: String(row[6] || '').trim() || 'unknown', failureReason: String(row[8] || '').trim() || 'unknown' }; }
 function dropSort_(a, b) { return b.year - a.year || b.sequence - a.sequence; }
 function dropSummary_(drop, metrics) { return { ...drop, metrics: metrics || {} }; }
-function aggregateDrop_(dropId, events) {
-  const rows = events.filter(event => event.dropId === dropId && ['view', 'download', 'import_attempt', 'import_success', 'import_failed'].indexOf(event.eventType) >= 0);
+function aggregateDrop_(dropId, events, resetAt) {
+  const resetTime = resetAt ? Date.parse(resetAt) : 0;
+  const rows = events.filter(event => event.dropId === dropId && (!resetTime || event.timestamp >= resetTime) && ['view', 'download', 'import_attempt', 'import_success', 'import_failed'].indexOf(event.eventType) >= 0);
   const sets = { view: new Set(), download: new Set(), import_success: new Set() }; rows.forEach(e => { if (sets[e.eventType] && e.visitorId) sets[e.eventType].add(e.visitorId); });
   const metrics = { totalViews: rows.filter(e => e.eventType === 'view').length, uniqueVisitors: sets.view.size, totalDownloads: rows.filter(e => e.eventType === 'download').length, uniqueDownloaders: sets.download.size, repeatDownloads: Math.max(rows.filter(e => e.eventType === 'download').length - sets.download.size, 0), importAttempts: rows.filter(e => e.eventType === 'import_attempt').length, importFailures: rows.filter(e => e.eventType === 'import_failed').length, totalImportSuccesses: rows.filter(e => e.eventType === 'import_success').length, uniqueImporters: sets.import_success.size };
   metrics.visitToDownload = metrics.uniqueVisitors ? metrics.uniqueDownloaders / metrics.uniqueVisitors * 100 : null; metrics.downloadToImport = metrics.uniqueDownloaders ? metrics.uniqueImporters / metrics.uniqueDownloaders * 100 : null; metrics.visitToImport = metrics.uniqueVisitors ? metrics.uniqueImporters / metrics.uniqueVisitors * 100 : null;
