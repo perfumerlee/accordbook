@@ -36,11 +36,13 @@
     .og-preview { container-type: inline-size; position: relative; aspect-ratio: 1200 / 630; max-width: 720px; box-sizing: border-box; padding: 0; background: #e8e1d5; border: 1px solid #c8bdad; overflow: hidden; margin: 18px 0; }
     .og-preview::after { content: ''; position: absolute; z-index: 0; width: 23.33%; aspect-ratio: 1; right: 4%; top: 32.5%; opacity: .055; background: url('https://accordbook.org/favicon.svg') center / contain no-repeat; pointer-events: none; }
     .og-preview header, .og-preview footer { position: absolute; z-index: 1; left: 6.67%; right: 6.67%; display: flex; justify-content: space-between; gap: 12px; overflow: hidden; white-space: nowrap; font: 2.08cqw/1 monospace; letter-spacing: .1em; }
-    .og-preview header { top: 11.1%; padding-bottom: 2.5%; border-bottom: 1px solid #bdb1a1; }
+    .og-preview header { top: 11.1%; padding-bottom: 2.5%; }
+    .og-preview header::after, .og-preview footer::after { content: ''; position: absolute; left: -60%; right: -60%; bottom: -1px; border-bottom: 1px solid #bdb1a1; }
     .og-preview strong, .og-preview p { z-index: 1; }
     .og-preview strong { position: absolute; left: 6.67%; right: 6.67%; top: 29.5%; display: block; color: #332d27; font: normal 4.83cqw/1.22 Georgia, serif; overflow-wrap: anywhere; }
-    .og-preview p { position: absolute; left: 6.67%; right: 6.67%; top: 52%; margin: 0; color: #5f5348; font: 2.33cqw/1.35 Georgia, serif; overflow-wrap: anywhere; }
-    .og-preview footer { bottom: 7.6%; padding-top: 2.5%; border-top: 1px solid #bdb1a1; }
+    .og-preview p { position: absolute; left: 6.67%; right: 6.67%; top: 47.6%; margin: 0; color: #5f5348; font: 2.33cqw/1.35 Georgia, serif; overflow-wrap: anywhere; }
+    .og-preview footer { bottom: 7.6%; padding-top: 2.5%; }
+    .og-preview footer::after { top: -1px; bottom: auto; }
     .og-preview footer span:first-child { font-size: 2.5cqw; color: #332d27; }
     .og-custom { max-width: 720px; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; margin: 18px 0; }
     .publication-message { min-height: 1.5em; overflow-wrap: anywhere; }
