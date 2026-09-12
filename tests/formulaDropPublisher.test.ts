@@ -197,6 +197,7 @@ describe('Admin presentation separation', () => {
     expect(dashboard).toContain('width: 1200px; height: 630px');
     expect(dashboard).toContain('scale(${preview.clientWidth / 1200})');
     expect(dashboard).toContain('width: 900px');
+    expect(dashboard).toContain('background-position: center 115px, center 534px');
     expect(dashboard).toContain('favicon.svg');
   });
   it('Save remains independent; only explicit confirmed Publish invokes new server action', () => {
