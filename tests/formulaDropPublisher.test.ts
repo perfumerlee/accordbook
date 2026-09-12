@@ -89,6 +89,11 @@ describe('server-only atomic Formula Drop publisher', () => {
     expect(x.publish().ok).toBe(true);
     expect(JSON.parse(x.blobs[0].content).description).toBe('FORMULA COMPOSITION\nMaterial\n-----\nNotes');
   });
+  it('canonicalizes parser-supported generated composition separators', () => {
+    const existing = { ...snapshot, description: 'FORMULA COMPOSITION\nMaterial\n-----\nNotes' };
+    const x = setup({ existing }); x.row[5] = 'FORMULA COMPOSITION\n11 Materials\nMaterial\n\nㅡ\n\nNotes';
+    expect(x.status().status).toBe('SYNCED');
+  });
   it('recognizes changed public content and preserves public optional metadata', () => {
     const x = setup({ existing: { ...snapshot, title: 'Old', summary: 'Editorial summary' } });
     expect(x.status().status).toBe('CHANGES NOT PUBLISHED');

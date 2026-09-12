@@ -75,6 +75,19 @@ function dropPublicJson_(value) {
   normalized.description = normalized.description.split('\n').filter((line, index, lines) =>
     !(index > 0 && /^\s*\d+\s+materials?\s*$/i.test(line) && /^\s*FORMULA COMPOSITION\s*$/i.test(lines[index - 1]))
   ).join('\n').trim();
+  const descriptionLines = normalized.description.split('\n');
+  const marker = descriptionLines.findIndex(line => /^\s*FORMULA COMPOSITION\s*$/i.test(line));
+  if (marker >= 0) {
+    let separator = descriptionLines.findIndex((line, index) => index > marker && /^[\sㅡ—-]+$/.test(line) && /[ㅡ—-]/.test(line));
+    if (separator >= 0) {
+      const compositionLines = descriptionLines.slice(marker + 1, separator).filter(line => line.trim());
+      let notesStart = separator + 1;
+      while (notesStart < descriptionLines.length && !descriptionLines[notesStart].trim()) notesStart++;
+      const notesLines = descriptionLines.slice(notesStart);
+      descriptionLines.splice(marker + 1, descriptionLines.length - marker - 1, ...compositionLines, '-----', ...notesLines);
+    }
+  }
+  normalized.description = descriptionLines.join('\n').trim();
   return normalized;
 }
 
@@ -85,7 +98,7 @@ function dropSemanticJson_(value) {
 }
 
 function compareFormulaDropPublicSnapshots(current, published, social) {
-  const fields = ['slug', 'title', 'subtitle', 'description', 'expiresAt'];
+  const fields = ['slug', 'title', 'subtitle', 'summary', 'description', 'publishedAt', 'updatedAt', 'expiresAt'];
   const result = { equal: true, fields: {} };
   fields.forEach(field => {
     const same = current[field] === published[field];
