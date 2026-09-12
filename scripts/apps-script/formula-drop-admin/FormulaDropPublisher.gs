@@ -30,7 +30,7 @@ function dropPublishRecord_(dropId) {
   };
   if (row[8] instanceof Date && isFinite(row[8].getTime())) snapshot.expiresAt = row[8].toISOString();
   const effective = adminDrop_(row).effectiveStatus;
-  return { snapshot, updatedAt: row[16] instanceof Date ? row[16].toISOString() : '',
+  return { snapshot: dropPublicJson_(snapshot), updatedAt: row[16] instanceof Date ? row[16].toISOString() : '',
     eligible: ['ACTIVE', 'EXPIRED'].indexOf(effective) >= 0 && !!snapshot.title && !!snapshot.description.trim() };
 }
 
@@ -68,7 +68,14 @@ function dropPublicJson_(value) {
     throw new Error('repository_content_invalid');
   }
   if (Utilities.newBlob(JSON.stringify(value)).getBytes().length > 100000) throw new Error('repository_content_invalid');
-  return value;
+  const normalized = {};
+  Object.keys(value).forEach(key => {
+    normalized[key] = String(value[key]).replace(/\r\n?/g, '\n').split('\n').map(line => line.replace(/[ \t]+$/g, '')).join('\n').trim();
+  });
+  normalized.description = normalized.description.split('\n').filter((line, index, lines) =>
+    !(index > 0 && /^\s*\d+\s+materials?\s*$/i.test(line) && /^\s*FORMULA COMPOSITION\s*$/i.test(lines[index - 1]))
+  ).join('\n').trim();
+  return normalized;
 }
 
 function dropSemanticJson_(value) {

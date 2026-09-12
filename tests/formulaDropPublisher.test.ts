@@ -74,6 +74,15 @@ describe('server-only atomic Formula Drop publisher', () => {
     expect(x.publish().status).toBe('SYNCED');
     expect(x.blobs).toHaveLength(0);
   });
+  it('normalizes generated material-count metadata and line endings at the public boundary', () => {
+    const authored = { ...snapshot, description: 'FORMULA COMPOSITION\r\n11 Materials  \r\nMaterial\r\n-----\r\nNotes  ' };
+    const x = setup({ existing: snapshot }); x.row[5] = authored.description;
+    const result = x.status();
+    expect(result.status).toBe('CHANGES NOT PUBLISHED');
+    expect(result.snapshot.description).toBe('FORMULA COMPOSITION\nMaterial\n-----\nNotes');
+    expect(x.publish().ok).toBe(true);
+    expect(JSON.parse(x.blobs[0].content).description).toBe('FORMULA COMPOSITION\nMaterial\n-----\nNotes');
+  });
   it('recognizes changed public content and preserves public optional metadata', () => {
     const x = setup({ existing: { ...snapshot, title: 'Old', summary: 'Editorial summary' } });
     expect(x.status().status).toBe('CHANGES NOT PUBLISHED');
