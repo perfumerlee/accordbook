@@ -3,9 +3,13 @@
 ## Development server rule
 
 - Accordbook uses port 5173 exclusively.
-- Normal local development must use:
+- Normal local development should use:
 
-  `npm.cmd run dev:clean`
+  `npm.cmd run dev:safe`
+
+- Direct development start without Git synchronization remains available:
+
+  `npm.cmd run dev`
 
 - Do not manually start multiple persistent Vite servers.
 - Do not silently switch to another port.
