@@ -19,6 +19,16 @@ export function textPath(font, text, x, y, size, color) {
   return `<path fill="${color}" d="${d}"/>`
 }
 let cachedFont
+let cachedLogo
+async function getLogoMarkup() {
+  if (!cachedLogo) {
+    const source = await readFile(join(process.cwd(), 'public/favicon.svg'), 'utf8')
+    const match = source.match(/<g[\s\S]*<\/g>/)
+    if (!match) throw new Error('Accordbook logo asset is missing')
+    cachedLogo = match[0]
+  }
+  return cachedLogo
+}
 async function getFont() {
   if (!cachedFont) {
     const data = await readFile(join(dirname(require.resolve('@fontsource/libre-baskerville/package.json')), 'files/libre-baskerville-latin-400-normal.woff'))
@@ -43,7 +53,7 @@ export async function layoutOg(drop) {
     let lines
     try { lines = wrapText(font,drop.title,size,1040) } catch { continue }
     if (lines.length <= 4 && lines.length * size * 1.22 <= 245) {
-      const subtitle = drop.subtitle ? wrapText(font,drop.subtitle,22,1040) : []
+      const subtitle = drop.subtitle ? wrapText(font,drop.subtitle,28,900) : []
       if (subtitle.length > 3) throw new Error('OG subtitle exceeds three lines')
       return {font,size,lines,subtitle}
     }
@@ -61,8 +71,19 @@ export async function generateOg(drop, customPath, output) {
     return 'CUSTOM'
   }
   const {font,size,lines,subtitle} = await layoutOg(drop)
+  const logo = await getLogoMarkup()
   const path = (text,x,y,fontSize,color) => textPath(font,text,x,y,fontSize,color)
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#e8e1d5"/><path d="M80 115H1120M80 534H1120" stroke="#bdb1a1"/>${path('FORMULA DROP',80,80,19,'#6f527f')}${path(drop.slug ? 'NO. '+drop.slug : 'ARCHIVE',880,80,19,'#6f527f')}${lines.map((line,i)=>path(line,80,204+i*size*1.22,size,'#332d27')).join('')}${subtitle.map((line,i)=>path(line,80,440+i*30,22,'#6b5d4f')).join('')}${path('ACCORD BOOK',80,582,21,'#332d27')}${path('A PUBLIC FORMULA STUDY',790,582,15,'#6b5d4f')}</svg>`
+  const titleY = 204
+  const titleBottom = titleY + (lines.length - 1) * size * 1.22 + size
+  const subtitleY = Math.min(440, Math.max(300, titleBottom + 42))
+  const number = drop.slug ? 'NO. ' + drop.slug : 'ARCHIVE'
+  const descriptor = 'A PUBLIC FORMULA STUDY'
+  const numberSize = 29
+  const descriptorSize = 22
+  const subtitleSize = 28
+  const numberX = 1120 - font.getAdvanceWidth(number,numberSize,{kerning:false})
+  const descriptorX = 1120 - font.getAdvanceWidth(descriptor,descriptorSize,{kerning:false})
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#e8e1d5"/><path d="M32 115H1168M32 534H1168" stroke="#bdb1a1"/><svg x="860" y="205" width="280" height="280" viewBox="0 0 512 512" opacity="0.055">${logo}</svg>${path('FORMULA DROP',80,80,25,'#6f527f')}${path(number,numberX,80,numberSize,'#6f527f')}${lines.map((line,i)=>path(line,80,titleY+i*size*1.22,size,'#332d27')).join('')}${subtitle.map((line,i)=>path(line,80,subtitleY+i*34,subtitleSize,'#5f5348')).join('')}${path('ACCORDBOOK',80,582,30,'#332d27')}${path(descriptor,descriptorX,582,descriptorSize,'#5f5348')}</svg>`
   await sharp(Buffer.from(svg)).png().toFile(output)
   return 'AUTO'
 }
