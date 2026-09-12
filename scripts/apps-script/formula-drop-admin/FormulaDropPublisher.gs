@@ -101,7 +101,7 @@ function dropRepositoryState_(config, slug) {
   return { head, tree: commit.tree.sha, root, snapshot, image: image && image.sha };
 }
 
-function dropMergedSnapshot_(record, repository) {
+function buildCanonicalPublicArchiveSnapshot_(record, repository) {
   // Preserve existing public-only optional editorial metadata without inventing dates.
   const snapshot = Object.assign({}, repository.snapshot || {}, record.snapshot);
   if (!record.snapshot.expiresAt) delete snapshot.expiresAt;
@@ -116,7 +116,7 @@ function getFormulaDropPublication(dropId) {
     catch (_) { return { ok: true, configured: false, ...record, status: 'NOT CONFIGURED', mode: 'AUTO' }; }
     const repo = dropRepositoryState_(config, record.snapshot.slug);
     return { ok: true, configured: true, ...record, head: repo.head, mode: repo.image ? 'CUSTOM' : 'AUTO',
-      status: !repo.snapshot ? 'NOT PUBLISHED' : dropSemanticJson_(repo.snapshot) === dropSemanticJson_(dropMergedSnapshot_(record, repo)) ? 'SYNCED' : 'CHANGES NOT PUBLISHED',
+      status: !repo.snapshot ? 'NOT PUBLISHED' : dropSemanticJson_(repo.snapshot) === dropSemanticJson_(buildCanonicalPublicArchiveSnapshot_(record, repo)) ? 'SYNCED' : 'CHANGES NOT PUBLISHED',
       imageUrl: repo.image ? 'https://raw.githubusercontent.com/' + config.owner + '/' + config.repo + '/' + repo.head + '/' + repo.root + 'og-source.png' : null };
   } catch (error) { return dropPublishError_(error); }
 }
@@ -166,7 +166,7 @@ function publishFormulaDropArchive(dropId, request) {
     const config = dropPublishConfig_(), repo = dropRepositoryState_(config, record.snapshot.slug);
     if (repo.head !== request.head) throw new Error('conflict');
     if (request.mode === 'CUSTOM' && !png && !repo.image) throw new Error('image_required');
-    const snapshot = dropMergedSnapshot_(record, repo), entries = [];
+    const snapshot = buildCanonicalPublicArchiveSnapshot_(record, repo), entries = [];
     const blob = (content, encoding) => dropGithub_(config, 'post', '/git/blobs', { content, encoding }).sha;
     if (!repo.snapshot || dropSemanticJson_(snapshot) !== dropSemanticJson_(repo.snapshot)) {
       entries.push({ path: repo.root + 'drop.json', mode: '100644', type: 'blob', sha: blob(JSON.stringify(snapshot, null, 2) + '\n', 'utf-8') });

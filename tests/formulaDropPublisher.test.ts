@@ -74,6 +74,12 @@ describe('server-only atomic Formula Drop publisher', () => {
     expect(x.publish().status).toBe('SYNCED');
     expect(x.blobs).toHaveLength(0);
   });
+  it('treats normalized AUTO content without a custom source image as synced', () => {
+    const x = setup({ existing: { ...snapshot, description: 'FORMULA COMPOSITION\r\nMaterial  ' } });
+    expect(x.status()).toMatchObject({ status: 'SYNCED', mode: 'AUTO', imageUrl: null });
+    expect(publisher).toContain('buildCanonicalPublicArchiveSnapshot_');
+    expect(publisher).not.toContain('dist/formula-drops');
+  });
   it('normalizes generated material-count metadata and line endings at the public boundary', () => {
     const authored = { ...snapshot, description: 'FORMULA COMPOSITION\r\n11 Materials  \r\nMaterial\r\n-----\r\nNotes  ' };
     const x = setup({ existing: snapshot }); x.row[5] = authored.description;
