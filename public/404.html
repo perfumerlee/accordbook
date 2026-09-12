@@ -4,6 +4,8 @@
   var path = window.location.pathname;
   if (!/^\/drop\/?(?:\d{4}-\d{3}\/?)?$/.test(path)) return;
   var route = path + window.location.search + window.location.hash;
-  window.location.replace('/?__accordbook_route=' + encodeURIComponent(route));
+  var base = document.querySelector('base');
+  var root = base ? base.href.replace(/\/$/, '') : '';
+  window.location.replace(root + '/?__accordbook_route=' + encodeURIComponent(route));
 }());
 </script></head><body></body></html>
