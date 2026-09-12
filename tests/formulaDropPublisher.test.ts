@@ -95,6 +95,16 @@ describe('server-only atomic Formula Drop publisher', () => {
     expect(x.publish().ok).toBe(true);
     expect(JSON.parse(x.blobs[0].content)).toEqual({ ...snapshot, summary: 'Editorial summary' });
   });
+  it('returns safe field-level diagnostics for a changed public field', () => {
+    const x = setup({ existing: { ...snapshot, description: 'FORMULA COMPOSITION\nOther material' } });
+    const result = x.status();
+    expect(result.status).toBe('CHANGES NOT PUBLISHED');
+    expect(result.comparison.equal).toBe(false);
+    expect(result.comparison.fields.description.status).toBe('modified');
+    expect(result.comparison.fields.description.current.lines).toBe(2);
+    expect(JSON.stringify(result)).not.toMatch(/private-|token|accessPin/);
+    expect(dashboard).toContain('PUBLIC CHANGES');
+  });
   it('first AUTO publication creates one JSON source commit with existing base tree', () => {
     const x = setup(); expect(x.publish().status).toBe('PUBLICATION REQUESTED');
     expect(x.calls.find(c => c.path === '/git/trees').body).toEqual({ base_tree: 'base-tree', tree: [{ path: root + 'drop.json', type: 'blob', mode: '100644', sha: sha(x.blobs[0].content) }] });

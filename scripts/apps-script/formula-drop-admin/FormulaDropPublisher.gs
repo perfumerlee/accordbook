@@ -84,6 +84,24 @@ function dropSemanticJson_(value) {
   return JSON.stringify(ordered);
 }
 
+function compareFormulaDropPublicSnapshots(current, published, social) {
+  const fields = ['slug', 'title', 'subtitle', 'description', 'expiresAt'];
+  const result = { equal: true, fields: {} };
+  fields.forEach(field => {
+    const same = current[field] === published[field];
+    result.fields[field] = { status: same ? 'same' : 'modified' };
+    if (!same) result.equal = false;
+    if (!same && typeof current[field] === 'string' && typeof published[field] === 'string') {
+      result.fields[field].current = { length: current[field].length, lines: current[field].split('\n').length };
+      result.fields[field].published = { length: published[field].length, lines: published[field].split('\n').length };
+    }
+  });
+  const socialSame = !social || social.mode === social.publishedMode;
+  result.fields.socialPreview = { status: socialSame ? 'same' : 'modified' };
+  if (!socialSame) result.equal = false;
+  return result;
+}
+
 function dropRepositoryState_(config, slug) {
   const head = dropGithub_(config, 'get', '/git/ref/heads/' + config.branch).object.sha;
   const commit = dropGithub_(config, 'get', '/git/commits/' + head);
@@ -115,8 +133,9 @@ function getFormulaDropPublication(dropId) {
     try { config = dropPublishConfig_(); }
     catch (_) { return { ok: true, configured: false, ...record, status: 'NOT CONFIGURED', mode: 'AUTO' }; }
     const repo = dropRepositoryState_(config, record.snapshot.slug);
+    const comparison = repo.snapshot ? compareFormulaDropPublicSnapshots(record.snapshot, repo.snapshot, { mode: repo.image ? 'CUSTOM' : 'AUTO', publishedMode: repo.image ? 'CUSTOM' : 'AUTO' }) : null;
     return { ok: true, configured: true, ...record, head: repo.head, mode: repo.image ? 'CUSTOM' : 'AUTO',
-      status: !repo.snapshot ? 'NOT PUBLISHED' : dropSemanticJson_(repo.snapshot) === dropSemanticJson_(buildCanonicalPublicArchiveSnapshot_(record, repo)) ? 'SYNCED' : 'CHANGES NOT PUBLISHED',
+      comparison, status: !repo.snapshot ? 'NOT PUBLISHED' : comparison.equal ? 'SYNCED' : 'CHANGES NOT PUBLISHED',
       imageUrl: repo.image ? 'https://raw.githubusercontent.com/' + config.owner + '/' + config.repo + '/' + repo.head + '/' + repo.root + 'og-source.png' : null };
   } catch (error) { return dropPublishError_(error); }
 }

@@ -45,6 +45,10 @@
     .og-preview-canvas footer span:first-child { font-size: 30px; color: #332d27; }
     .og-custom { max-width: 720px; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; margin: 18px 0; }
     .publication-message { min-height: 1.5em; overflow-wrap: anywhere; }
+    .publication-diff { max-width: 520px; margin: 16px 0; padding: 12px 0; border-top: 1px solid #d8cdbd; border-bottom: 1px solid #d8cdbd; }
+    .publication-diff .eyebrow { margin: 0 0 8px; }
+    .publication-diff > div { display: flex; justify-content: space-between; gap: 20px; padding: 4px 0; font: 12px monospace; }
+    .publication-diff strong { font-weight: normal; color: #75695e; }
     @media (max-width: 700px) {
       main { padding: 24px 14px; }
       .cards { grid-template-columns: repeat(2, 1fr); }
@@ -376,6 +380,11 @@
       };
       google.script.run.withSuccessHandler(receive).withFailureHandler(() => receive({ ok: false })).getFormulaDropPublication(dropId);
     }
+    function publicationDiff(data) {
+      if (!data.comparison || data.status !== 'CHANGES NOT PUBLISHED') return '';
+      const labels = { slug: 'SLUG', title: 'TITLE', subtitle: 'SUBTITLE', description: 'DESCRIPTION', expiresAt: 'EXPIRES AT', socialPreview: 'SOCIAL PREVIEW' };
+      return `<section class="publication-diff"><p class="eyebrow">PUBLIC CHANGES</p>${Object.keys(labels).map(key => `<div><span>${labels[key]}</span><strong>${data.comparison.fields[key]?.status === 'modified' ? 'MODIFIED' : 'SAME'}</strong></div>`).join('')}</section>`;
+    }
     function renderPublication() {
       const state = publication, data = state.data, host = state.host;
       if (!host.isConnected) return;
@@ -384,7 +393,7 @@
         return;
       }
       host.innerHTML = `<h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2>
-        <p class="eyebrow" id="publication-status" role="status">${esc(data.status)}</p>
+        <p class="eyebrow" id="publication-status" role="status">${esc(data.status)}</p>${publicationDiff(data)}
         <p>영구 공개 주소: <a href="https://accordbook.org/drop/${esc(data.snapshot.slug)}" target="_blank" rel="noopener">accordbook.org/drop/${esc(data.snapshot.slug)}</a></p>
         <p class="muted">저장·활성화와 별개로 명시적으로 발행합니다. 발행된 아카이브는 배포 기간이 끝나도 남습니다. SYNCED는 저장소 기준이며 실제 배포 완료를 뜻하지 않습니다.</p>
         <div class="publication-controls"><label><input type="radio" name="og-mode" value="AUTO" ${state.mode === 'AUTO' ? 'checked' : ''} onchange="changePublicationMode('AUTO')"> AUTO</label>
