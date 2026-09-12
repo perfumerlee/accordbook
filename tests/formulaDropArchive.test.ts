@@ -34,9 +34,14 @@ describe('Permanent public archive',()=>{
     expect(html).not.toContain('<script>bad()'); expect(html).toContain('&lt;img &quot;x&quot;&gt;'); expect(html).toContain('\\u003c')
   })
   it('keeps archive entries linked when live API omits them and lets live status win',()=>{
-    const saved=archiveDrops()[0]; expect(saved.status).toBe('EXPIRED')
-    expect(mergeArchiveDrops([])).toContainEqual(saved)
-    expect(mergeArchiveDrops([{...saved,status:'ACTIVE'}]).find(d=>d.dropId===saved.dropId).status).toBe('ACTIVE')
+    const saved=archiveDrops()[0]
+    if (saved) {
+      expect(saved.status).toBe('EXPIRED')
+      expect(mergeArchiveDrops([])).toContainEqual(saved)
+      expect(mergeArchiveDrops([{...saved,status:'ACTIVE'}]).find(d=>d.dropId===saved.dropId).status).toBe('ACTIVE')
+    } else {
+      expect(mergeArchiveDrops([])).toEqual([])
+    }
   })
   it.each(['Study','Mcintosh Apple / Simplified Study','An extended public formula study exploring material relationships and composition across several variations','Apple & Pear — “Study”'])('wraps OG title legibly: %s',async title=>{
     const layout=await layoutOg({...drop,title}); expect(layout.size).toBeGreaterThanOrEqual(34)
