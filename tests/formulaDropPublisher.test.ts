@@ -194,7 +194,9 @@ describe('Admin presentation separation', () => {
     const html = context.autoOgPreview({ ...snapshot, title: '<script>unsafe</script>' });
     expect(html).toContain('&lt;script&gt;'); expect(html).toContain('FORMULA DROP'); expect(html).not.toContain('<img');
     expect(dashboard).toContain('aspect-ratio: 1200 / 630');
-    expect(dashboard).toContain('top: 47.6%');
+    expect(dashboard).toContain('width: 1200px; height: 630px');
+    expect(dashboard).toContain('scale(${preview.clientWidth / 1200})');
+    expect(dashboard).toContain('width: 900px');
     expect(dashboard).toContain('favicon.svg');
   });
   it('Save remains independent; only explicit confirmed Publish invokes new server action', () => {

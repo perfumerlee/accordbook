@@ -33,17 +33,18 @@
     .publication-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .publication-controls label { font-weight: normal; }
     .publication-controls input { width: auto; }
-    .og-preview { container-type: inline-size; position: relative; aspect-ratio: 1200 / 630; max-width: 720px; box-sizing: border-box; padding: 0; background: #e8e1d5; border: 1px solid #c8bdad; overflow: hidden; margin: 18px 0; }
-    .og-preview::after { content: ''; position: absolute; z-index: 0; width: 23.33%; aspect-ratio: 1; right: 4%; top: 32.5%; opacity: .055; background: url('https://accordbook.org/favicon.svg') center / contain no-repeat; pointer-events: none; }
-    .og-preview header, .og-preview footer { position: absolute; z-index: 1; left: 6.67%; right: 6.67%; display: flex; justify-content: space-between; gap: 12px; overflow: hidden; white-space: nowrap; font: 2.08cqw/1 monospace; letter-spacing: .1em; }
-    .og-preview header { top: 11.1%; padding-bottom: 2.5%; }
-    .og-preview header::after, .og-preview footer::after { content: ''; position: absolute; left: -60%; right: -60%; bottom: -1px; border-bottom: 1px solid #bdb1a1; }
-    .og-preview strong, .og-preview p { z-index: 1; }
-    .og-preview strong { position: absolute; left: 6.67%; right: 6.67%; top: 29.5%; display: block; color: #332d27; font: normal 4.83cqw/1.22 Georgia, serif; overflow-wrap: anywhere; }
-    .og-preview p { position: absolute; left: 6.67%; right: 6.67%; top: 47.6%; margin: 0; color: #5f5348; font: 2.33cqw/1.35 Georgia, serif; overflow-wrap: anywhere; }
-    .og-preview footer { bottom: 7.6%; padding-top: 2.5%; }
-    .og-preview footer::after { top: -1px; bottom: auto; }
-    .og-preview footer span:first-child { font-size: 2.5cqw; color: #332d27; }
+    .og-preview { position: relative; aspect-ratio: 1200 / 630; width: 100%; max-width: 720px; box-sizing: border-box; background: #e8e1d5; border: 1px solid #c8bdad; overflow: hidden; margin: 18px 0; }
+    .og-preview-canvas { position: absolute; left: 0; top: 0; width: 1200px; height: 630px; transform-origin: 0 0; background: #e8e1d5; overflow: hidden; }
+    .og-preview-canvas::after { content: ''; position: absolute; z-index: 0; left: 860px; top: 205px; width: 280px; height: 280px; opacity: .055; background: url('https://accordbook.org/favicon.svg') center / contain no-repeat; pointer-events: none; }
+    .og-preview-canvas header, .og-preview-canvas footer { position: absolute; z-index: 1; left: 80px; right: 80px; display: flex; justify-content: space-between; gap: 12px; overflow: hidden; white-space: nowrap; font: 25px/1 monospace; letter-spacing: .1em; color: #6f527f; }
+    .og-preview-canvas header { top: 70px; padding-bottom: 16px; }
+    .og-preview-canvas header::after, .og-preview-canvas footer::after { content: ''; position: absolute; left: -48px; right: -48px; bottom: -1px; border-bottom: 1px solid #bdb1a1; }
+    .og-preview-canvas strong, .og-preview-canvas p { z-index: 1; }
+    .og-preview-canvas strong { position: absolute; left: 80px; width: 1040px; top: 186px; display: block; color: #332d27; font: normal 58px/1.22 Georgia, serif; overflow-wrap: anywhere; }
+    .og-preview-canvas p { position: absolute; left: 80px; width: 900px; top: 300px; margin: 0; color: #5f5348; font: 28px/1.22 Georgia, serif; overflow-wrap: anywhere; }
+    .og-preview-canvas footer { bottom: 48px; padding-top: 16px; color: #5f5348; }
+    .og-preview-canvas footer::after { top: -1px; bottom: auto; }
+    .og-preview-canvas footer span:first-child { font-size: 30px; color: #332d27; }
     .og-custom { max-width: 720px; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; margin: 18px 0; }
     .publication-message { min-height: 1.5em; overflow-wrap: anywhere; }
     @media (max-width: 700px) {
@@ -363,7 +364,7 @@
         repository_content_invalid: '저장소의 공개 JSON/이미지 형식을 확인하세요.' })[error] || '발행 상태를 확인할 수 없습니다. 변경사항은 저장소에 반영되지 않았을 수 있으므로 상태를 다시 확인하세요.';
     }
     function autoOgPreview(snapshot) {
-      return `<div class="og-preview" role="img" aria-label="AUTO social preview 근사 예시"><header><span>FORMULA DROP</span><span>NO. ${esc(snapshot.slug)}</span></header><strong>${esc(snapshot.title)}</strong><p>${esc(snapshot.subtitle)}</p><footer><span>ACCORDBOOK</span><span>A PUBLIC FORMULA STUDY</span></footer></div>`;
+      return `<div class="og-preview" role="img" aria-label="AUTO social preview 근사 예시"><div class="og-preview-canvas"><header><span>FORMULA DROP</span><span>NO. ${esc(snapshot.slug)}</span></header><strong>${esc(snapshot.title)}</strong><p>${esc(snapshot.subtitle)}</p><footer><span>ACCORDBOOK</span><span>A PUBLIC FORMULA STUDY</span></footer></div></div>`;
     }
     function loadPublication(dropId) {
       const host = $('publication');
@@ -404,6 +405,15 @@
       $('publication-upload').hidden = s.mode !== 'CUSTOM';
       const imageUrl = s.objectUrl || s.data.imageUrl;
       $('publication-preview').innerHTML = s.mode === 'AUTO' ? autoOgPreview(s.data.snapshot) : imageUrl ? `<img class="og-custom" src="${esc(imageUrl)}" alt="CUSTOM social preview — 중앙 크롭 근사 예시">` : '<p>미리볼 PNG를 선택하세요.</p>';
+      const preview = $('publication-preview').querySelector?.('.og-preview');
+      if (preview) {
+        const canvas = preview.querySelector('.og-preview-canvas');
+        const resize = () => { canvas.style.transform = `scale(${preview.clientWidth / 1200})`; };
+        resize();
+        s.previewObserver?.disconnect();
+        s.previewObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
+        s.previewObserver?.observe(preview);
+      }
       $('publication-status').textContent = s.busy ? 'PUBLISHING' : s.data.status === 'ERROR' ? 'ERROR' : (s.file || s.mode !== s.data.mode) && s.data.configured ? 'CHANGES NOT PUBLISHED' : s.data.status;
       $('publication-publish').disabled = s.busy || s.validating || !s.data.configured || !s.data.eligible || (s.mode === 'CUSTOM' && !imageUrl);
       $('publication-refresh').disabled = s.busy;
