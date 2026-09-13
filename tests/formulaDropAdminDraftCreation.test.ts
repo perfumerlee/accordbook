@@ -16,11 +16,11 @@ describe('Formula Drop Draft creation', () => {
     expect(gs).toContain("'DROP-' + year + '-' + String(sequence).padStart(3, '0')")
   })
 
-  it('provides shared access defaults and derives the asset URL from the filename', () => {
+  it('provides shared access defaults and keeps the physical asset URL independent', () => {
     expect(gs).toContain("'accordbook'")
     expect(gs).toContain("'0000'")
     expect(gs).toContain('fileUrl: suppliedUrl')
-    expect(html).toContain("https://accordbook.org/formula-drops/' + config.dropId.slice(5)")
+    expect(html).not.toContain("https://accordbook.org/formula-drops/' + config.dropId.slice(5)")
   })
 
   it('canonicalizes legacy sequence-only Drop filenames using the full Drop slug', () => {
