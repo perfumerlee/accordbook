@@ -5,6 +5,7 @@ import { IntroSplash } from './components/IntroSplash'
 import Rev30Preview from './rev30-preview/Rev30Preview'
 import FormulaDropIndexPage from './components/FormulaDropIndexPage'
 import FormulaDropDetailPage from './components/FormulaDropDetailPage'
+import LocalFormulaVaultPage from './components/LocalFormulaVaultPage'
 import { resolveAccordbookRoute } from './services/formulaDropRoutes'
 
 const reservedRoute = new URLSearchParams(window.location.search).get('__accordbook_route')
@@ -22,7 +23,7 @@ if (import.meta.hot) {
 
 root.render(
   <StrictMode>
-    {isRev30Preview ? <Rev30Preview /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : <ProductionWithIntro />}
+    {isRev30Preview ? <Rev30Preview /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
   </StrictMode>,
 )
 

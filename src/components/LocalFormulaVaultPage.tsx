@@ -1,0 +1,22 @@
+import { useEffect, useState } from 'react'
+import { connectVault, disconnectVault, isLocalFormulaVaultSupported, loadVaultRecord, queryVaultPermission, requestVaultPermission, saveVaultRecord, confirmVaultRecord, type VaultState } from '../services/localFormulaVault'
+import './localFormulaVault.css'
+
+const labels: Record<VaultState, string> = { UNSUPPORTED: 'UNSUPPORTED', NOT_CONNECTED: 'NOT CONNECTED', CHECKING: 'CHECKING', CONNECTED: 'CONNECTED', PERMISSION_REQUIRED: 'PERMISSION REQUIRED', FOLDER_NOT_AVAILABLE: 'FOLDER NOT AVAILABLE', ERROR: 'ERROR' }
+
+export default function LocalFormulaVaultPage() {
+  const [state, setState] = useState<VaultState>('CHECKING')
+  const [record, setRecord] = useState<Awaited<ReturnType<typeof loadVaultRecord>>>()
+  const [message, setMessage] = useState('')
+  const inspect = async () => {
+    if (!isLocalFormulaVaultSupported()) { setState('UNSUPPORTED'); return }
+    try { const saved = await loadVaultRecord(); setRecord(saved); if (!saved) { setState('NOT_CONNECTED'); return }; const permission = await queryVaultPermission(saved.directoryHandle); if (permission === 'granted') { await confirmVaultRecord(saved); setState('CONNECTED') } else setState('PERMISSION_REQUIRED') } catch { setState('FOLDER_NOT_AVAILABLE') }
+  }
+  useEffect(() => { void inspect() }, [])
+  const connect = async () => { setMessage(''); try { const handle = await connectVault(); const saved = await saveVaultRecord(handle); setRecord(saved); setState('CONNECTED') } catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; setState('ERROR'); setMessage('The folder could not be connected. Please try again.') } }
+  const reconnect = async () => { if (!record) return; try { const permission = await requestVaultPermission(record.directoryHandle); if (permission === 'granted') { await confirmVaultRecord(record); setState('CONNECTED') } else setState('PERMISSION_REQUIRED') } catch { setState('FOLDER_NOT_AVAILABLE') } }
+  const change = async () => { try { const handle = await connectVault(); const saved = await saveVaultRecord(handle); setRecord(saved); setState('CONNECTED') } catch (error) { if (!(error instanceof DOMException && error.name === 'AbortError')) { setState('ERROR'); setMessage('The folder could not be changed.') } } }
+  const disconnect = async () => { await disconnectVault(); setRecord(undefined); setState('NOT_CONNECTED'); setMessage('This browser is no longer connected to a Formula folder.') }
+  const unsupported = state === 'UNSUPPORTED'
+  return <main className="vault-page" data-vault-state={state}><div className="vault-shell"><header className="vault-header"><a href="/" className="vault-brand">Accordbook</a><span>OPERATOR UTILITY</span></header><section className="vault-intro"><p className="vault-kicker">LOCAL FORMULA VAULT</p><h1>Store Formula Drop packages directly on this device.</h1><p>This folder is local to this browser and device. It is independent from GitHub, the public archive, and Accordbook cloud data.</p></section><section className="vault-status"><div><p className="vault-kicker">STATUS</p><strong>{labels[state]}</strong></div>{record && <div><p className="vault-kicker">FOLDER</p><strong>{record.directoryHandle.name}</strong></div>}</section>{unsupported ? <p className="vault-note">Automatic local storage is not available in this browser. Use Chrome or Edge desktop, or continue using normal <code>.accordbook</code> downloads.</p> : state === 'PERMISSION_REQUIRED' ? <button className="vault-button" onClick={() => void reconnect()}>RECONNECT FOLDER</button> : state === 'NOT_CONNECTED' ? <button className="vault-button" onClick={() => void connect()}>CONNECT FORMULA FOLDER</button> : state === 'FOLDER_NOT_AVAILABLE' ? <><p className="vault-note">The saved folder is unavailable. It may have been moved, renamed, or disconnected.</p><button className="vault-button" onClick={() => void connect()}>CHOOSE FORMULA FOLDER</button></> : state === 'ERROR' ? <><p className="vault-note">{message}</p><button className="vault-button" onClick={() => void inspect()}>TRY AGAIN</button></> : state === 'CONNECTED' ? <div className="vault-actions"><button className="vault-button" onClick={() => void change()}>CHANGE FOLDER</button><button className="vault-link" onClick={() => void disconnect()}>DISCONNECT</button></div> : <p className="vault-note">Checking this browser and the saved folder…</p>}<p className="vault-footnote">Folder permission is stored only in this browser and may need to be granted again later.</p></div></main>
+}

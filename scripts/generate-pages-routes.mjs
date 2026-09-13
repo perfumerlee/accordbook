@@ -16,6 +16,9 @@ export async function generatePages(root = process.cwd()) {
     await mkdir(imageDir,{recursive:true})
     await generateOg(drop || {title:'Formula Drop Archive',subtitle:'Published formulas for perfumers.'},join(root,'public/formula-drops',drop?.slug || 'archive','og-source.png'),join(imageDir,'og.png'))
   }
+  const operatorShell = shell.replace('</head>', '<meta name="robots" content="noindex, nofollow" />\n  </head>')
+  await mkdir(join(root,'dist/operator/formula-storage'),{recursive:true})
+  await writeFile(join(root,'dist/operator/formula-storage/index.html'),operatorShell)
   await writeFile(join(root,'dist/sitemap.xml'),sitemap(archives))
   return archives.length
 }
