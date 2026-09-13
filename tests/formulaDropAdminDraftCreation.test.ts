@@ -22,4 +22,10 @@ describe('Formula Drop Draft creation', () => {
     expect(gs).toContain('formulaDropAssetUrl_')
     expect(html).toContain("https://accordbook.org/formula-drops/' + config.dropId.slice(5)")
   })
+
+  it('canonicalizes legacy sequence-only Drop filenames using the full Drop slug', () => {
+    expect(gs).toContain('buildFormulaDropFileName_')
+    expect(gs).toContain("'ACBK-DROP-' + dropId.slice(5) + '-' + stem + '.accordbook'")
+    expect(gs).toContain("replace(/^ACBK-DROP-(?:\\d{4}-)?\\d{3}[-_]?/i, '')")
+  })
 })
