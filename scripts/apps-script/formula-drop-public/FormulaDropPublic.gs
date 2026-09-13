@@ -5,9 +5,10 @@ const FORMULA_DROP_EVENTS_SHEET_NAME = 'FormulaDropEvents';
 const FORMULA_DROP_HEADERS = ['dropId', 'year', 'sequence', 'title', 'subtitle', 'description', 'status', 'startAt', 'expiresAt', 'fileName', 'fileUrl', 'licenseId', 'publicAccessName', 'publicAccessLast4', 'publicAccessPin', 'createdAt', 'updatedAt'];
 const FORMULA_DROP_EVENT_HEADERS = ['eventId', 'timestamp', 'dropId', 'visitorId', 'sessionId', 'eventType', 'source', 'referrerHost', 'failureReason'];
 const EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'];
+function buildFormulaDropFileName_(dropId, existingFileName, title) { if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '')) return ''; const source = String(existingFileName || '').trim().replace(/\.accordbook$/i, '').replace(/^ACBK-DROP-(?:\d{4}-)?\d{3}[-_]?/i, '').replace(/^DROP-(?:\d{4}-)?\d{3}[-_]?/i, '') || String(title || '').trim(); const stem = source.normalize('NFC').replace(/[\\/:*?"<>|]+/g, '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'formula-drop'; return 'ACBK-DROP-' + dropId.slice(5) + '-' + stem + '.accordbook'; }
 function downloadDrop_(row) {
   const publicDrop = publicDrop_(row); if (!publicDrop || publicDrop.status !== 'ACTIVE') return null;
-  const fileName = String(row[9] || '').trim(); const fileUrl = String(row[10] || '').trim(); const accessName = String(row[12] || '').trim(); const accessLast4 = row[13]; const accessPin = row[14];
+  const fileName = buildFormulaDropFileName_(String(row[0] || '').trim(), String(row[9] || '').trim(), String(row[3] || '').trim()); const fileUrl = String(row[10] || '').trim(); const accessName = String(row[12] || '').trim(); const accessLast4 = row[13]; const accessPin = row[14];
   if (!fileName || fileName.length > 255 || !/^https:\/\/[^\s]+$/i.test(fileUrl) || fileUrl.length > 2000 || !accessName || !/^\d{4}$/.test(String(accessLast4)) || !/^\d{6}$/.test(String(accessPin))) return null;
   return { fileName, fileUrl, accessName, accessLast4: String(accessLast4), accessPin: String(accessPin) };
 }
