@@ -3,6 +3,8 @@ import { join, dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { readArchives, renderPage, sitemap } from './formula-drop-archive.mjs'
 import { generateOg } from './generate-formula-drop-og.mjs'
+import { generateGuideRoutes, guideSitemapEntries } from './guide-static.mjs'
+import { copyGuideAssets, validateGuideDocumentAssets } from './guide-assets.mjs'
 
 export async function generatePages(root = process.cwd()) {
   const archives = await readArchives(join(root,'public/formula-drops'))
@@ -19,7 +21,14 @@ export async function generatePages(root = process.cwd()) {
   const operatorShell = shell.replace('</head>', '<meta name="robots" content="noindex, nofollow" />\n  </head>')
   await mkdir(join(root,'dist/operator/formula-storage'),{recursive:true})
   await writeFile(join(root,'dist/operator/formula-storage/index.html'),operatorShell)
-  await writeFile(join(root,'dist/sitemap.xml'),sitemap(archives))
+  await mkdir(join(root,'dist/operator/guide'),{recursive:true})
+  await writeFile(join(root,'dist/operator/guide/index.html'),operatorShell)
+  const guide = await generateGuideRoutes(root, shell)
+  if (guide.documents.length) await validateGuideDocumentAssets(root, guide.documents)
+  await copyGuideAssets(root, guide.documents)
+  const guideUrls = ['/guide/en/', '/guide/ko/', ...guideSitemapEntries(guide.documents)]
+  const baseSitemap = sitemap(archives).replace('</urlset>', guideUrls.map(url => `<url><loc>${url}</loc></url>`).join('') + '</urlset>')
+  await writeFile(join(root,'dist/sitemap.xml'),baseSitemap)
   return archives.length
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

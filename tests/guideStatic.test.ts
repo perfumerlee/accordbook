@@ -1,0 +1,15 @@
+import { describe, expect, it } from 'vitest'
+import { guideSeoState, guideSitemapEntries } from '../scripts/guide-static.mjs'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+const doc = { schemaVersion: 1, guideId: 'time-machine', slug: 'time-machine', order: 3, metadata: { lastUpdated: '2026-09-14' }, locales: { en: { status: 'PUBLISHED', title: 'Time Machine', subtitle: 'Guide', seo: { title: 'Time Machine — Accordbook Guide', description: 'English guide' } }, ko: { status: 'DRAFT', title: '타임 머신', subtitle: '안내', seo: { title: '타임 머신', description: 'Korean draft' } } }, blocks: [] }
+describe('Guide static route and SEO policy', () => {
+  it('indexes EN and canonicalizes with a trailing slash', () => expect(guideSeoState(doc, 'en')).toMatchObject({ renderedLocale: 'en', isFallback: false, isIndexable: true, canonicalUrl: 'https://accordbook.org/guide/en/time-machine/', availableHreflangLocales: ['en'] }))
+  it('generates a physical but noindex KO fallback', () => expect(guideSeoState(doc, 'ko')).toMatchObject({ renderedLocale: 'en', isFallback: true, isIndexable: false, canonicalUrl: 'https://accordbook.org/guide/en/time-machine/', availableHreflangLocales: ['en'] }))
+  it('includes only indexable locale chapters in sitemap', () => expect(guideSitemapEntries([doc])).toEqual(['https://accordbook.org/guide/en/time-machine/']))
+  it('includes both counterparts when KO is published', () => expect(guideSitemapEntries([{ ...doc, locales: { ...doc.locales, ko: { ...doc.locales.ko, status: 'PUBLISHED' } } }])).toEqual(['https://accordbook.org/guide/en/time-machine/', 'https://accordbook.org/guide/ko/time-machine/']))
+  it('loads exactly the three Phase 4 production chapters with editorial orders', async () => { const ids = ['getting-started', 'time-machine', 'formula-drop']; const docs = await Promise.all(ids.map(async id => JSON.parse(await readFile(join(process.cwd(), 'content/guide', `${id}.json`), 'utf8')))); expect(docs.map(d => [d.guideId, d.order])).toEqual([['getting-started', 1], ['time-machine', 3], ['formula-drop', 5]]) })
+  it('keeps production chapter locales complete and published', async () => { const ids = ['getting-started', 'time-machine', 'formula-drop']; const docs = await Promise.all(ids.map(async id => JSON.parse(await readFile(join(process.cwd(), 'content/guide', `${id}.json`), 'utf8')))); expect(docs.every(d => d.locales.en.status === 'PUBLISHED' && d.locales.ko.status === 'PUBLISHED' && d.blocks.length > 0)).toBe(true) })
+  it('keeps the operator route outside public Guide sitemap inputs', () => expect(guideSitemapEntries([])).not.toContain('https://accordbook.org/operator/guide/'))
+  it('uses shared block arrays in production documents', async () => { const doc = JSON.parse(await readFile(join(process.cwd(), 'content/guide/getting-started.json'), 'utf8')); expect(Array.isArray(doc.blocks)).toBe(true); expect(doc.locales.en.blocks).toBeUndefined(); expect(doc.locales.ko.blocks).toBeUndefined() })
+})

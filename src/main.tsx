@@ -7,6 +7,8 @@ import FormulaDropIndexPage from './components/FormulaDropIndexPage'
 import FormulaDropDetailPage from './components/FormulaDropDetailPage'
 import LocalFormulaVaultPage from './components/LocalFormulaVaultPage'
 import { resolveAccordbookRoute } from './services/formulaDropRoutes'
+import GuidePage from './components/guide/GuidePage'
+import GuideEditor from './components/guide/GuideEditor'
 
 const reservedRoute = new URLSearchParams(window.location.search).get('__accordbook_route')
 if (reservedRoute && reservedRoute.startsWith('/drop')) {
@@ -14,6 +16,8 @@ if (reservedRoute && reservedRoute.startsWith('/drop')) {
 }
 const isRev30Preview = new URLSearchParams(window.location.search).get('rev30preview') === '1'
 const route = resolveAccordbookRoute(window.location.pathname)
+const guideRoute = window.location.pathname === '/guide' || window.location.pathname.startsWith('/guide/')
+const operatorGuideRoute = window.location.pathname === '/operator/guide' || window.location.pathname === '/operator/guide/'
 
 // Keep one React root when Vite re-evaluates this entry during development.
 const root: Root = import.meta.hot?.data.root ?? createRoot(document.getElementById('root')!)
@@ -23,7 +27,7 @@ if (import.meta.hot) {
 
 root.render(
   <StrictMode>
-    {isRev30Preview ? <Rev30Preview /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
+    {isRev30Preview ? <Rev30Preview /> : operatorGuideRoute ? <GuideEditor /> : guideRoute ? <GuidePage /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
   </StrictMode>,
 )
 

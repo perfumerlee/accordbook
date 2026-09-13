@@ -1,0 +1,69 @@
+[
+  {
+    "captureId": "getting-started-app-overview",
+    "chapter": "getting-started",
+    "locale": "en",
+    "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 },
+    "state": "fresh-isolated-app",
+    "route": "/",
+    "target": "main",
+    "output": "getting-started/en/desktop/app-overview.png"
+  },
+  {
+    "captureId": "getting-started-formula-with-materials",
+    "chapter": "getting-started",
+    "locale": "en",
+    "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 },
+    "state": "formula-with-materials",
+    "route": "/",
+    "target": "main",
+    "output": "getting-started/en/desktop/formula-with-materials.png"
+  },
+  {
+    "captureId": "time-machine-timeline",
+    "chapter": "time-machine",
+    "locale": "en",
+    "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 },
+    "state": "time-machine-timeline",
+    "route": "/",
+    "target": ".tm-panel",
+    "output": "time-machine/en/desktop/timeline.png"
+  },
+  {
+    "captureId": "time-machine-version-detail", "chapter": "time-machine", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "time-machine-version-detail", "route": "/", "target": ".tm-panel",
+    "output": "time-machine/en/desktop/version-detail.png"
+  },
+  {
+    "captureId": "time-machine-compare", "chapter": "time-machine", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "time-machine-compare", "route": "/", "target": ".tm-panel",
+    "output": "time-machine/en/desktop/compare.png", "enabled": false
+  },
+  {
+    "captureId": "time-machine-restore", "chapter": "time-machine", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "time-machine-restore", "route": "/", "target": ".tm-panel",
+    "output": "time-machine/en/desktop/restore-confirmation.png", "enabled": false
+  },
+  {
+    "captureId": "time-machine-mobile", "chapter": "time-machine", "locale": "en", "device": "mobile",
+    "viewport": { "width": 390, "height": 844 }, "state": "time-machine-timeline", "route": "/", "target": ".tm-panel",
+    "output": "time-machine/en/mobile/timeline.png"
+  },
+  {
+    "captureId": "time-machine-timeline-mobile",
+    "chapter": "time-machine",
+    "locale": "en", "device": "mobile", "viewport": { "width": 390, "height": 844 },
+    "state": "time-machine-timeline", "route": "/", "target": ".tm-panel",
+    "output": "time-machine/en/mobile/timeline.png", "enabled": false
+  },
+  {
+    "captureId": "formula-drop-detail",
+    "chapter": "formula-drop",
+    "locale": "en", "device": "desktop", "viewport": { "width": 1440, "height": 900 },
+    "state": "drop-detail", "route": "/drop/2026-001?dropData=snapshot", "target": "main",
+    "output": "formula-drop/en/desktop/detail.png"
+  }
+]

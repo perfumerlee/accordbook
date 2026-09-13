@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "terms": [
+    { "key": "formula", "en": "Formula", "ko": "Formula", "notes": "Keep product terminology in English." },
+    { "key": "material", "en": "Material", "ko": "Material" },
+    { "key": "parts", "en": "Parts", "ko": "Parts" },
+    { "key": "dilution", "en": "Dilution", "ko": "Dilution" },
+    { "key": "solvent", "en": "Solvent", "ko": "Solvent" },
+    { "key": "version", "en": "Version", "ko": "Version" },
+    { "key": "time-machine", "en": "Time Machine", "ko": "Time Machine" },
+    { "key": "restore", "en": "Restore", "ko": "Restore" },
+    { "key": "experiment", "en": "Experiment", "ko": "Experiment" },
+    { "key": "composition", "en": "Composition", "ko": "Composition" },
+    { "key": "formula-drop", "en": "Formula Drop", "ko": "Formula Drop" },
+    { "key": "import", "en": "Import", "ko": "Import" },
+    { "key": "export", "en": "Export", "ko": "Export" }
+  ]
+}
