@@ -63,3 +63,23 @@ export async function queryVaultPermission(handle: VaultHandle): Promise<Permiss
 export async function disconnectVault(): Promise<void> {
   await transaction('readwrite', (store, done, fail) => { const request = store.delete(RECORD_KEY); request.onsuccess = () => done(undefined); request.onerror = () => fail(request.error) })
 }
+
+export type VaultSaveResult = { status: 'SAVED' | 'ALREADY_SAVED'; fileName: string; packageId: string } | { status: 'PERMISSION_REQUIRED' | 'SAVE_FAILED'; error?: unknown }
+const safeSlug = /^\d{4}-\d{3}$/
+function safeFileName(value: string): boolean { return !!value && value.length <= 255 && /\.accordbook$/i.test(value) && !/[\\/\0-\x1f\x7f]/.test(value) && value !== '.' && value !== '..' }
+function collisionName(fileName: string, packageId: string): string { return fileName.replace(/\.accordbook$/i, '') + '--' + packageId.replace(/[^a-z0-9]/gi, '').slice(0, 8) + '.accordbook' }
+
+export async function saveFormulaDropPackage(options: { rootHandle: VaultHandle; slug: string; fileName: string; blob: Blob; packageId: string }): Promise<VaultSaveResult> {
+  if (!safeSlug.test(options.slug) || !safeFileName(options.fileName) || !options.blob.size || !options.packageId) return { status: 'SAVE_FAILED', error: new Error('invalid_package_target') }
+  try {
+    if (await queryVaultPermission(options.rootHandle) !== 'granted') return { status: 'PERMISSION_REQUIRED' }
+    const directory = await options.rootHandle.getDirectoryHandle(options.slug, { create: true })
+    let targetName = options.fileName
+    let target: FileSystemFileHandle
+    try { target = await directory.getFileHandle(targetName, { create: false }); const existing = await target.getFile(); const text = await existing.text(); const parsed = JSON.parse(text) as { packageId?: string }; if (parsed.packageId === options.packageId) return { status: 'ALREADY_SAVED', fileName: targetName, packageId: options.packageId }; targetName = collisionName(options.fileName, options.packageId) } catch (error) { if (error instanceof DOMException && error.name !== 'NotFoundError') throw error }
+    target = await directory.getFileHandle(targetName, { create: true })
+    const writable = await target.createWritable()
+    try { await writable.write(options.blob); await writable.close() } catch (error) { try { await writable.abort?.() } catch { /* best effort */ } return { status: 'SAVE_FAILED', error } }
+    return { status: 'SAVED', fileName: targetName, packageId: options.packageId }
+  } catch (error) { return { status: 'SAVE_FAILED', error } }
+}

@@ -15,4 +15,11 @@ describe('Formula Drop Draft creation', () => {
     expect(gs).toContain("Number(row[1]) === year ? Math.max(max, Number(row[2]) || 0) : max")
     expect(gs).toContain("'DROP-' + year + '-' + String(sequence).padStart(3, '0')")
   })
+
+  it('provides shared access defaults and derives the asset URL from the filename', () => {
+    expect(gs).toContain("'accordbook'")
+    expect(gs).toContain("'0000'")
+    expect(gs).toContain('formulaDropAssetUrl_')
+    expect(html).toContain("https://accordbook.org/formula-drops/' + config.dropId.slice(5)")
+  })
 })
