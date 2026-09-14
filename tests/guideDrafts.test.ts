@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { guideFingerprint, isGuideDraftEnvelope } from '../src/services/guideDrafts'
+import { draftFingerprintChanged, guideFingerprint, isGuideDraftEnvelope, retainedRevisionMetadata } from '../src/services/guideDrafts'
 const document = { schemaVersion: 1 as const, guideId: 'time-machine', slug: 'time-machine', order: 3, metadata: { lastUpdated: '2026-09-14' }, locales: { en: { status: 'PUBLISHED' as const, title: 'Time Machine', subtitle: 'Guide', seo: { title: 'Time Machine', description: 'Guide' } } }, blocks: [] }
 describe('Guide draft contract', () => {
   it('accepts only the controlled draft envelope shape', () => { expect(isGuideDraftEnvelope({ format: 'accordbook-guide-draft', formatVersion: 1, guideId: 'time-machine', revision: 1, updatedAt: '2026-09-14T00:00:00.000Z', basePublishedFingerprint: 'abc', document })).toBe(true); expect(isGuideDraftEnvelope({ format: 'other', revision: 1 })).toBe(false) })
   it('fingerprints the same document deterministically and changes on content edits', async () => { const first = await guideFingerprint(document); expect(first).toBe(await guideFingerprint(JSON.parse(JSON.stringify(document)))); expect(first).not.toBe(await guideFingerprint({ ...document, metadata: { lastUpdated: 'changed' } })) })
+  it('keeps draft history newest-first and retains at most five revisions', () => { const revisions = Array.from({ length: 6 }, (_, index) => ({ revision: index + 1, updatedAt: `2026-09-${String(index + 1).padStart(2, '0')}`, basePublishedFingerprint: 'abc' })); expect(retainedRevisionMetadata(revisions).map(item => item.revision)).toEqual([6, 5, 4, 3, 2]) })
+  it('detects a published-source fingerprint change without mutating the draft', () => { const draft = { format: 'accordbook-guide-draft' as const, formatVersion: 1 as const, guideId: 'time-machine', revision: 3, updatedAt: '2026-09-14T00:00:00.000Z', basePublishedFingerprint: 'abc', document }; expect(draftFingerprintChanged(draft, 'abc')).toBe(false); expect(draftFingerprintChanged(draft, 'def')).toBe(true); expect(draft.basePublishedFingerprint).toBe('abc') })
 })
