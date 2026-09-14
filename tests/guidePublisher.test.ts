@@ -1,0 +1,30 @@
+import { describe, expect, it } from 'vitest'
+import { collectGuideAssetReferences, getPublishEligibility, isSafeGuideAssetReference, publishCommitPlan, publisherGuidePath, publishTreeEntry, serializePublishedGuide } from '../src/services/guidePublisher'
+import type { GuideDocument } from '../src/models/guide'
+import { runPublishWorkflow, type PublishWorkflowDeps } from '../src/services/guidePublisherWorkflow'
+
+const document = { schemaVersion: 1, guideId: 'time-machine', slug: 'time-machine', order: 3, metadata: { lastUpdated: '2026-09-14' }, locales: { en: { status: 'PUBLISHED', title: 'Time Machine', subtitle: 'History', seo: { title: 'Time Machine', description: 'History' } } }, blocks: [
+  { blockId: 'figure', type: 'screenshot', media: { figureId: 'figure', variants: { en: { desktop: { src: 'assets/time-machine/en/desktop/timeline.png', alt: 'Timeline', caption: 'Timeline', viewport: '1440x900' }, mobile: { src: 'assets/time-machine/en/mobile/timeline.png', alt: 'Timeline', caption: 'Timeline', viewport: '390x844' } } } } },
+  { blockId: 'step', type: 'step', step: 1, content: { en: { text: 'Open it.' } }, media: { figureId: 'step-figure', variants: { en: { desktop: { src: 'assets/time-machine/en/desktop/timeline.png', alt: 'Timeline', caption: 'Timeline', viewport: '1440x900' } } } } },
+] } as GuideDocument
+
+describe('Guide Publisher contract', () => {
+  it('enforces the server-owned allowlist mapping', () => {
+    expect(publisherGuidePath('getting-started')).toBe('content/guide/getting-started.json')
+    expect(publisherGuidePath('time-machine')).toBe('content/guide/time-machine.json')
+    expect(publisherGuidePath('formula-drop')).toBe('content/guide/formula-drop.json')
+    for (const value of ['unknown', '../x', 'src/app.ts', '/tmp/x']) expect(publisherGuidePath(value)).toBeUndefined()
+  })
+  it('collects and deduplicates all media variants', () => expect(collectGuideAssetReferences(document)).toEqual(['assets/time-machine/en/desktop/timeline.png', 'assets/time-machine/en/mobile/timeline.png']))
+  it('rejects unsafe asset references', () => { for (const value of ['../secret.png', '/assets/foo.png', 'C:\\foo.png', 'https://example.com/a.png', 'file://x']) expect(isSafeGuideAssetReference(value)).toBe(false); expect(isSafeGuideAssetReference('assets/time-machine/en/desktop/timeline.png')).toBe(true) })
+  it('serializes only the canonical document for the Git blob', () => { const value = serializePublishedGuide(document); expect(value.endsWith('\n')).toBe(true); expect(JSON.parse(value)).toEqual(document); expect(value).not.toContain('basePublishedFingerprint') })
+  it('plans one allowlisted tree entry and non-forced commit', () => { expect(publishTreeEntry('time-machine', 'blob')).toEqual({ path: 'content/guide/time-machine.json', mode: '100644', type: 'blob', sha: 'blob' }); expect(publishCommitPlan('time-machine', 'parent', 'tree')).toEqual({ message: 'content: publish guide time-machine', tree: 'tree', parents: ['parent'], force: false }) })
+  it('disables publication until a clean valid current draft exists', () => { const base = { connected: true, draftExists: true, dirty: false, historical: false, conflict: false, publishedChanged: false, document }; expect(getPublishEligibility({ ...base, draftExists: false }).enabled).toBe(false); expect(getPublishEligibility({ ...base, dirty: true }).enabled).toBe(false); expect(getPublishEligibility(base).enabled).toBe(true) })
+  const makeDeps = (overrides: Partial<PublishWorkflowDeps<GuideDocument>> = {}) => { const calls: string[] = []; const deps: PublishWorkflowDeps<GuideDocument> = { readHead: async () => { calls.push('head'); return { revision: 5, document, baseFingerprint: 'same' } }, readPublished: async () => { calls.push('published'); return { document, fingerprint: 'same' } }, validateAssets: async () => { calls.push('assets'); return [] }, transaction: async () => { calls.push('transaction'); return { commitSha: 'abc123' } }, rebase: async () => { calls.push('rebase'); return 6 }, ...overrides }; return { calls, deps } }
+  it('short-circuits revision mismatch before publication work', async () => { const x = makeDeps(); expect(await runPublishWorkflow(4, 'same', x.deps)).toEqual({ ok: false, code: 'REVISION_CONFLICT', currentRevision: 5 }); expect(x.calls).toEqual(['head']) })
+  it('short-circuits fingerprint mismatch before mutation', async () => { const x = makeDeps({ readPublished: async () => { x.calls.push('published'); return { document, fingerprint: 'changed' } } }); expect(await runPublishWorkflow(5, 'same', x.deps)).toEqual({ ok: false, code: 'PUBLISHED_SOURCE_CHANGED' }); expect(x.calls).toEqual(['head', 'published']) })
+  it('short-circuits missing assets before transaction', async () => { const x = makeDeps({ validateAssets: async () => { x.calls.push('assets'); return ['assets/missing.png'] } }); expect(await runPublishWorkflow(5, 'same', x.deps)).toEqual({ ok: false, code: 'UNPUBLISHED_ASSET_REFERENCE' }); expect(x.calls).toEqual(['head', 'published', 'assets']) })
+  it('rebases only after a successful transaction', async () => { const x = makeDeps(); expect(await runPublishWorkflow(5, 'same', x.deps)).toEqual({ ok: true, revisionAfter: 6, commitSha: 'abc123' }); expect(x.calls).toEqual(['head', 'published', 'assets', 'transaction', 'rebase']) })
+  it('does not rebase when ref update fails', async () => { const x = makeDeps({ transaction: async () => { x.calls.push('transaction'); throw new Error('PUBLISH_CONFLICT') } }); await expect(runPublishWorkflow(5, 'same', x.deps)).rejects.toThrow('PUBLISH_CONFLICT'); expect(x.calls).not.toContain('rebase') })
+  it('preserves commit metadata when rebase fails after publication', async () => { const x = makeDeps({ rebase: async () => { x.calls.push('rebase'); throw new Error('drive failure') } }); expect(await runPublishWorkflow(5, 'same', x.deps)).toEqual({ ok: false, code: 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED', commitSha: 'abc123', publishedFingerprint: 'same' }); expect(x.calls).toEqual(['head', 'published', 'assets', 'transaction', 'rebase']) })
+})

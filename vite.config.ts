@@ -11,10 +11,11 @@ import { createReadStream } from 'node:fs'
 import { realpath } from 'node:fs/promises'
 // @ts-expect-error Vite config imports a Node-only helper without bundled Node typings.
 import { validateGuideAssetPath, isContained, inspectGuideAsset, assetMime } from './scripts/guide-assets.mjs'
+// @ts-expect-error Local Node middleware helper has no bundled declaration file.
+import { forwardGuideDraft } from './scripts/guide-draft-proxy.mjs'
 
 declare const process: { cwd(): string }
 declare const Buffer: any
-declare function fetch(input: string, init?: { method?: string; headers?: Record<string, string>; body?: any }): Promise<any>
 
 const certDir = resolve(process.cwd(), 'certs')
 const keyFile = resolve(certDir, 'accordbook-key.pem')
@@ -29,7 +30,27 @@ function guideDevAssets() {
 }
 
 function guideDraftDevProxy(target: string) {
-  return { name: 'guide-draft-dev-proxy', configureServer(server: { middlewares: { use: Function } }) { server.middlewares.use(async (req: any, res: any, next: any) => { if (req.url?.split('?')[0] !== '/api/guide-drafts' || req.method !== 'POST') return next(); if (!target) { res.statusCode = 503; return res.end(JSON.stringify({ ok: false, code: 'NETWORK_ERROR' })); } const chunks: any[] = []; req.on('data', (chunk: any) => chunks.push(chunk)); req.on('end', async () => { try { const upstream = await fetch(target, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: Buffer.concat(chunks) }); res.statusCode = upstream.status; res.setHeader('Content-Type', upstream.headers.get('content-type') ?? 'application/json'); res.end(Buffer.from(await upstream.arrayBuffer())); } catch { res.statusCode = 502; res.end(JSON.stringify({ ok: false, code: 'NETWORK_ERROR' })); } }); }) } }
+  return { name: 'guide-draft-dev-proxy', configureServer(server: { middlewares: { use: Function } }) {
+    server.middlewares.use((req: any, res: any, next: any) => {
+      if (req.url?.split('?')[0] !== '/api/guide-drafts' || req.method !== 'POST') return next()
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      res.setHeader('Cache-Control', 'no-store')
+      res.setHeader('X-Guide-Proxy', 'local')
+      if (!target) { res.statusCode = 503; return res.end(JSON.stringify({ ok: false, code: 'NETWORK_ERROR' })) }
+      const chunks: any[] = []
+      req.on('data', (chunk: any) => chunks.push(chunk))
+      req.on('end', async () => {
+        try {
+          const result = await forwardGuideDraft(target, Buffer.concat(chunks))
+          res.statusCode = result.status
+          res.end(result.body)
+        } catch {
+          res.statusCode = 502
+          res.end(JSON.stringify({ ok: false, code: 'NETWORK_ERROR' }))
+        }
+      })
+    })
+  } }
 }
 
 export default defineConfig(({ mode }) => {

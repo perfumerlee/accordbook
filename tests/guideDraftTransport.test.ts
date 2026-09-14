@@ -1,6 +1,12 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { performGuideDraftRequest, requestGuideDraft, draftConnectionMessage } from '../src/services/guideDrafts'
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers() })
+it('reports upstream 404 accurately without repeating the request', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"ok":false,"code":"UPSTREAM_ERROR","upstreamStatus":404}', {status:502,headers:{'X-Guide-Proxy':'local'}}))
+  const result = await performGuideDraftRequest('/api/guide-drafts','getDraft',{},'fixture')
+  expect(draftConnectionMessage(result)).toBe('Apps Script returned HTTP 404. The local proxy is reachable.')
+  expect(fetcher).toHaveBeenCalledOnce()
+})
 it('recovers a transient authentication transport failure once', async () => {
   const fetcher = vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new TypeError('Offline')).mockResolvedValueOnce(new Response('{"ok":true}'))
   expect(await performGuideDraftRequest('https://example.test/exec', 'checkAuth', {}, 'fixture')).toEqual({ ok: true })
