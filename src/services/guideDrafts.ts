@@ -4,7 +4,8 @@ export type GuideDraftEnvelope = { format: 'accordbook-guide-draft'; formatVersi
 export type GuideDraftMeta = Pick<GuideDraftEnvelope, 'revision' | 'updatedAt' | 'basePublishedFingerprint'>
 export type GuideDraftResult = { ok: true; draft?: GuideDraftEnvelope; revisions?: GuideDraftMeta[]; revision?: number; updatedAt?: string } | { ok: false; code: 'AUTH_FAILED' | 'NO_DRAFT' | 'REVISION_CONFLICT' | 'INVALID_DRAFT' | 'REVISION_NOT_FOUND' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE'; message?: string; currentRevision?: number }
 export type GuideDraftClient = { connect(key: string): Promise<boolean>; getDraft(guideId: string): Promise<GuideDraftResult>; listDraftRevisions(guideId: string): Promise<GuideDraftResult>; getDraftRevision(guideId: string, revision: number): Promise<GuideDraftResult>; saveDraft(guideId: string, expectedRevision: number | null, basePublishedFingerprint: string, document: GuideDocument): Promise<GuideDraftResult>; deleteDraft(guideId: string): Promise<GuideDraftResult> }
-const endpoint = (import.meta.env.VITE_GUIDE_DRAFT_ENDPOINT ?? '').trim()
+const configuredEndpoint = (import.meta.env.VITE_GUIDE_DRAFT_ENDPOINT ?? '').trim()
+const endpoint = import.meta.env.DEV ? '/api/guide-drafts' : configuredEndpoint
 let operatorKey = ''
 export function createGuideDraftRequest(action: string, payload: Record<string, unknown>, key: string, signal?: AbortSignal): RequestInit { return { method: 'POST', body: JSON.stringify({ action, ...payload, operatorKey: key }), headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, credentials: 'omit', redirect: 'follow', signal } }
 export async function requestGuideDraft(url: string, action: string, payload: Record<string, unknown>, key: string): Promise<GuideDraftResult> {
