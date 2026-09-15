@@ -6,11 +6,20 @@ function storeOperatorKey(key: string) { try { sessionStorage.setItem(OPERATOR_K
 
 export type GuideDraftEnvelope = { format: 'accordbook-guide-draft'; formatVersion: 1; guideId: string; revision: number; updatedAt: string; basePublishedFingerprint: string; document: GuideDocument }
 export type GuideDraftMeta = Pick<GuideDraftEnvelope, 'revision' | 'updatedAt' | 'basePublishedFingerprint'>
-export type GuideDraftResult = { ok: true; draft?: GuideDraftEnvelope; revisions?: GuideDraftMeta[]; revision?: number; updatedAt?: string; guideId?: string; commitSha?: string; publishedAt?: string; publishedFingerprint?: string; draftRevisionAfterPublish?: number } | { ok: false; code: 'AUTH_FAILED' | 'NO_DRAFT' | 'REVISION_CONFLICT' | 'INVALID_DRAFT' | 'REVISION_NOT_FOUND' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'PUBLISHED_SOURCE_CHANGED' | 'UNPUBLISHED_ASSET_REFERENCE' | 'GITHUB_AUTH_FAILED' | 'GITHUB_SOURCE_NOT_FOUND' | 'PUBLISH_CONFLICT' | 'GITHUB_WRITE_FAILED' | 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED'; message?: string; currentRevision?: number; assetPaths?: string[] }
+export type GuideDraftResult = { ok: true; draft?: GuideDraftEnvelope; revisions?: GuideDraftMeta[]; revision?: number; updatedAt?: string; guideId?: string; commitSha?: string; publishedAt?: string; stagingWarning?: string; publishedFingerprint?: string; draftRevisionAfterPublish?: number } | { ok: false; code: 'ASSET_PUBLISH_NOT_DEPLOYED' | 'STAGED_ASSET_REQUIRED' | 'EXTRA_STAGED_ASSET' | 'ASSET_PATH_INVALID' | 'ASSET_GUIDE_MISMATCH' | 'ASSET_UNSUPPORTED_TYPE' | 'ASSET_TOO_LARGE' | 'ASSET_AGGREGATE_TOO_LARGE' | 'ASSET_DECODE_FAILED' | 'ASSET_MIME_MISMATCH' | 'ASSET_DIMENSION_INVALID' | 'ASSET_HASH_MISMATCH' | 'ASSET_PATH_CONFLICT' | 'STAGED_FILE_MISSING' | 'STAGED_FILE_CORRUPTED' | 'AUTH_FAILED' | 'NO_DRAFT' | 'REVISION_CONFLICT' | 'INVALID_DRAFT' | 'REVISION_NOT_FOUND' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'PUBLISHED_SOURCE_CHANGED' | 'UNPUBLISHED_ASSET_REFERENCE' | 'GITHUB_AUTH_FAILED' | 'GITHUB_SOURCE_NOT_FOUND' | 'PUBLISH_CONFLICT' | 'GITHUB_WRITE_FAILED' | 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED'; message?: string; currentRevision?: number; assetPaths?: string[] }
 export type GuideDraftClient = { connect(key: string): Promise<boolean>; getDraft(guideId: string): Promise<GuideDraftResult>; listDraftRevisions(guideId: string): Promise<GuideDraftResult>; getDraftRevision(guideId: string, revision: number): Promise<GuideDraftResult>; saveDraft(guideId: string, expectedRevision: number | null, basePublishedFingerprint: string, document: GuideDocument): Promise<GuideDraftResult>; deleteDraft(guideId: string): Promise<GuideDraftResult> }
+export type GuidePublishCapabilities = { ok: true; assetPublishProtocol: 1; atomicAssetPublish: true; serverAssetValidation: true; singleCommit: true } | { ok: false; code: 'ASSET_PUBLISH_NOT_DEPLOYED' | 'AUTH_FAILED' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE'; message?: string }
+export async function checkGuideAtomicPublishProtocol(guideId = 'getting-started'): Promise<GuidePublishCapabilities> {
+  const result = await requestGuideDraftAction('prepareAssetPublish', { guideId })
+  if (!result.ok) return result as GuidePublishCapabilities
+  const value = result as unknown as Record<string, unknown>
+  if (value.assetPublishProtocol !== 1 || !value.draft || typeof value.draft !== 'object') return { ok: false, code: 'ASSET_PUBLISH_NOT_DEPLOYED' }
+  return { ok: true, assetPublishProtocol: 1, atomicAssetPublish: true, serverAssetValidation: true, singleCommit: true }
+}
 const configuredEndpoint = (import.meta.env.VITE_GUIDE_DRAFT_ENDPOINT ?? '').trim()
 const endpoint = import.meta.env.DEV ? '/api/guide-drafts' : configuredEndpoint
 let operatorKey = ''
+export function guideDraftConnected() { return Boolean(operatorKey) }
 export function createGuideDraftRequest(action: string, payload: Record<string, unknown>, key: string, signal?: AbortSignal): RequestInit { return { method: 'POST', body: JSON.stringify({ action, ...payload, operatorKey: key }), headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, credentials: 'omit', redirect: 'follow', signal } }
 export async function requestGuideDraft(url: string, action: string, payload: Record<string, unknown>, key: string): Promise<GuideDraftResult> {
   if (!url || !key) return { ok: false, code: 'NETWORK_ERROR' };
@@ -40,6 +49,7 @@ let connectionError = '';
 export function guideDraftConnectionError() { return connectionError; }
 export function draftConnectionMessage(result: GuideDraftResult): string {
   if (result.ok) return '';
+  if (result.code === 'NO_DRAFT') return 'NO SAVED DRAFT'
   if (result.code === 'AUTH_FAILED') return 'Operator Key was not accepted. Check the key and its configured hash.';
   if (result.code === 'TIMEOUT') return 'Draft storage did not respond within 60 seconds. Authentication could not be checked.';
   if (result.code === 'INVALID_RESPONSE') return result.message?.match(/^Apps Script returned HTTP \d{3}( \((exec|content|exec-redirect)\))?\. The local proxy is reachable\.$/) ? result.message : 'Draft storage returned an unexpected response. Check the Web App deployment.';

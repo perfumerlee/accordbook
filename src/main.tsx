@@ -9,6 +9,7 @@ import LocalFormulaVaultPage from './components/LocalFormulaVaultPage'
 import { resolveAccordbookRoute } from './services/formulaDropRoutes'
 import GuidePage from './components/guide/GuidePage'
 import GuideEditor from './components/guide/GuideEditor'
+import GuidePublishProtocolCheck from './components/guide/GuidePublishProtocolCheck'
 
 const reservedRoute = new URLSearchParams(window.location.search).get('__accordbook_route')
 if (reservedRoute && reservedRoute.startsWith('/drop')) {
@@ -27,7 +28,7 @@ if (import.meta.hot) {
 
 root.render(
   <StrictMode>
-    {isRev30Preview ? <Rev30Preview /> : operatorGuideRoute ? <GuideEditor /> : guideRoute ? <GuidePage /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
+    {isRev30Preview ? <Rev30Preview /> : operatorGuideRoute ? <><GuideEditor /><GuidePublishProtocolCheck /></> : guideRoute ? <GuidePage /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropDetailPage dropId={route.dropId} /> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
   </StrictMode>,
 )
 

@@ -57,7 +57,9 @@ export function publishErrorMessage(result: Extract<GuideDraftResult, { ok: fals
 }
 
 export const guidePublisher: GuidePublisher = {
-  publish(guideId, expectedDraftRevision) {
-    return requestGuideDraftAction('publishGuide', { guideId, expectedDraftRevision })
+  async publish(guideId, expectedDraftRevision) {
+    const result = await requestGuideDraftAction('publishGuide', { guideId, expectedDraftRevision })
+    if (result.ok || result.code === 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED') window.dispatchEvent(new Event('guide-publication-complete'))
+    return result
   },
 }
