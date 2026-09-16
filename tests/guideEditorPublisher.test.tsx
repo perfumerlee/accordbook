@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { confirmPublishIntent, getPublishEligibility } from '../src/services/guidePublisher'
 import { loadGuideDocuments } from '../src/services/guideContent'
 
@@ -6,6 +7,11 @@ const document = loadGuideDocuments().find(item => item.guideId === 'time-machin
 const base = { connected: true, draftExists: true, dirty: false, historical: false, conflict: false, publishedChanged: false, document }
 
 describe('GuideEditor Publisher UI contract', () => {
+  it('binds RECOVER BASE to invoke the recovery handler', () => {
+    const source = readFileSync(new URL('../src/components/guide/GuideLegacyRecovery.tsx', import.meta.url), 'utf8')
+    expect(source).toContain('onClick={() => void recover()}')
+    expect(source).not.toContain('onClick={() => void recover}')
+  })
   it.each([
     ['disconnected', { connected: false }], ['no Draft', { draftExists: false }], ['dirty', { dirty: true }],
     ['historical', { historical: true }], ['revision conflict', { conflict: true }], ['published source changed', { publishedChanged: true }],
