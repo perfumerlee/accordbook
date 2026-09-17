@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "guideId": "experiments",
+  "slug": "experiments",
+  "order": 4,
+  "metadata": {
+    "lastUpdated": "2026-09-16",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Experiments",
+      "subtitle": "Explore several directions from one clear starting point.",
+      "seo": {
+        "title": "Experiments — Accordbook Guide",
+        "description": "Use BASE and Variants to explore multiple directions without overwriting the Formula you started from."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "실험",
+      "subtitle": "하나의 분명한 시작점에서 여러 방향을 탐색합니다.",
+      "seo": {
+        "title": "실험 — Accordbook Guide",
+        "description": "BASE와 시안을 사용해 시작한 포뮬러를 덮어쓰지 않고 여러 방향을 탐색합니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:1f29950bb68265051c7fc528e7352f21ff15ce2af10df54cef9a766015e45313",
+        "reviewedAgainstFingerprint": "v1:1f29950bb68265051c7fc528e7352f21ff15ce2af10df54cef9a766015e45313",
+        "reviewedKoFingerprint": "v1:d29a3bee5b2e9c5fc2c7ae4688663e920b17efe712c62714436a1612cdd16c15"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "experiments-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Experiments give you a separate space to explore variations of a Formula without changing the Formula you started from. Keep one BASE, then develop several directions side by side."
+        },
+        "ko": {
+          "text": "실험은 시작한 포뮬러를 바꾸지 않고 여러 변형을 탐색할 수 있는 별도의 작업 공간입니다. 하나의 BASE를 기준으로 여러 방향을 나란히 발전시켜 보세요."
+        }
+      }
+    },
+    {
+      "blockId": "why-experiments",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Explore More Than One Direction"
+        },
+        "ko": {
+          "text": "여러 방향을 탐색하기"
+        }
+      }
+    },
+    {
+      "blockId": "parallel-work",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Perfume development rarely moves in a straight line. One adjustment may improve lift, another may soften the drydown, and a third may reveal a different direction. Experiments let those ideas remain separate instead of forcing every change into the same working Formula."
+        },
+        "ko": {
+          "text": "향수 개발은 좀처럼 한 방향으로만 진행되지 않습니다. 한 가지 조정은 확산을 높이고, 다른 조정은 잔향을 부드럽게 하며, 또 다른 조정은 새로운 방향을 보여줄 수 있습니다. 실험을 사용하면 모든 변화를 하나의 작업 포뮬러에 억지로 넣지 않고 아이디어를 분리해 둘 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "experiment-principle",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Use Experiments when you want to compare possibilities. Use the Formula itself when you want to continue one main working direction."
+        },
+        "ko": {
+          "text": "가능성을 비교하고 싶을 때는 실험을 사용합니다. 하나의 주요 작업 방향을 이어가고 싶을 때는 포뮬러 자체에서 작업합니다."
+        }
+      }
+    },
+    {
+      "blockId": "start-from-base",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Start from a BASE"
+        },
+        "ko": {
+          "text": "BASE에서 시작하기"
+        }
+      }
+    },
+    {
+      "blockId": "base",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Every Experiment begins with a BASE. The BASE is a snapshot of the Formula state chosen when the Experiment is created, giving the variations that follow a clear reference point. The BASE can come from the current Formula or a saved Version."
+        },
+        "ko": {
+          "text": "모든 실험은 BASE에서 시작합니다. BASE는 실험을 만들 때 선택한 포뮬러 상태의 스냅샷으로, 이후 시안이 따라갈 분명한 기준점이 됩니다. BASE는 현재 포뮬러나 저장된 버전에서 가져올 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "experiments-base-overview",
+      "type": "screenshot",
+      "media": {
+        "figureId": "experiments-base-overview",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/experiments/en/desktop/experiments-base-overview.png",
+              "alt": "Accordbook Experiments workspace showing the read-only BASE and the beginning of the Variant area.",
+              "caption": "The BASE keeps the starting point visible while new directions develop beside it.",
+              "viewport": "1440x900"
+            }
+          },
+          "ko": {
+            "desktop": {
+              "src": "assets/experiments/ko/desktop/experiments-base-overview.png",
+              "alt": "읽기 전용 BASE와 시안 영역이 보이는 Accordbook 실험 작업 공간.",
+              "caption": "BASE를 기준으로 새로운 방향을 나란히 발전시킬 수 있습니다.",
+              "viewport": "1440x900"
+            }
+          }
+        }
+      }
+    },
+    {
+      "blockId": "variants",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Build Variants"
+        },
+        "ko": {
+          "text": "시안 만들기"
+        }
+      }
+    },
+    {
+      "blockId": "variant-directions",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Variants are separate working directions inside the Experiment. Start with A, B, or C and change only what you want to test in that direction."
+        },
+        "ko": {
+          "text": "시안은 실험 안에서 분리된 작업 방향입니다. A, B, C 중 하나로 시작해 해당 방향에서 시험하려는 부분만 변경합니다."
+        }
+      }
+    },
+    {
+      "blockId": "variant-independence",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Changing one Variant does not rewrite the others. This makes small differences easier to preserve and compare as the Experiment develops."
+        },
+        "ko": {
+          "text": "한 시안을 변경해도 다른 시안은 바뀌지 않습니다. 따라서 실험이 진행되는 동안 작은 차이를 보존하고 비교하기가 쉬워집니다."
+        }
+      }
+    },
+    {
+      "blockId": "experiments-variants-overview",
+      "type": "screenshot",
+      "media": {
+        "figureId": "experiments-variants-overview",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/experiments/en/desktop/experiments-variants-overview.png",
+              "alt": "Accordbook Experiments workspace showing multiple Variants beside the BASE.",
+              "caption": "Variants keep different directions visible without collapsing them into one Formula.",
+              "viewport": "1440x900"
+            }
+          },
+          "ko": {
+            "desktop": {
+              "src": "assets/experiments/ko/desktop/experiments-variants-overview.png",
+              "alt": "BASE 옆에 여러 시안이 보이는 Accordbook 실험 작업 공간.",
+              "caption": "시안을 사용하면 서로 다른 방향을 하나의 포뮬러로 합치지 않고 확인할 수 있습니다.",
+              "viewport": "1440x900"
+            }
+          }
+        }
+      }
+    },
+    {
+      "blockId": "branch-the-work",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Branch the Work"
+        },
+        "ko": {
+          "text": "작업을 분기하기"
+        }
+      }
+    },
+    {
+      "blockId": "branching",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "When one Variant leads to another useful question, continue from that direction instead of returning to the BASE each time. This keeps the path of the Experiment visible as the work becomes more specific."
+        },
+        "ko": {
+          "text": "한 시안에서 또 다른 유용한 질문이 생기면 매번 BASE로 돌아가지 말고 그 방향에서 계속 진행합니다. 작업이 구체화될수록 실험의 흐름을 확인할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "keep-base",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "The BASE is the reference point for the Experiment. Let the Variants carry the changes."
+        },
+        "ko": {
+          "text": "BASE는 실험의 기준점입니다. 변경 사항은 시안에서 진행합니다."
+        }
+      }
+    },
+    {
+      "blockId": "experiments-stay-separate",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Experiments Stay Separate"
+        },
+        "ko": {
+          "text": "실험은 분리된 상태로 유지하기"
+        }
+      }
+    },
+    {
+      "blockId": "experiment-boundary",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "An Experiment is a separate working document linked to its parent Formula. Changes inside the Experiment do not silently replace the Formula or its Time Machine history."
+        },
+        "ko": {
+          "text": "실험은 상위 포뮬러에 연결된 별도의 작업 문서입니다. 실험 안의 변경 사항은 포뮬러나 타임머신 기록을 조용히 대체하지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "next-formula-drop",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Formula Drop"
+        },
+        "ko": {
+          "text": "다음: Formula Drop"
+        }
+      },
+      "href": "/guide/en/formula-drop",
+      "kind": "internal"
+    }
+  ]
+}
