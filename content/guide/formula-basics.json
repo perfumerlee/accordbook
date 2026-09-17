@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "guideId": "formula-basics",
+  "slug": "formula-basics",
+  "order": 2,
+  "metadata": {
+    "lastUpdated": "2026-09-16",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Formula Basics",
+      "subtitle": "Read Materials, Parts, dilutions, and totals as one working Formula.",
+      "seo": {
+        "title": "Formula Basics — Accordbook Guide",
+        "description": "Understand Materials, Parts, dilutions, solvents, and totals in an Accordbook Formula."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "포뮬러 기본",
+      "subtitle": "원료, 배합량, 희석, 용매, 합계를 하나의 작업 포뮬러로 이해합니다.",
+      "seo": {
+        "title": "포뮬러 기본 — Accordbook Guide",
+        "description": "Accordbook 포뮬러에서 원료, 배합량, 희석, 용매, 합계를 이해하는 방법입니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:7ca5e85638121be4c84375c78b463a054ca9db6e0745bab11f8bfa04767285e1",
+        "reviewedAgainstFingerprint": "v1:7ca5e85638121be4c84375c78b463a054ca9db6e0745bab11f8bfa04767285e1",
+        "reviewedKoFingerprint": "v1:f17b871421cf7421b0a004194c1d710d85f719f9f38ded656941a4e887fc2785"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "formula-basics-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Accordbook treats a Formula as a working record of Materials and their relative amounts. Composition, calculation context, and notes stay together on one page so you can return to the same idea and continue working from it."
+        },
+        "ko": {
+          "text": "Accordbook에서 포뮬러는 원료와 그 상대량을 기록하는 작업 문서입니다. 구성, 계산 기준, 메모를 한 페이지에 함께 남기므로 같은 작업으로 돌아와 이어서 진행할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "formula-structure",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Understanding a Formula"
+        },
+        "ko": {
+          "text": "포뮬러 이해하기"
+        }
+      }
+    },
+    {
+      "blockId": "formula-identity",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Each Formula has its own identity. The Formula name tells you what you are working on, while the Formula ID gives the page a stable reference as the work develops over time."
+        },
+        "ko": {
+          "text": "각 포뮬러에는 고유한 식별 정보가 있습니다. 포뮬러 이름은 지금 작업하는 대상을 알려주고, 포뮬러 ID는 작업이 이어지는 동안 페이지를 안정적으로 참조하게 합니다."
+        }
+      }
+    },
+    {
+      "blockId": "formula-structure-overview",
+      "type": "screenshot",
+      "media": {
+        "figureId": "formula-structure-overview",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/formula-basics/en/desktop/formula-structure-overview.png",
+              "alt": "Accordbook Formula editor showing the Formula header and Material table.",
+              "caption": "The Formula header and Material table form the core working surface.",
+              "viewport": "1440x900"
+            }
+          },
+          "ko": {
+            "desktop": {
+              "src": "assets/formula-basics/ko/desktop/formula-structure-overview.png",
+              "alt": "포뮬러 헤더와 원료 표가 보이는 Accordbook 포뮬러 편집기.",
+              "caption": "포뮬러 헤더와 원료 표가 작업 화면의 중심을 이룹니다.",
+              "viewport": "1440x900"
+            }
+          }
+        }
+      }
+    },
+    {
+      "blockId": "materials-and-parts",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Materials and Parts"
+        },
+        "ko": {
+          "text": "원료와 배합량"
+        }
+      }
+    },
+    {
+      "blockId": "material-row",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Each row represents one Material in the Formula. Enter the Material name, then use Parts to describe how much of it belongs in the composition. CAS or reference information can be added when it is useful for identifying the Material more precisely."
+        },
+        "ko": {
+          "text": "각 행은 포뮬러의 원료 하나를 나타냅니다. 원료 이름을 입력한 뒤 배합량으로 구성에서 차지하는 양을 표시합니다. 원료를 더 정확히 식별할 수 있다면 CAS 또는 참고 정보를 추가합니다."
+        }
+      }
+    },
+    {
+      "blockId": "parts",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Accordbook uses Parts as the basic proportional language of a Formula. On the standard 10 g working scale, 1,000 Parts equals 10.00 g, so 1 Part equals 0.01 g. This makes it easy to adjust proportions while keeping the Formula readable."
+        },
+        "ko": {
+          "text": "Accordbook은 배합량을 포뮬러의 기본 비율 단위로 사용합니다. 표준 10 g 작업 기준에서 배합량 1,000은 10.00 g이고 배합량 1은 0.01 g입니다. 포뮬러를 읽기 쉽게 유지하면서 비율을 조정할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "parts-reference",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Parts describe proportion first. Weight and percentage views are calculated from the Formula, so you can keep working in relative amounts while Accordbook handles the conversion."
+        },
+        "ko": {
+          "text": "배합량은 먼저 비율을 나타냅니다. 무게와 백분율은 포뮬러에서 계산되므로 Accordbook이 변환하는 동안 상대량을 기준으로 작업할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "dilutions-and-solvents",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Dilutions and Solvents"
+        },
+        "ko": {
+          "text": "희석과 용매"
+        }
+      }
+    },
+    {
+      "blockId": "dilution",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "When a Material is used as a dilution, Accordbook keeps that information with the Material. A dilution can be shown in a form such as \"@10% in ALC,\" keeping the working concentration visible without changing the Material itself."
+        },
+        "ko": {
+          "text": "원료를 희석해 사용할 때 Accordbook은 그 정보를 원료와 함께 보관합니다. 희석은 \"@10% in ALC\"와 같이 표시할 수 있어 원료 자체를 바꾸지 않고 작업 농도를 확인할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "solvent-labels",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Common solvents such as ALC, DPG, IPM, and TEC remain visible as part of the Formula context. Dedicated solvent rows are identified separately so they are easy to distinguish from the concentrate."
+        },
+        "ko": {
+          "text": "ALC, DPG, IPM, TEC와 같은 일반적인 용매는 포뮬러의 작업 맥락 안에 계속 표시됩니다. 별도의 용매 행은 원액과 쉽게 구분할 수 있도록 따로 식별됩니다."
+        }
+      }
+    },
+    {
+      "blockId": "totals",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Reading the Total"
+        },
+        "ko": {
+          "text": "합계 읽기"
+        }
+      }
+    },
+    {
+      "blockId": "total",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "The Total area shows how the current Formula adds up. Concentrate and Solvent values make the balance of the working Formula easier to read while you adjust Materials and Parts."
+        },
+        "ko": {
+          "text": "합계 영역은 현재 포뮬러의 합계를 보여줍니다. 원료와 배합량을 조정할 때 농축도와 용매 값이 작업 포뮬러의 균형을 더 쉽게 파악하도록 돕습니다."
+        }
+      }
+    },
+    {
+      "blockId": "formula-total-overview",
+      "type": "screenshot",
+      "media": {
+        "figureId": "formula-total-overview",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/formula-basics/en/desktop/formula-total-overview.png",
+              "alt": "Accordbook Formula editor showing Material rows, Parts, and the Formula total.",
+              "caption": "The Total area makes the current balance of the Formula visible while you work.",
+              "viewport": "1440x900"
+            }
+          },
+          "ko": {
+            "desktop": {
+              "src": "assets/formula-basics/ko/desktop/formula-total-overview.png",
+              "alt": "원료 행, 배합량, 포뮬러 합계가 보이는 Accordbook 포뮬러 편집기.",
+              "caption": "합계 영역에서 작업 중인 포뮬러의 현재 균형을 확인할 수 있습니다.",
+              "viewport": "1440x900"
+            }
+          }
+        }
+      }
+    },
+    {
+      "blockId": "working-principle",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "A Formula does not have to be finished to be useful. Accordbook is designed to preserve the current working state clearly, so you can make the next change without losing the reasoning behind the previous one."
+        },
+        "ko": {
+          "text": "포뮬러는 완성되지 않아도 유용할 수 있습니다. Accordbook은 현재 작업 상태를 명확히 보존하도록 설계되어, 이전 판단의 맥락을 잃지 않고 다음 변경을 이어갈 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "next-time-machine",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Time Machine"
+        },
+        "ko": {
+          "text": "다음: 타임머신"
+        }
+      },
+      "href": "/guide/en/time-machine",
+      "kind": "internal"
+    }
+  ]
+}
