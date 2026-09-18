@@ -48,7 +48,7 @@
         "variants": {
           "en": {
             "desktop": {
-              "src": "assets/getting-started/en/desktop/image-c6f19799.png",
+              "src": "assets/getting-started/en/desktop/app-overview.png",
               "alt": "Accordbook Formula editor showing a new Formula and its Materials table",
               "caption": "The Formula editor is the main working surface.",
               "viewport": "1440x900"
