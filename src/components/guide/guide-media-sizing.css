@@ -1,0 +1,79 @@
+/*
+ * Guide figure sizing
+ *
+ * Desktop screenshots use a stable 800px base width by default.
+ * Individual screenshots may opt into 70/80/90/100% via
+ * media.presentation.desktopScale.
+ *
+ * Tablet/mobile intentionally ignore the desktop presentation preference.
+ */
+
+@media (min-width: 1200px) {
+  .guide-figure {
+    width: min(var(--guide-figure-desktop-width, 800px), calc(100vw - 96px));
+    max-width: none;
+    margin: 38px 0 38px 50%;
+    transform: translateX(-50%);
+  }
+
+  .guide-figure img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .guide-figure {
+    width: 100%;
+    max-width: 100%;
+    margin: 34px 0;
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .guide-figure {
+    width: 100%;
+    max-width: 100%;
+    margin: 28px 0;
+    transform: none;
+  }
+
+  .guide-figure img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+
+/*
+ * Operator Guide live preview
+ *
+ * The public desktop rule uses a fixed desktop width and centers the figure
+ * with translateX(). Inside the split Editor preview that can overflow into
+ * the editing column. Keep the same saved desktop width, but clamp it to the
+ * preview frame and center it normally.
+ */
+@media (min-width: 1200px) {
+  .operator-preview .preview-frame:not(.mobile) .guide-figure {
+    width: min(var(--guide-figure-desktop-width, 800px), 100%);
+    max-width: 100%;
+    margin: 38px auto;
+    transform: none;
+  }
+
+  .operator-preview .preview-frame:not(.mobile) .guide-figure img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Mobile preview must ignore desktop presentation sizing completely. */
+.operator-preview .preview-frame.mobile .guide-figure {
+  width: 100%;
+  max-width: 100%;
+  margin: 28px 0;
+  transform: none;
+}
