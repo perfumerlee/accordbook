@@ -1,0 +1,224 @@
+/*
+ * Guide Editor visual polish.
+ * Loaded after guide-editor.css so this file can refine presentation
+ * without changing the established editor layout and component styles.
+ */
+
+.operator-guide .operator-guide-header {
+  align-items: flex-end;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.operator-guide .operator-title-block {
+  min-width: 0;
+}
+
+.operator-guide .operator-title-row {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.operator-guide .operator-title-row h1 {
+  margin: 0;
+}
+
+.operator-guide .operator-document-state {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.operator-guide .status-chip {
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .055em;
+  line-height: 1;
+  padding: 5px 8px 4px;
+  white-space: nowrap;
+}
+
+.operator-guide .status-chip-draft {
+  font-weight: 500;
+  opacity: .72;
+}
+
+.operator-guide .status-chip-published {
+  border-color: color-mix(in srgb, currentColor 36%, transparent);
+}
+
+.operator-guide .status-chip-dirty {
+  border-style: dashed;
+}
+
+.operator-guide .operator-toolbar-polished {
+  align-items: center;
+  display: grid;
+  gap: 10px 18px;
+  grid-template-columns: auto minmax(180px, 1fr) auto;
+  min-height: 64px;
+}
+
+.operator-guide .toolbar-primary,
+.operator-guide .toolbar-context,
+.operator-guide .publication-links {
+  align-items: center;
+  display: flex;
+}
+
+.operator-guide .toolbar-primary {
+  gap: 8px;
+}
+
+.operator-guide .toolbar-context {
+  gap: 18px;
+  justify-content: flex-end;
+}
+
+.operator-guide .connection-status {
+  align-items: center;
+  display: inline-flex;
+  font-size: 10px;
+  gap: 5px;
+  margin-right: 4px;
+  opacity: .72;
+  white-space: nowrap;
+}
+
+.operator-guide .toolbar-feedback {
+  align-items: center;
+  display: flex;
+  min-height: 24px;
+  min-width: 0;
+}
+
+.operator-guide .toolbar-feedback > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.operator-guide .publish-feedback,
+.operator-guide .draft-feedback {
+  font-size: 11px;
+}
+
+.operator-guide .publish-feedback-published {
+  font-weight: 600;
+}
+
+.operator-guide .publish-feedback-failed,
+.operator-guide .publish-feedback-warning {
+  font-weight: 600;
+}
+
+.operator-guide .publication-links {
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.operator-guide .publication-links small {
+  font-size: 9px;
+  letter-spacing: .05em;
+  margin-right: 2px;
+  opacity: .58;
+}
+
+.operator-guide .publication-links a {
+  border-bottom: 1px solid currentColor;
+  font-size: 10px;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.operator-guide .chapter-selector {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operator-guide .chapter-selector > span {
+  font-size: 9px;
+  line-height: 1;
+  opacity: .65;
+}
+
+.operator-guide .chapter-selector select {
+  min-width: 150px;
+}
+
+.operator-guide .publish-action:not(:disabled) {
+  font-weight: 600;
+}
+
+.operator-guide .operator-key-field {
+  min-width: 180px;
+}
+
+/* Routine connection/load messages are intentionally suppressed in TSX.
+   Keep warnings/errors visually separate from the normal toolbar. */
+.operator-guide .draft-status-area:empty {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .operator-guide .operator-toolbar-polished {
+    grid-template-columns: 1fr auto;
+  }
+
+  .operator-guide .toolbar-feedback {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 767px) {
+  .operator-guide .operator-guide-header {
+    align-items: flex-start;
+  }
+
+  .operator-guide .operator-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .operator-guide .operator-toolbar-polished {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .operator-guide .toolbar-primary,
+  .operator-guide .toolbar-context {
+    flex-wrap: wrap;
+  }
+
+  .operator-guide .toolbar-context {
+    justify-content: space-between;
+  }
+
+  .operator-guide .toolbar-feedback {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .operator-guide .toolbar-feedback > * {
+    white-space: normal;
+  }
+
+  .operator-guide .chapter-selector {
+    flex: 1 1 180px;
+  }
+
+  .operator-guide .chapter-selector select {
+    width: 100%;
+  }
+}

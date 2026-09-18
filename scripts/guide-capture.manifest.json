@@ -65,5 +65,70 @@
     "locale": "en", "device": "desktop", "viewport": { "width": 1440, "height": 900 },
     "state": "drop-detail", "route": "/drop/2026-001?dropData=snapshot", "target": "main",
     "output": "formula-drop/en/desktop/detail.png"
+  },
+  {
+    "captureId": "formula-basics-structure-overview",
+    "chapter": "formula-basics", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "formula-with-materials", "route": "/", "target": "main.main",
+    "output": "formula-basics/en/desktop/formula-structure-overview.png"
+  },
+  {
+    "captureId": "formula-basics-total-overview",
+    "chapter": "formula-basics", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "formula-with-materials", "route": "/", "target": ".summary-grid",
+    "output": "formula-basics/en/desktop/formula-total-overview.png"
+  },
+  {
+    "captureId": "formula-basics-structure-overview-ko",
+    "chapter": "formula-basics", "locale": "ko", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "formula-with-materials", "route": "/", "target": "main.main",
+    "output": "formula-basics/ko/desktop/formula-structure-overview.png"
+  },
+  {
+    "captureId": "formula-basics-total-overview-ko",
+    "chapter": "formula-basics", "locale": "ko", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "formula-with-materials", "route": "/", "target": ".summary-grid",
+    "output": "formula-basics/ko/desktop/formula-total-overview.png"
+  },
+  {
+    "captureId": "experiments-base-overview",
+    "chapter": "experiments", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "experiments-base", "route": "/", "target": ".experiment-detail",
+    "output": "experiments/en/desktop/experiments-base-overview.png"
+  },
+  {
+    "captureId": "experiments-variants-overview",
+    "chapter": "experiments", "locale": "en", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "experiments-variants", "route": "/", "target": ".experiment-detail",
+    "output": "experiments/en/desktop/experiments-variants-overview.png"
+  },
+  {
+    "captureId": "experiments-base-overview-ko",
+    "chapter": "experiments", "locale": "ko", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "experiments-base", "route": "/", "target": ".experiment-detail",
+    "output": "experiments/ko/desktop/experiments-base-overview.png"
+  },
+  {
+    "captureId": "experiments-variants-overview-ko",
+    "chapter": "experiments", "locale": "ko", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "experiments-variants", "route": "/", "target": ".experiment-detail",
+    "output": "experiments/ko/desktop/experiments-variants-overview.png"
+  },
+  {
+    "captureId": "import-export-formula-file-actions",
+    "chapter": "import-export",
+    "locale": "en",
+    "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 },
+    "state": "formula-file-actions",
+    "route": "/",
+    "target": ".sidebar",
+    "output": "import-export/en/desktop/formula-file-actions.png"
+  },
+  {
+    "captureId": "import-export-formula-file-actions-ko",
+    "chapter": "import-export", "locale": "ko", "device": "desktop",
+    "viewport": { "width": 1440, "height": 900 }, "state": "formula-file-actions", "route": "/", "target": ".sidebar",
+    "output": "import-export/ko/desktop/formula-file-actions.png"
   }
 ]

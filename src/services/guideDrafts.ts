@@ -12,8 +12,9 @@ export type GuideDraftEnvelope = GuideDraftEnvelopeV1 | GuideDraftEnvelopeV2
 export type PublishedGuideSnapshot = { guideId: string; document: GuideDocument; publishedFingerprint: string; commitSha?: string }
 export type LegacyUpgradeAssessment = { eligible: true; status: 'eligible' } | { eligible: false; status: 'already-v2' | 'guide-id-mismatch' | 'stale-base-unavailable' | 'invalid-draft' }
 export type GuideDraftMeta = Pick<GuideDraftEnvelope, 'revision' | 'updatedAt' | 'basePublishedFingerprint'>
-export type GuideDraftResult = { ok: true; status?: 'refreshed' | 'already-current' | 'conflicts' | 'upgraded' | 'already-v2'; draft?: GuideDraftEnvelope; revisions?: GuideDraftMeta[]; conflicts?: GuideMergeConflict[]; provisionalMergedDocument?: GuideDocument; authoritativePublished?: PublishedGuideSnapshot; revision?: number; updatedAt?: string; guideId?: string; document?: GuideDocument; commitSha?: string; publishedAt?: string; stagingWarning?: string; publishedFingerprint?: string; draftRevisionAfterPublish?: number } | { ok: false; code: 'ASSET_PUBLISH_NOT_DEPLOYED' | 'STAGED_ASSET_REQUIRED' | 'EXTRA_STAGED_ASSET' | 'ASSET_PATH_INVALID' | 'ASSET_GUIDE_MISMATCH' | 'ASSET_UNSUPPORTED_TYPE' | 'ASSET_TOO_LARGE' | 'ASSET_AGGREGATE_TOO_LARGE' | 'ASSET_DECODE_FAILED' | 'ASSET_MIME_MISMATCH' | 'ASSET_DIMENSION_INVALID' | 'ASSET_HASH_MISMATCH' | 'ASSET_PATH_CONFLICT' | 'STAGED_FILE_MISSING' | 'STAGED_FILE_CORRUPTED' | 'AUTH_FAILED' | 'NO_DRAFT' | 'LEGACY_DRAFT_BASE_UNAVAILABLE' | 'LEGACY_BASE_NOT_FOUND' | 'LEGACY_BASE_HISTORY_LIMIT' | 'LEGACY_BASE_AMBIGUOUS' | 'REVISION_CONFLICT' | 'BASE_REVISION_CONFLICT' | 'REMOTE_REVISION_CONFLICT' | 'INVALID_REFRESH_PROPOSAL' | 'REFRESH_FAILED' | 'INVALID_DRAFT' | 'INVALID_PUBLISHED_GUIDE' | 'REVISION_NOT_FOUND' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'PUBLISHED_SOURCE_CHANGED' | 'UNPUBLISHED_ASSET_REFERENCE' | 'GITHUB_AUTH_FAILED' | 'GITHUB_SOURCE_NOT_FOUND' | 'PUBLISH_CONFLICT' | 'GITHUB_WRITE_FAILED' | 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED'; message?: string; currentRevision?: number; assetPaths?: string[] }
+export type GuideDraftResult = { ok: true; status?: 'refreshed' | 'already-current' | 'conflicts' | 'upgraded' | 'already-v2'; draft?: GuideDraftEnvelope; revisions?: GuideDraftMeta[]; conflicts?: GuideMergeConflict[]; provisionalMergedDocument?: GuideDocument; authoritativePublished?: PublishedGuideSnapshot; revision?: number; updatedAt?: string; guideId?: string; document?: GuideDocument; commitSha?: string; publishedAt?: string; stagingWarning?: string; publishedFingerprint?: string; draftRevisionAfterPublish?: number } | { ok: false; code: 'ASSET_PUBLISH_NOT_DEPLOYED' | 'STAGED_ASSET_REQUIRED' | 'EXTRA_STAGED_ASSET' | 'ASSET_PATH_INVALID' | 'ASSET_GUIDE_MISMATCH' | 'ASSET_UNSUPPORTED_TYPE' | 'ASSET_TOO_LARGE' | 'ASSET_AGGREGATE_TOO_LARGE' | 'ASSET_DECODE_FAILED' | 'ASSET_MIME_MISMATCH' | 'ASSET_DIMENSION_INVALID' | 'ASSET_HASH_MISMATCH' | 'ASSET_PATH_CONFLICT' | 'STAGED_FILE_MISSING' | 'STAGED_FILE_CORRUPTED' | 'AUTH_FAILED' | 'NO_DRAFT' | 'LEGACY_DRAFT_BASE_UNAVAILABLE' | 'LEGACY_BASE_NOT_FOUND' | 'LEGACY_BASE_HISTORY_LIMIT' | 'LEGACY_BASE_AMBIGUOUS' | 'REVISION_CONFLICT' | 'BASE_REVISION_CONFLICT' | 'REMOTE_REVISION_CONFLICT' | 'INVALID_REFRESH_PROPOSAL' | 'REFRESH_FAILED' | 'INVALID_DRAFT' | 'INVALID_PUBLISHED_GUIDE' | 'REVISION_NOT_FOUND' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'PUBLISHED_SOURCE_CHANGED' | 'TRANSLATION_NOT_READY' | 'UNPUBLISHED_ASSET_REFERENCE' | 'GITHUB_AUTH_FAILED' | 'GITHUB_SOURCE_NOT_FOUND' | 'PUBLISH_CONFLICT' | 'GITHUB_WRITE_FAILED' | 'PUBLISH_SUCCEEDED_DRAFT_REBASE_FAILED'; message?: string; currentRevision?: number; assetPaths?: string[] }
 export type GuideDraftClient = { connect(key: string): Promise<boolean>; getDraft(guideId: string): Promise<GuideDraftResult>; listDraftRevisions(guideId: string): Promise<GuideDraftResult>; getDraftRevision(guideId: string, revision: number): Promise<GuideDraftResult>; saveDraft(guideId: string, expectedRevision: number | null, basePublishedFingerprint: string, document: GuideDocument): Promise<GuideDraftResult>; deleteDraft(guideId: string): Promise<GuideDraftResult> }
+export type SafeGuideDraftError = { ok: false; code: string; reason?: string; diagnosticCode?: 'UPSTREAM_ERROR'; stage?: 'exec' | 'content' | 'exec-redirect'; upstreamStatus?: number }
 export type GuidePublishCapabilities = { ok: true; assetPublishProtocol: 1; atomicAssetPublish: true; serverAssetValidation: true; singleCommit: true } | { ok: false; code: 'ASSET_PUBLISH_NOT_DEPLOYED' | 'AUTH_FAILED' | 'NETWORK_ERROR' | 'TIMEOUT' | 'INVALID_RESPONSE'; message?: string }
 export async function checkGuideAtomicPublishProtocol(guideId = 'getting-started'): Promise<GuidePublishCapabilities> {
   const result = await requestGuideDraftAction('prepareAssetPublish', { guideId })
@@ -38,7 +39,7 @@ export async function requestGuideDraft(url: string, action: string, payload: Re
         const problem = await response.json().catch(() => null);
         if (problem?.code === 'UPSTREAM_ERROR' && Number.isInteger(problem.upstreamStatus)) {
           const stage = ['exec', 'content', 'exec-redirect'].includes(problem.stage) ? ` (${problem.stage})` : '';
-          return { ok: false, code: 'INVALID_RESPONSE', message: `Apps Script returned HTTP ${problem.upstreamStatus}${stage}. The local proxy is reachable.` };
+          return { ok: false, code: 'UPSTREAM_ERROR', diagnosticCode: 'UPSTREAM_ERROR', upstreamStatus: problem.upstreamStatus, stage: problem.stage } as unknown as GuideDraftResult;
         }
         if (problem?.code === 'INVALID_RESPONSE') return { ok: false, code: 'INVALID_RESPONSE' };
       }
@@ -53,11 +54,29 @@ export async function requestGuideDraft(url: string, action: string, payload: Re
 }
 let connectionError = '';
 export function guideDraftConnectionError() { return connectionError; }
+const SAFE_DRAFT_REASONS = new Set(['INVALID_GUIDE_ID', 'MISSING_DOCUMENT', 'DOCUMENT_GUIDE_ID_MISMATCH', 'DOCUMENT_TOO_LARGE', 'INVALID_FORMAT_VERSION', 'INVALID_DOCUMENT', 'MISSING_BASE_PUBLISHED_DOCUMENT', 'INVALID_BASE_PUBLISHED_DOCUMENT', 'INVALID_BASE_PUBLISHED_FINGERPRINT', 'DRAFT_SCHEMA_REJECTED', 'DRAFT_SAVE_EXCEPTION'])
+export function safeDraftErrorMessage(error: unknown): string {
+  const value = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+  const code = typeof value.code === 'string' && /^[A-Z_]+$/.test(value.code) ? value.code : undefined;
+  const reason = typeof value.reason === 'string' && SAFE_DRAFT_REASONS.has(value.reason) ? value.reason : undefined;
+  const diagnosticCode = value.diagnosticCode === 'UPSTREAM_ERROR' || value.code === 'UPSTREAM_ERROR' ? 'UPSTREAM_ERROR' : undefined;
+  const stage = ['exec', 'content', 'exec-redirect'].includes(String(value.stage)) ? String(value.stage) : undefined;
+  const upstreamStatus = Number.isInteger(value.upstreamStatus) && Number(value.upstreamStatus) >= 100 && Number(value.upstreamStatus) <= 599 ? Number(value.upstreamStatus) : undefined;
+  if (diagnosticCode && stage && upstreamStatus !== undefined) return `Draft request failed. Your browser edits are preserved. Please retry. Code: ${diagnosticCode} · Stage: ${stage} · Upstream: ${upstreamStatus}`;
+  if (code === 'INVALID_DRAFT' && reason) return `Draft request failed. Your browser edits are preserved. Please retry. Code: ${code} · Reason: ${reason}`;
+  return 'Draft request failed. Your browser edits are preserved. Please retry.';
+}
 export function draftConnectionMessage(result: GuideDraftResult): string {
   if (result.ok) return '';
   if (result.code === 'NO_DRAFT') return 'NO SAVED DRAFT'
   if (result.code === 'AUTH_FAILED') return 'Operator Key was not accepted. Check the key and its configured hash.';
   if (result.code === 'TIMEOUT') return 'Draft storage did not respond within 60 seconds. Authentication could not be checked.';
+  const reason = (result as { reason?: string }).reason;
+  if (result.code === 'INVALID_DRAFT' && reason && SAFE_DRAFT_REASONS.has(reason)) return `Draft request failed. Your browser edits are preserved. Code: INVALID_DRAFT. Reason: ${reason}`;
+  const diagnostic = result as GuideDraftResult & { diagnosticCode?: string; upstreamStatus?: number; stage?: string };
+  const upstreamMessage = result.code === 'INVALID_RESPONSE' ? result.message?.match(/^Apps Script returned HTTP (\d{3}) \((exec|content|exec-redirect)\)\./) : null;
+  if (upstreamMessage) return `Draft request failed. Your browser edits are preserved. Code: UPSTREAM_ERROR. Stage: ${upstreamMessage[2]}. Upstream: ${upstreamMessage[1]}`;
+  if ((diagnostic.diagnosticCode === 'UPSTREAM_ERROR' || (diagnostic as unknown as { code?: string }).code === 'UPSTREAM_ERROR') && Number.isInteger(diagnostic.upstreamStatus) && ['exec', 'content', 'exec-redirect'].includes(diagnostic.stage ?? '')) return `Draft request failed. Your browser edits are preserved. Code: UPSTREAM_ERROR. Stage: ${diagnostic.stage}. Upstream: ${diagnostic.upstreamStatus}`;
   if (result.code === 'INVALID_RESPONSE') return result.message?.match(/^Apps Script returned HTTP \d{3}( \((exec|content|exec-redirect)\))?\. The local proxy is reachable\.$/) ? result.message : 'Draft storage returned an unexpected response. Check the Web App deployment.';
   return 'Draft storage connection failed. Authentication could not be checked.';
 }

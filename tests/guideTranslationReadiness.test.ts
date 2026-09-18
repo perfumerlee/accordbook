@@ -1,0 +1,11 @@
+import { describe, expect, it } from 'vitest'
+import { assessGuideKoTranslationReadiness, calculateGuideEnTranslationFingerprint, calculateGuideKoTranslationFingerprint } from '../src/services/guideTranslation'
+import type { GuideDocument } from '../src/models/guide'
+
+const base = (): GuideDocument => ({ schemaVersion: 1, guideId: 'faq', slug: 'faq', order: 8, metadata: { lastUpdated: '2026-09-16' }, locales: { en: { status: 'DRAFT', title: 'FAQ', subtitle: 'Answers', seo: { title: 'FAQ', description: 'Answers' } }, ko: { status: 'DRAFT', title: '자주 묻는 질문', subtitle: '답변', seo: { title: 'FAQ', description: '답변' }, translation: { state: 'READY', translatedFromFingerprint: null, reviewedAgainstFingerprint: null, reviewedKoFingerprint: null } } }, blocks: [{ blockId: 'p', type: 'paragraph', content: { en: { text: 'Hello' }, ko: { text: '안녕' } } }, { blockId: 'd', type: 'divider' }] })
+
+describe('Guide KO translation readiness', () => {
+  it('reports missing metadata as legacy without mutation', async () => { const d = base(); delete d.locales.ko!.translation; const before = JSON.stringify(d); const result = await assessGuideKoTranslationReadiness(d); expect(result.legacyMode).toBe(true); expect(result.freshness).toBe('UNTRACKED'); expect(JSON.stringify(d)).toBe(before) })
+  it('requires raw KO content instead of EN fallback', async () => { const d = base(); delete d.blocks[0].content.ko; d.locales.ko!.translation = { state: 'REVIEW', translatedFromFingerprint: await calculateGuideEnTranslationFingerprint(d), reviewedAgainstFingerprint: null, reviewedKoFingerprint: null }; const result = await assessGuideKoTranslationReadiness(d); expect(result.issues.some(i => i.code === 'MISSING_BLOCK_TRANSLATION')).toBe(true) })
+  it('accepts a complete current READY translation and rejects stale READY', async () => { const d = base(); const fp = await calculateGuideEnTranslationFingerprint(d); d.locales.ko!.translation!.reviewedAgainstFingerprint = fp; d.locales.ko!.translation!.reviewedKoFingerprint = await calculateGuideKoTranslationFingerprint(d); expect((await assessGuideKoTranslationReadiness(d)).ready).toBe(true); d.locales.en.title = 'Changed'; const result = await assessGuideKoTranslationReadiness(d); expect(result.ready).toBe(false); expect(result.issues.some(i => i.code === 'STALE_TRANSLATION')).toBe(true) })
+})

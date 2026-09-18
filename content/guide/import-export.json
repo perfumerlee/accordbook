@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:01c8b78182322e73cb9c2186e4f45c210b8a27b08471f17fea8a58d5ae075757",
-        "reviewedAgainstFingerprint": "v1:01c8b78182322e73cb9c2186e4f45c210b8a27b08471f17fea8a58d5ae075757",
-        "reviewedKoFingerprint": "v1:3903e4bd0e95de7543c8df5cf2a6e800af633897b83d65dff2a52961ee3c7694"
+        "translatedFromFingerprint": "v1:d3a6d7bb1c7da0b9d51b5f5fda25eee258e5322ac599f41cf8c61c1a14ee0867",
+        "reviewedAgainstFingerprint": "v1:d3a6d7bb1c7da0b9d51b5f5fda25eee258e5322ac599f41cf8c61c1a14ee0867",
+        "reviewedKoFingerprint": "v1:cb25b00d3ff1a2e78c4d40c51cf01658467d8c54ea9cac6c82e9540c4e353b83"
       }
     }
   },
@@ -246,6 +246,20 @@
           "text": "라이선스 포뮬러를 열려면 확인이 필요합니다. 여러 번 실패하면 가져오기가 일시적으로 잠길 수 있으며, 다시 시도할 수 있는 시점은 화면에 표시됩니다."
         }
       }
+    },
+    {
+      "blockId": "next-data-backup",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Data & Backup"
+        },
+        "ko": {
+          "text": "다음: 데이터와 백업"
+        }
+      },
+      "href": "/guide/en/data-backup",
+      "kind": "internal"
     }
   ]
 }

@@ -1,0 +1,125 @@
+/* Guide publish feedback.
+   Publication success is rendered as a compact receipt rail below the toolbar
+   so it never competes with Save / Publish / Chapter controls. */
+
+.publication-panel .publish-complete {
+  cursor: default;
+  opacity: .64;
+}
+
+.publish-up-to-date {
+  opacity: .68;
+}
+
+.publish-receipt {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 24px;
+  width: 100%;
+  margin: -2px 0 16px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line-soft, #cbbda8);
+  border-bottom: 1px solid var(--line-soft, #cbbda8);
+  background: rgba(255, 250, 240, .36);
+}
+
+.publish-receipt-result,
+.publish-receipt-meta,
+.publish-receipt-links {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.publish-receipt-result {
+  gap: 10px;
+}
+
+.publish-receipt-result strong {
+  flex: 0 0 auto;
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+
+.publish-receipt-result code {
+  flex: 0 0 auto;
+  font-size: 10px;
+  opacity: .58;
+}
+
+.publish-receipt-result > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.publish-receipt-meta {
+  justify-content: flex-end;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.publish-receipt-meta > small {
+  font-size: 10px;
+  opacity: .62;
+}
+
+.publish-receipt-links {
+  gap: 6px;
+}
+
+.publish-receipt-links span {
+  margin-right: 2px;
+  font-size: 9px;
+  letter-spacing: .1em;
+  opacity: .55;
+}
+
+.publish-receipt-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 22px;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+  font-size: 10px;
+  line-height: 1;
+}
+
+@media (max-width: 980px) {
+  .publish-receipt {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .publish-receipt-meta {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 600px) {
+  .publish-receipt-result {
+    flex-wrap: wrap;
+    gap: 6px 9px;
+  }
+
+  .publish-receipt-result > span {
+    flex-basis: 100%;
+    white-space: normal;
+  }
+
+  .publish-receipt-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+    white-space: normal;
+  }
+}

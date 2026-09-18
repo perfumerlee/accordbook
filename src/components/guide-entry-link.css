@@ -1,0 +1,407 @@
+/* Global Guide entry point for the Accordbook notebook.
+   Desktop/tablet: quiet text link near global utility controls.
+   Smartphone: Guide moves into the notebook drawer instead of occupying the
+   compact app header. */
+
+.guide-entry-link {
+  box-sizing: border-box;
+  color: var(--muted, #806f5d);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color .16s ease, border-color .16s ease, opacity .16s ease;
+}
+
+.guide-entry-link:focus-visible {
+  outline: 2px solid var(--accent, #a85f3e);
+  outline-offset: 3px;
+}
+
+/* Desktop / tablet */
+.guide-entry-link--desktop {
+  order: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 5px;
+  border-bottom: 1px solid transparent;
+  font: 600 10px/1 ui-monospace, monospace;
+  letter-spacing: .09em;
+}
+
+.guide-entry-link--desktop:hover,
+.guide-entry-link--desktop:focus-visible {
+  border-bottom-color: currentColor;
+  color: var(--ink, #332d27);
+}
+
+.note-header .utility-actions .guide-entry-link--desktop {
+  order: 0;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .tablet-utility-row .utility-actions .guide-entry-link--desktop {
+    order: 1;
+    min-height: 34px;
+    padding: 0 7px;
+  }
+
+  .tablet-utility-row .utility-actions .language-toggle {
+    order: 2;
+  }
+}
+
+/* Smartphone
+   The hamburger already represents global navigation on this layout.
+   Keep the top bar clean and place Guide immediately above the privacy footer
+   in that drawer. */
+.guide-entry-mobile-slot {
+  display: none;
+}
+
+.guide-entry-link--mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .guide-entry-link--desktop {
+    display: none;
+  }
+
+  .guide-entry-mobile-slot {
+    display: block;
+    margin: 12px 0 18px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(217, 201, 174, .42);
+    border-bottom: 1px solid rgba(217, 201, 174, .42);
+  }
+
+  .guide-entry-link--mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 38px;
+    padding: 4px 0;
+    color: #f3ead9;
+    font: 600 11px/1 ui-monospace, monospace;
+    letter-spacing: .09em;
+  }
+
+  .guide-entry-link--mobile:hover,
+  .guide-entry-link--mobile:focus-visible {
+    color: #fffaf0;
+  }
+
+  .guide-entry-arrow {
+    font: 15px/1 Georgia, serif;
+    opacity: .7;
+  }
+}
+
+
+.guide-entry-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.guide-entry-icon {
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+/* The Guide entry is intentionally a little stronger than passive metadata:
+   it is a permanent product-level navigation item. */
+.guide-entry-link--desktop {
+  color: color-mix(in srgb, var(--ink, #332d27) 82%, transparent);
+}
+
+.guide-entry-link--desktop:hover,
+.guide-entry-link--desktop:focus-visible {
+  color: var(--ink, #332d27);
+}
+
+@media (max-width: 767px) {
+  .guide-entry-mobile-slot {
+    margin: 14px 0 20px;
+    padding: 0;
+    border: 0;
+  }
+
+  .guide-entry-link--mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid rgba(139, 89, 56, .28);
+    border-radius: 9px;
+    background: rgba(255, 250, 240, .72);
+    color: #6d4d35;
+    font: 700 12px/1 ui-monospace, monospace;
+    letter-spacing: .08em;
+    box-shadow: 0 1px 0 rgba(255,255,255,.45) inset;
+  }
+
+  .guide-entry-link--mobile:hover,
+  .guide-entry-link--mobile:focus-visible {
+    border-color: rgba(139, 89, 56, .52);
+    background: rgba(255, 250, 240, .94);
+    color: #4f3525;
+  }
+
+  .guide-entry-link--mobile:active {
+    background: rgba(214, 197, 170, .34);
+  }
+
+  .guide-entry-link--mobile .guide-entry-icon {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+    stroke-width: 1.5;
+  }
+
+  .guide-entry-link--mobile .guide-entry-main {
+    gap: 9px;
+  }
+
+  .guide-entry-arrow {
+    color: #8b5938;
+    font: 18px/1 Georgia, serif;
+    opacity: .92;
+  }
+}
+
+
+@media (min-width: 768px) {
+  .guide-entry-link--desktop {
+    gap: 6px;
+    color: #6d4d35;
+    font-weight: 700;
+  }
+
+  .guide-entry-link--desktop .guide-entry-icon {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+  }
+}
+
+
+/* Unified GUIDE control language
+   All viewports use the same bordered cream control with the open-book icon.
+   Desktop/tablet stay compact; mobile drawer expands to a full-width row. */
+
+@media (min-width: 768px) {
+  .guide-entry-link--desktop {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid rgba(185, 168, 144, .75);
+    border-radius: 999px;
+    background: rgba(255, 250, 240, .60);
+    color: var(--muted, #806f5d);
+    font: 700 10px/1 ui-monospace, monospace;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition:
+      color .18s ease,
+      border-color .18s ease,
+      background-color .18s ease;
+  }
+
+  .guide-entry-link--desktop:hover,
+  .guide-entry-link--desktop:focus-visible {
+    border-bottom-color: var(--accent, #a85f3e);
+    border-color: var(--accent, #a85f3e);
+    background: rgba(255, 250, 240, .90);
+    color: var(--ink, #332d27);
+  }
+
+  .guide-entry-link--desktop:active {
+    background: rgba(214, 197, 170, .34);
+  }
+
+  .guide-entry-link--desktop .guide-entry-main {
+    gap: 6px;
+  }
+
+  .guide-entry-link--desktop .guide-entry-icon {
+    width: 15px;
+    height: 15px;
+    flex-basis: 15px;
+  }
+
+  /* Keep GUIDE before locale/print controls in the utility row. */
+  .note-header .utility-actions .guide-entry-link--desktop {
+    order: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .tablet-utility-row .utility-actions .guide-entry-link--desktop {
+    order: 1;
+    min-height: 34px;
+    height: 34px;
+    padding: 0 10px;
+  }
+
+  .tablet-utility-row .utility-actions .language-toggle {
+    order: 2;
+  }
+}
+
+@media (min-width: 768px) {
+  .guide-entry-link--desktop {
+    border-bottom-width: 1px;
+  }
+}
+
+/* Tablet should follow the smartphone Guide pattern.
+   0-1199px: Guide lives in the sidebar / drawer as a full-width row.
+   1200px+: Guide stays as the compact utility button in the main header. */
+
+@media (max-width: 1199px) {
+  .guide-entry-link--desktop {
+    display: none !important;
+  }
+
+  .guide-entry-mobile-slot {
+    display: block;
+    margin: 14px 0 20px;
+    padding: 0;
+    border: 0;
+  }
+
+  .guide-entry-link--mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid rgba(139, 89, 56, .28);
+    border-radius: 9px;
+    background: rgba(255, 250, 240, .72);
+    color: #6d4d35;
+    font: 700 12px/1 ui-monospace, monospace;
+    letter-spacing: .08em;
+    box-shadow: 0 1px 0 rgba(255,255,255,.45) inset;
+  }
+
+  .guide-entry-link--mobile:hover,
+  .guide-entry-link--mobile:focus-visible {
+    border-color: rgba(139, 89, 56, .52);
+    background: rgba(255, 250, 240, .94);
+    color: #4f3525;
+  }
+
+  .guide-entry-link--mobile:active {
+    background: rgba(214, 197, 170, .34);
+  }
+
+  .guide-entry-link--mobile .guide-entry-icon {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+    stroke-width: 1.5;
+  }
+
+  .guide-entry-link--mobile .guide-entry-main {
+    gap: 9px;
+  }
+
+  .guide-entry-arrow {
+    color: #8b5938;
+    font: 18px/1 Georgia, serif;
+    opacity: .92;
+  }
+}
+
+/* Compact drawer Guide placement for touch layouts.
+   The full-width Guide row reduced the flex space available to Notebook and
+   Archive. Keep the same book + GUIDE identity, but position it in the brand
+   header so it consumes no additional vertical flow space. */
+@media (max-width: 1199px) {
+  .guide-entry-mobile-slot {
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    z-index: 3;
+    display: block;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .guide-entry-link--mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 78px;
+    min-height: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid rgba(139, 89, 56, .28);
+    border-radius: 999px;
+    background: rgba(255, 250, 240, .72);
+    color: #6d4d35;
+    font: 700 10px/1 ui-monospace, monospace;
+    letter-spacing: .07em;
+    box-shadow: 0 1px 0 rgba(255,255,255,.42) inset;
+  }
+
+  .guide-entry-link--mobile:hover,
+  .guide-entry-link--mobile:focus-visible {
+    border-color: rgba(139, 89, 56, .52);
+    background: rgba(255, 250, 240, .94);
+    color: #4f3525;
+  }
+
+  .guide-entry-link--mobile:active {
+    background: rgba(214, 197, 170, .34);
+  }
+
+  .guide-entry-link--mobile .guide-entry-main {
+    gap: 6px;
+  }
+
+  .guide-entry-link--mobile .guide-entry-icon {
+    width: 15px;
+    height: 15px;
+    flex-basis: 15px;
+  }
+
+  .guide-entry-link--mobile .guide-entry-arrow {
+    display: none;
+  }
+}
+
+/* Very narrow drawers still keep a safe gap between the Accordbook wordmark
+   and the Guide control. */
+@media (max-width: 380px) {
+  .guide-entry-mobile-slot {
+    top: 16px;
+    right: 10px;
+  }
+
+  .guide-entry-link--mobile {
+    min-width: 72px;
+    padding: 0 8px;
+    font-size: 9px;
+  }
+}

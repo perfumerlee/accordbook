@@ -173,6 +173,20 @@
           "text": "Restore는 현재 Formula의 내용을 변경합니다. 별도의 Formula를 새로 만드는 기능은 아닙니다."
         }
       }
+    },
+    {
+      "blockId": "next-formula-drop",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Formula Drop"
+        },
+        "ko": {
+          "text": "다음: Formula Drop"
+        }
+      },
+      "href": "/guide/en/formula-drop",
+      "kind": "internal"
     }
   ]
 }

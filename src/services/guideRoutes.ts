@@ -37,31 +37,55 @@ export function resolveGuideRoute(pathname: string): GuideRoute {
   return { kind: 'GUIDE_NOT_FOUND' }
 }
 
-export function isLocalizableGuideHref(href: string) {
-  if (href === '/guide' || href === '/guide/') return true
+function splitHrefSuffix(href: string) {
+  const index = href.search(/[?#]/)
+  if (index < 0) return { path: href, suffix: '' }
+  return { path: href.slice(0, index), suffix: href.slice(index) }
+}
 
-  const match = href.match(
-    /^\/guide\/(en|ko)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?\/?$/,
+function parseLocalGuideHref(href: string) {
+  const { path, suffix } = splitHrefSuffix(href)
+
+  if (path === '/guide' || path === '/guide/') {
+    return {
+      kind: 'home' as const,
+      trailingSlash: path.endsWith('/'),
+      suffix,
+    }
+  }
+
+  const match = path.match(
+    /^\/guide\/(en|ko)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?(\/?)$/,
   )
-  if (!match) return false
+  if (!match) return undefined
 
   const slug = match[2]
-  return slug === undefined || id.test(slug)
+  if (slug !== undefined && !id.test(slug)) return undefined
+
+  return {
+    kind: slug ? ('chapter' as const) : ('locale-home' as const),
+    slug,
+    trailingSlash: match[3] === '/',
+    suffix,
+  }
+}
+
+export function isLocalizableGuideHref(href: string) {
+  return Boolean(parseLocalGuideHref(href))
 }
 
 export function resolveGuideHrefForLocale(
   href: string,
   locale: 'en' | 'ko',
 ) {
-  if (href === '/guide' || href === '/guide/') {
-    return `/guide/${locale}/`
+  const parsed = parseLocalGuideHref(href)
+  if (!parsed) return href
+
+  if (parsed.kind === 'home' || parsed.kind === 'locale-home') {
+    const slash = parsed.trailingSlash ? '/' : ''
+    return `/guide/${locale}${slash}${parsed.suffix}`
   }
 
-  const match = href.match(
-    /^\/guide\/(?:en|ko)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?\/?$/,
-  )
-  if (!match) return href
-
-  const slug = match[1]
-  return slug ? `/guide/${locale}/${slug}/` : `/guide/${locale}/`
+  const slash = parsed.trailingSlash ? '/' : ''
+  return `/guide/${locale}/${parsed.slug}${slash}${parsed.suffix}`
 }

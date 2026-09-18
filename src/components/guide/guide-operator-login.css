@@ -1,0 +1,296 @@
+/* Operator Guide access gate + async loading states.
+   The modal is intentionally plain and editorial to match Accordbook. */
+
+.operator-login-page {
+  min-height: 100vh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 28px;
+  box-sizing: border-box;
+  background: var(--paper, #f5efe2);
+  color: var(--ink, #332d27);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.operator-login-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 0, transparent 49%, rgba(114, 80, 131, .045) 50%, transparent 51%),
+    var(--paper, #f5efe2);
+  background-size: 100% 32px;
+}
+
+.operator-login-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  box-sizing: border-box;
+  padding: 34px 34px 30px;
+  border: 1px solid var(--line-soft, #cbbda8);
+  background: #fffaf0;
+  box-shadow: 0 24px 70px rgba(51, 45, 39, .12);
+}
+
+.operator-login-brand {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line-soft, #cbbda8);
+}
+
+.operator-login-brand h1 {
+  margin: 0;
+  font: 400 38px/1.05 Georgia, serif;
+}
+
+.operator-login-brand > p:last-child {
+  margin: 13px 0 0;
+  max-width: 34ch;
+  font-size: 12px;
+  line-height: 1.65;
+  opacity: .72;
+}
+
+.operator-login-form {
+  display: grid;
+  gap: 10px;
+  padding-top: 24px;
+}
+
+.operator-login-form label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.operator-login-form input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #bda98e;
+  background: #fff;
+  color: inherit;
+  padding: 12px 13px;
+  outline: none;
+  font: 14px/1.3 Inter, system-ui, sans-serif;
+}
+
+.operator-login-form input:focus {
+  border-color: var(--accent, #725083);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #725083) 12%, transparent);
+}
+
+.operator-login-submit {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 2px;
+  border: 1px solid var(--ink, #332d27);
+  background: var(--ink, #332d27);
+  color: #fffaf0;
+  cursor: pointer;
+  font: 600 11px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .1em;
+}
+
+.operator-login-submit:disabled {
+  cursor: default;
+  opacity: .45;
+}
+
+.operator-login-status {
+  min-height: 36px;
+  padding-top: 5px;
+  font-size: 11px;
+  line-height: 1.55;
+  opacity: .72;
+}
+
+.operator-login-status strong {
+  color: #a34d3f;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.operator-loader {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  display: inline-block;
+  flex: 0 0 auto;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: operator-loader-spin .75s linear infinite;
+}
+
+.operator-working-indicator {
+  position: fixed;
+  z-index: 120;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  max-width: calc(100vw - 32px);
+  padding: 0 13px;
+  border: 1px solid var(--line-soft, #cbbda8);
+  background: rgba(255, 250, 240, .96);
+  box-shadow: 0 8px 24px rgba(51, 45, 39, .12);
+  color: var(--ink, #332d27);
+  font: 600 10px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .055em;
+  pointer-events: none;
+}
+
+@keyframes operator-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .operator-loader {
+    animation: none;
+    border-right-color: currentColor;
+  }
+}
+
+@media (max-width: 560px) {
+  .operator-login-page {
+    padding: 18px;
+  }
+
+  .operator-login-card {
+    padding: 28px 22px 24px;
+  }
+
+  .operator-login-brand h1 {
+    font-size: 34px;
+  }
+
+  .operator-working-indicator {
+    top: 10px;
+  }
+}
+
+
+/* Session-level connection status belongs in the Guide Editor header,
+   beside the Draft state, rather than among document actions. */
+.operator-guide .header-connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 8px 4px;
+  border: 1px solid color-mix(in srgb, #56734d 30%, transparent);
+  border-radius: 999px;
+  color: #56734d;
+  font: 600 9px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.operator-guide .header-connection-dot {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (max-width: 767px) {
+  .operator-guide .header-connection-status {
+    margin-top: 8px;
+  }
+}
+
+
+.operator-session-restore {
+  position: relative;
+  z-index: 1;
+  width: min(390px, 100%);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 30px;
+  border: 1px solid var(--line-soft, #cbbda8);
+  background: #fffaf0;
+  box-shadow: 0 24px 70px rgba(51, 45, 39, .1);
+}
+
+.operator-session-restore-loader {
+  width: 20px;
+  height: 20px;
+}
+
+.operator-session-restore > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.operator-session-restore .operator-kicker {
+  margin: 0 0 3px;
+}
+
+.operator-session-restore strong {
+  font: 400 21px/1.2 Georgia, serif;
+}
+
+.operator-session-restore small {
+  font-size: 11px;
+  line-height: 1.5;
+  opacity: .64;
+}
+
+@media (max-width: 560px) {
+  .operator-session-restore {
+    padding: 24px 22px;
+  }
+}
+
+
+.operator-guide .operator-session-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.operator-guide .operator-logout {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  background: transparent;
+  color: inherit;
+  padding: 3px 0 2px;
+  cursor: pointer;
+  font: 600 9px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .08em;
+  opacity: .58;
+}
+
+.operator-guide .operator-logout:hover:not(:disabled),
+.operator-guide .operator-logout:focus-visible {
+  opacity: 1;
+}
+
+.operator-guide .operator-logout:disabled {
+  cursor: default;
+  opacity: .3;
+}
+
+@media (max-width: 767px) {
+  .operator-guide .operator-session-controls {
+    margin-top: 8px;
+  }
+
+  .operator-guide .header-connection-status {
+    margin-top: 0;
+  }
+}

@@ -1,11 +1,20 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { performGuideDraftRequest, requestGuideDraft, draftConnectionMessage } from '../src/services/guideDrafts'
+import { performGuideDraftRequest, requestGuideDraft, draftConnectionMessage, safeDraftErrorMessage } from '../src/services/guideDrafts'
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers() })
 it('reports upstream 404 accurately without repeating the request', async () => {
-  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"ok":false,"code":"UPSTREAM_ERROR","upstreamStatus":404}', {status:502,headers:{'X-Guide-Proxy':'local'}}))
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"ok":false,"code":"UPSTREAM_ERROR","upstreamStatus":404,"stage":"exec"}', {status:502,headers:{'X-Guide-Proxy':'local'}}))
   const result = await performGuideDraftRequest('/api/guide-drafts','getDraft',{},'fixture')
-  expect(draftConnectionMessage(result)).toBe('Apps Script returned HTTP 404. The local proxy is reachable.')
+  expect(draftConnectionMessage(result)).toContain('Code: UPSTREAM_ERROR. Stage: exec. Upstream: 404')
   expect(fetcher).toHaveBeenCalledOnce()
+})
+it('shows safe upstream diagnostics without exposing unknown response text', async () => {
+  expect(draftConnectionMessage({ ok: false, code: 'INVALID_RESPONSE', message: 'Apps Script returned HTTP 500 (exec). The local proxy is reachable.', diagnosticCode: 'UPSTREAM_ERROR', upstreamStatus: 500, stage: 'exec' } as never)).toContain('Code: UPSTREAM_ERROR. Stage: exec. Upstream: 500')
+  expect(draftConnectionMessage({ ok: false, code: 'INVALID_DRAFT', reason: 'UNSAFE\nDETAIL' } as never)).not.toContain('UNSAFE')
+})
+it('formats only allowlisted diagnostics for the editor catch path', () => {
+  expect(safeDraftErrorMessage({ code: 'INVALID_DRAFT', reason: 'INVALID_DOCUMENT' })).toContain('Code: INVALID_DRAFT · Reason: INVALID_DOCUMENT')
+  expect(safeDraftErrorMessage({ diagnosticCode: 'UPSTREAM_ERROR', stage: 'exec', upstreamStatus: 500 })).toContain('Code: UPSTREAM_ERROR · Stage: exec · Upstream: 500')
+  expect(safeDraftErrorMessage({ code: 'INVALID_DRAFT', reason: 'RAW SECRET DETAILS' })).not.toContain('RAW SECRET')
 })
 it('recovers a transient authentication transport failure once', async () => {
   const fetcher = vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new TypeError('Offline')).mockResolvedValueOnce(new Response('{"ok":true}'))

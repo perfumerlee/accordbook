@@ -3,136 +3,21 @@
   "guideId": "formula-drop",
   "slug": "formula-drop",
   "order": 5,
-  "metadata": {
-    "lastUpdated": "2026-09-14",
-    "productVersion": "1.07"
-  },
+  "metadata": { "lastUpdated": "2026-09-14", "productVersion": "1.07" },
   "locales": {
-    "en": {
-      "status": "PUBLISHED",
-      "title": "Formula Drop",
-      "subtitle": "Open a shared Formula and continue working locally.",
-      "seo": {
-        "title": "Formula Drop — Accordbook Guide",
-        "description": "View a shared Formula Drop, download its .accordbook file, and import it into Accordbook."
-      }
-    },
-    "ko": {
-      "status": "PUBLISHED",
-      "title": "Formula Drop",
-      "subtitle": "공유된 Formula를 열고 로컬에서 계속 작업합니다.",
-      "seo": {
-        "title": "Formula Drop — Accordbook Guide",
-        "description": "공유된 Formula Drop을 확인하고 .accordbook 파일을 다운로드해 Accordbook으로 가져오는 방법입니다."
-      }
-    }
+    "en": { "status": "PUBLISHED", "title": "Formula Drop", "subtitle": "Open a shared Formula and continue working locally.", "seo": { "title": "Formula Drop — Accordbook Guide", "description": "View a shared Formula Drop, download its .accordbook file, and import it into Accordbook." } },
+    "ko": { "status": "PUBLISHED", "title": "Formula Drop", "subtitle": "공유된 Formula를 열고 로컬에서 계속 작업합니다.", "seo": { "title": "Formula Drop — Accordbook Guide", "description": "공유된 Formula Drop을 확인하고 .accordbook 파일을 다운로드해 Accordbook으로 가져오는 방법입니다." } }
   },
   "blocks": [
-    {
-      "blockId": "drop-intro",
-      "type": "paragraph",
-      "content": {
-        "en": {
-          "text": "A Formula Drop is a shared Formula page. The public page lets you review the available information and begin the download workflow."
-        },
-        "ko": {
-          "text": "Formula Drop은 공유된 Formula 페이지입니다. 공개 페이지에서 제공되는 정보를 확인하고 다운로드를 시작할 수 있습니다."
-        }
-      }
-    },
-    {
-      "blockId": "drop-detail-figure",
-      "type": "screenshot",
-      "media": {
-        "figureId": "formula-drop-detail",
-        "variants": {
-          "en": {
-            "desktop": {
-              "src": "assets/formula-drop/en/desktop/detail.png",
-              "alt": "Formula Drop detail page showing the Drop number, Formula composition, and Download Formula action",
-              "caption": "The Drop detail page contains the composition and download action.",
-              "viewport": "1440x900"
-            }
-          }
-        }
-      }
-    },
-    {
-      "blockId": "open-drop",
-      "type": "step",
-      "step": 1,
-      "content": {
-        "en": {
-          "text": "Open the shared Formula Drop page and review its title, status, composition, and availability."
-        },
-        "ko": {
-          "text": "공유된 Formula Drop 페이지를 열고 제목, 상태, 구성, 이용 가능 여부를 확인합니다."
-        }
-      }
-    },
-    {
-      "blockId": "download-drop",
-      "type": "step",
-      "step": 2,
-      "content": {
-        "en": {
-          "text": "Select DOWNLOAD FORMULA. Accordbook prepares an .accordbook Formula file for the download workflow."
-        },
-        "ko": {
-          "text": "DOWNLOAD FORMULA를 선택합니다. Accordbook은 다운로드를 위해 .accordbook Formula 파일을 준비합니다."
-        }
-      }
-    },
-    {
-      "blockId": "access-details-note",
-      "type": "note",
-      "content": {
-        "en": {
-          "text": "Keep the Access Details shown during the download available. They may be required when the shared Formula is imported."
-        },
-        "ko": {
-          "text": "다운로드 과정에서 표시되는 Access Details를 보관합니다. 공유된 Formula를 가져올 때 필요할 수 있습니다."
-        }
-      }
-    },
-    {
-      "blockId": "import-file",
-      "type": "step",
-      "step": 3,
-      "content": {
-        "en": {
-          "text": "Open Accordbook, choose Import, and select the downloaded .accordbook file."
-        },
-        "ko": {
-          "text": "Accordbook을 열고 Import를 선택한 뒤 다운로드한 .accordbook 파일을 선택합니다."
-        }
-      }
-    },
-    {
-      "blockId": "access-form",
-      "type": "step",
-      "step": 4,
-      "content": {
-        "en": {
-          "text": "If Accordbook asks for access information, enter the details supplied with this Drop. Do not guess or reuse details from another Drop."
-        },
-        "ko": {
-          "text": "Accordbook에서 접근 정보를 요청하면 해당 Drop과 함께 제공된 정보를 입력합니다. 다른 Drop의 정보를 추측하거나 재사용하지 않습니다."
-        }
-      }
-    },
-    {
-      "blockId": "open-imported-formula",
-      "type": "step",
-      "step": 5,
-      "content": {
-        "en": {
-          "text": "After the import completes, the Formula opens in Accordbook and can be worked with like your other local Formulas."
-        },
-        "ko": {
-          "text": "가져오기가 완료되면 Formula가 Accordbook에서 열리고 다른 로컬 Formula처럼 작업할 수 있습니다."
-        }
-      }
-    }
+    { "blockId": "drop-intro", "type": "paragraph", "content": { "en": { "text": "A Formula Drop is a shared Formula page. The public page lets you review the available information and begin the download workflow." }, "ko": { "text": "Formula Drop은 공유된 Formula 페이지입니다. 공개 페이지에서 제공되는 정보를 확인하고 다운로드를 시작할 수 있습니다." } } },
+    { "blockId": "drop-detail-figure", "type": "screenshot", "media": { "figureId": "formula-drop-detail", "variants": { "en": { "desktop": { "src": "assets/formula-drop/en/desktop/detail.png", "alt": "Formula Drop detail page showing the Drop number, Formula composition, and Download Formula action", "caption": "The Drop detail page contains the composition and download action.", "viewport": "1440x900" } } } } },
+    { "blockId": "open-drop", "type": "step", "step": 1, "content": { "en": { "text": "Open the shared Formula Drop page and review its title, status, composition, and availability." }, "ko": { "text": "공유된 Formula Drop 페이지를 열고 제목, 상태, 구성, 이용 가능 여부를 확인합니다." } } },
+    { "blockId": "download-drop", "type": "step", "step": 2, "content": { "en": { "text": "Select DOWNLOAD FORMULA. Accordbook prepares an .accordbook Formula file for the download workflow." }, "ko": { "text": "DOWNLOAD FORMULA를 선택합니다. Accordbook은 다운로드를 위해 .accordbook Formula 파일을 준비합니다." } } },
+    { "blockId": "access-details-note", "type": "note", "content": { "en": { "text": "Keep the Access Details shown during the download available. They may be required when the shared Formula is imported." }, "ko": { "text": "다운로드 과정에서 표시되는 Access Details를 보관합니다. 공유된 Formula를 가져올 때 필요할 수 있습니다." } } },
+    { "blockId": "import-file", "type": "step", "step": 3, "content": { "en": { "text": "Open Accordbook, choose Import, and select the downloaded .accordbook file." }, "ko": { "text": "Accordbook을 열고 Import를 선택한 뒤 다운로드한 .accordbook 파일을 선택합니다." } } },
+    { "blockId": "access-form", "type": "step", "step": 4, "content": { "en": { "text": "If Accordbook asks for access information, enter the details supplied with this Drop. Do not guess or reuse details from another Drop." }, "ko": { "text": "Accordbook에서 접근 정보를 요청하면 해당 Drop과 함께 제공된 정보를 입력합니다. 다른 Drop의 정보를 추측하거나 재사용하지 않습니다." } } },
+    { "blockId": "open-imported-formula", "type": "step", "step": 5, "content": { "en": { "text": "After the import completes, the Formula opens in Accordbook and can be worked with like your other local Formulas." }, "ko": { "text": "가져오기가 완료되면 Formula가 Accordbook에서 열리고 다른 로컬 Formula처럼 작업할 수 있습니다." } } },
+    { "blockId": "drop-security-warning", "type": "warning", "content": { "en": { "text": "Only use Access Details provided for the specific Formula Drop. Never publish them in notes, Guide content, or screenshots." }, "ko": { "text": "해당 Formula Drop에 제공된 Access Details만 사용합니다. 이를 노트, Guide 콘텐츠, 스크린샷에 공개하지 않습니다." } } },
+    { "blockId": "back-to-start", "type": "link", "content": { "en": { "text": "Back to Getting Started" }, "ko": { "text": "시작하기로 돌아가기" } }, "href": "/guide/en/getting-started", "kind": "internal" }
   ]
 }

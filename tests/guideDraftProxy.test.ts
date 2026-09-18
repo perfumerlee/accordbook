@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest'
+vi.mock('../scripts/guide-draft-error-snapshot.mjs', () => ({ writeDraftErrorSnapshot: vi.fn() }))
 // @ts-expect-error Node-only local proxy helper.
 import { forwardGuideDraft } from '../scripts/guide-draft-proxy.mjs'
 
@@ -14,6 +15,11 @@ it('identifies upstream 404 without exposing the Google response or retrying pub
   const result = await forwardGuideDraft('https://example.test/exec', '{"action":"publishGuide"}', fetcher)
   expect(result).toEqual({ status: 502, body: '{"ok":false,"code":"UPSTREAM_ERROR","upstreamStatus":404,"stage":"exec"}' })
   expect(fetcher).toHaveBeenCalledOnce()
+})
+it('preserves a safe Apps Script JSON error instead of converting it to a local 502', async () => {
+  const fetcher = vi.fn().mockResolvedValue(new Response('{"ok":false,"code":"INVALID_DRAFT","reason":"INVALID_DOCUMENT","secret":"omit"}', { status: 500, headers: { 'Content-Type': 'application/json' } }))
+  const result = await forwardGuideDraft('https://example.test/exec', '{}', fetcher)
+  expect(result).toEqual({ status: 200, body: '{"ok":false,"code":"INVALID_DRAFT","reason":"INVALID_DOCUMENT"}' })
 })
 it('rejects successful HTML responses safely', async () => {
   const result = await forwardGuideDraft('https://example.test/exec', '{}', vi.fn().mockResolvedValue(new Response('<html>login</html>')))

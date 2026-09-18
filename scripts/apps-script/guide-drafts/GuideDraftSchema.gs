@@ -15,3 +15,15 @@ function draftEnvelopeFromSave_(body, guideId, revision) {
   if (version === 2) candidate.basePublishedDocument = body.basePublishedDocument;
   return validateDraftEnvelope_(candidate, guideId) ? candidate : null;
 }
+function draftSaveFailureReason_(body, guideId) {
+  if (body.formatVersion !== undefined && body.formatVersion !== 1 && body.formatVersion !== 2) return 'INVALID_FORMAT_VERSION';
+  if (!body.document || typeof body.document !== 'object' || Array.isArray(body.document)) return 'MISSING_DOCUMENT';
+  if (body.document.guideId !== guideId) return 'DOCUMENT_GUIDE_ID_MISMATCH';
+  if (body.formatVersion === 2 || Object.prototype.hasOwnProperty.call(body, 'basePublishedDocument')) {
+    if (!body.basePublishedDocument || typeof body.basePublishedDocument !== 'object' || Array.isArray(body.basePublishedDocument)) return 'MISSING_BASE_PUBLISHED_DOCUMENT';
+    if (!validatePublishDocument_(body.basePublishedDocument)) return 'INVALID_BASE_PUBLISHED_DOCUMENT';
+  }
+  if (!validatePublishDocument_(body.document)) return 'INVALID_DOCUMENT';
+  if (typeof body.basePublishedFingerprint !== 'string' || !body.basePublishedFingerprint) return 'INVALID_BASE_PUBLISHED_FINGERPRINT';
+  return 'DRAFT_SCHEMA_REJECTED';
+}

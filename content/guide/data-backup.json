@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:86322ecc55b5af09aa05f007ba4c61ee002787d08908d93cf5a67b39d83cda7a",
-        "reviewedAgainstFingerprint": "v1:86322ecc55b5af09aa05f007ba4c61ee002787d08908d93cf5a67b39d83cda7a",
-        "reviewedKoFingerprint": "v1:86468c4f90c082d66cef4c2a67d33e073839ace68d561f054125ab7acff05445"
+        "translatedFromFingerprint": "v1:07de239b0b42fae3aefc151b61e0a74d2a6e64f690a21a3d5c04433dd0aa206b",
+        "reviewedAgainstFingerprint": "v1:07de239b0b42fae3aefc151b61e0a74d2a6e64f690a21a3d5c04433dd0aa206b",
+        "reviewedKoFingerprint": "v1:409790d9923c227d1a179ce0f604eefc426fd3110af8201391d76ff7999626a3"
       }
     }
   },
@@ -243,6 +243,20 @@
           "text": "같은 기기에만 저장한 백업은 그 기기와 함께 사라질 수 있습니다. 평소 작업하는 브라우저나 기기와 분리된 장소에 최신 사본을 하나 이상 보관하세요."
         }
       }
+    },
+    {
+      "blockId": "next-faq",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: FAQ"
+        },
+        "ko": {
+          "text": "다음: 자주 묻는 질문"
+        }
+      },
+      "href": "/guide/en/faq",
+      "kind": "internal"
     }
   ]
 }

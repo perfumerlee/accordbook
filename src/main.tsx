@@ -11,6 +11,7 @@ import GuidePage from './components/guide/GuidePage'
 import GuideEditor from './components/guide/GuideEditor'
 import GuidePublishProtocolCheck from './components/guide/GuidePublishProtocolCheck'
 import { GuideLegacyRecovery } from './components/guide/GuideLegacyRecovery'
+import GuideEntryLink from './components/GuideEntryLink'
 
 const reservedRoute = new URLSearchParams(window.location.search).get('__accordbook_route')
 if (reservedRoute && reservedRoute.startsWith('/drop')) {
@@ -36,7 +37,7 @@ root.render(
 function ProductionWithIntro() {
   const [introDone, setIntroDone] = useState(false)
   const handleIntroDone = useCallback(() => setIntroDone(true), [])
-  return <><AccordbookNotebook introComplete={introDone} /><>{!introDone && <IntroSplashBoundary onDone={handleIntroDone} />}</></>
+  return <><AccordbookNotebook introComplete={introDone} /><GuideEntryLink /><>{!introDone && <IntroSplashBoundary onDone={handleIntroDone} />}</></>
 }
 
 class IntroSplashBoundary extends Component<{ onDone: () => void; children?: ReactNode }, { failed: boolean }> {

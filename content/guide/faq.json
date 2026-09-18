@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:fee81ff25c4c5f00e13b9291b1534e378fa229ed8db16c14777b470f13cf3e8b",
-        "reviewedAgainstFingerprint": "v1:fee81ff25c4c5f00e13b9291b1534e378fa229ed8db16c14777b470f13cf3e8b",
-        "reviewedKoFingerprint": "v1:a1c893945aa980ebf73b767f0a46058e4f66a143554359c2a8e60902adc12cce"
+        "translatedFromFingerprint": "v1:7fe30754152f4f9864a97050294274c0282f8ae1c2fac8a955665ef96d0893fd",
+        "reviewedAgainstFingerprint": "v1:7fe30754152f4f9864a97050294274c0282f8ae1c2fac8a955665ef96d0893fd",
+        "reviewedKoFingerprint": "v1:37d69cdcc0d339a16500885ed1f9f5f78d3412015f06ab62f43d490c7c5c61bd"
       }
     }
   },
@@ -395,6 +395,20 @@
           "text": "현재는 지원하지 않습니다. 작업 노트북은 브라우저에 로컬로 저장되므로 기기 간에 자동으로 동기화되지 않습니다. 노트북을 옮길 때는 노트북 백업과 복원을 사용하세요."
         }
       }
+    },
+    {
+      "blockId": "faq-back-link",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Back to Guide"
+        },
+        "ko": {
+          "text": "Guide로 돌아가기"
+        }
+      },
+      "href": "/guide/en",
+      "kind": "internal"
     }
   ]
 }

@@ -19,11 +19,15 @@ const browser = await chromium.launch({ headless: true })
 async function waitForAccordbookStable(page) {
   await page.locator('main.main').waitFor({ state: 'visible', timeout: 15000 })
   await page.evaluate(() => document.fonts?.ready)
-  await page.getByText('Saved locally').waitFor({ state: 'visible', timeout: 10000 })
+  await page.getByText(/Saved locally|로컬 저장 완료/).waitFor({ state: 'visible', timeout: 10000 })
 }
 
 async function prepareGettingStartedFormula(page) {
   await waitForAccordbookStable(page)
+  const welcomeClose = page.locator('.first-start-close')
+  if (await welcomeClose.count()) await welcomeClose.click({ force: true })
+  const welcomeBackdrop = page.locator('.first-start-backdrop')
+  if (await welcomeBackdrop.count()) await welcomeBackdrop.evaluate((element) => element.remove())
   const title = page.locator('input.formula-name')
   await title.fill('Documentation Formula')
   const materialInputs = page.locator('.rows input.material')
@@ -31,12 +35,12 @@ async function prepareGettingStartedFormula(page) {
   await materialInputs.first().fill('Bergamot')
   await partsInputs.first().fill('40')
   for (const [name, parts] of [['Hedione', '30'], ['Iso E Super', '20'], ['Galaxolide', '10']]) {
-    await page.getByRole('button', { name: /\+ Add material/i }).click()
+    await page.getByRole('button', { name: /\+ Add material|\+ 원료 추가/i }).click()
     await materialInputs.nth(await materialInputs.count() - 1).fill(name)
     await partsInputs.nth(await partsInputs.count() - 1).fill(parts)
   }
   await page.waitForTimeout(700)
-  await page.getByText('Saved locally').waitFor({ state: 'visible', timeout: 10000 })
+  await page.getByText(/Saved locally|로컬 저장 완료/).waitFor({ state: 'visible', timeout: 10000 })
 }
 
 async function prepareTimeMachineHistory(page, state = 'time-machine-timeline') {
@@ -69,14 +73,42 @@ async function prepareTimeMachineHistory(page, state = 'time-machine-timeline') 
   }
 }
 
+async function prepareExperiments(page, withVariants = false) {
+  await prepareGettingStartedFormula(page)
+  await page.getByRole('button', { name: /EXPERIMENTS|실험/i }).first().click({ force: true })
+  const remainingWelcome = page.locator('.first-start-backdrop')
+  if (await remainingWelcome.count()) await remainingWelcome.evaluate((element) => element.remove())
+  await page.getByRole('button', { name: /CREATE EXPERIMENT|실험 만들기/i }).click()
+  await page.getByLabel(/EXPERIMENT NAME|실험 이름/i).fill('Soft Floral Study')
+  await page.getByRole('button', { name: /^CREATE$|^만들기$/i }).click()
+  await page.locator('.experiment-detail').waitFor({ state: 'visible', timeout: 10000 })
+  if (withVariants) {
+    const add = page.getByRole('button', { name: /\+ ADD VARIANT|\+ 시안 추가/i })
+    await add.click()
+    await add.click()
+    const branch = page.getByRole('button', { name: /Create Branch from A/i })
+    if (await branch.count()) await branch.click()
+    await page.waitForTimeout(500)
+  }
+}
+
+async function prepareFormulaFileActions(page) {
+  await prepareGettingStartedFormula(page)
+  await page.getByRole('button', { name: /Export|내보내기/i }).click()
+  await page.getByRole('button', { name: /Export current formula|현재 포뮬러 내보내기/i }).waitFor({ state: 'visible' })
+}
+
 try {
   for (const item of captures) {
     const context = await browser.newContext({ viewport: item.viewport, reducedMotion: 'reduce', ignoreHTTPSErrors: true })
     try {
       const page = await context.newPage()
+      if (item.locale === 'ko') await context.addInitScript(() => localStorage.setItem('accordbook.locale', 'ko'))
       await page.goto(baseUrl + item.route, { waitUntil: 'networkidle' })
       if (item.state === 'formula-with-materials') await prepareGettingStartedFormula(page)
       if (item.state.startsWith('time-machine-')) await prepareTimeMachineHistory(page, item.state)
+      if (item.state === 'experiments-base' || item.state === 'experiments-variants') await prepareExperiments(page, item.state === 'experiments-variants')
+      if (item.state === 'formula-file-actions') await prepareFormulaFileActions(page)
       if (item.state === 'drop-detail') await page.waitForSelector('.formula-drop-detail', { state: 'visible', timeout: 15000 })
       await waitForAccordbookStable(page).catch(() => {})
       const target = page.locator(item.target)

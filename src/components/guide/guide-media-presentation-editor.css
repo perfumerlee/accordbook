@@ -1,0 +1,72 @@
+.guide-media-editor-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.guide-desktop-size-control {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(48, 41, 31, .22);
+}
+
+.guide-desktop-size-control legend {
+  padding: 0 6px;
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+.guide-desktop-size-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.guide-desktop-size-toolbar button {
+  min-width: 58px;
+  padding: 6px 9px;
+  border: 1px solid rgba(48, 41, 31, .28);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.guide-desktop-size-toolbar button[aria-pressed="true"] {
+  border-color: currentColor;
+  box-shadow: inset 0 -2px 0 currentColor;
+  font-weight: 700;
+}
+
+.guide-desktop-size-toolbar strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.guide-desktop-size-range {
+  display: grid;
+  grid-template-columns: auto minmax(140px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.guide-desktop-size-range span {
+  font-size: 10px;
+  opacity: .64;
+}
+
+.guide-desktop-size-range input[type="range"] {
+  width: 100%;
+  accent-color: currentColor;
+}
+
+.guide-desktop-size-control small {
+  display: block;
+  margin-top: 8px;
+  opacity: .64;
+}
+
+@media (max-width: 767px) {
+  .guide-desktop-size-range {
+    grid-template-columns: 34px minmax(0, 1fr) 40px;
+  }
+}

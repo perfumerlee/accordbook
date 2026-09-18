@@ -1,0 +1,214 @@
+/* Context Guide links are deliberately non-flow UI.
+   Time Machine, Experiments modal, and Data heading links are absolutely
+   positioned so they do not increase component height or move existing controls.
+   Experiment Detail uses the existing header action rail on desktop only. */
+
+.context-guide-link {
+  box-sizing: border-box;
+  color: var(--muted, #806f5d);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.context-guide-link:focus-visible {
+  outline: 1px solid var(--accent, #a85f3e);
+  outline-offset: 3px;
+}
+
+.context-guide-icon {
+  display: block;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+}
+
+.context-guide-external {
+  font: 11px/1 Georgia, serif;
+  opacity: .62;
+}
+
+/* Time Machine: use otherwise empty header space immediately before Close.
+   Absolute positioning keeps the existing 14px header rule / height untouched. */
+.tm-panel > header {
+  position: relative;
+}
+
+.context-guide-link--time-machine {
+  position: absolute;
+  top: 1px;
+  right: 35px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font: 700 9px/1 "Courier New", ui-monospace, monospace;
+  letter-spacing: .07em;
+}
+
+.context-guide-link--time-machine:hover,
+.context-guide-link--time-machine:focus-visible {
+  background: rgba(201,119,60,.08);
+  color: var(--ink, #332d27);
+}
+
+/* Experiments entry/create modal:
+   float beside the existing close control; it is not part of header flex flow. */
+.experiment-modal {
+  position: relative;
+}
+
+.context-guide-link--experiment-modal {
+  position: absolute;
+  top: 27px;
+  right: 76px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font: 700 9px/1 "Courier New", ui-monospace, monospace;
+  letter-spacing: .06em;
+}
+
+.context-guide-link--experiment-modal:hover,
+.context-guide-link--experiment-modal:focus-visible {
+  border-color: var(--border, #d8c7aa);
+  background: var(--paper-2, #fffaf0);
+  color: var(--ink, #332d27);
+}
+
+/* Experiment Detail already owns a horizontal header-actions rail.
+   Add the link only where there is sufficient desktop width.
+   It matches the existing 28px edit/delete actions and does not add a new row. */
+.context-guide-link--experiment-detail {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .context-guide-link--experiment-detail {
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--border, #d8c7aa);
+    border-radius: 3px;
+    background: transparent;
+    font: 700 9px/1 Inter, system-ui, sans-serif;
+    letter-spacing: .04em;
+  }
+
+  .context-guide-link--experiment-detail:hover,
+  .context-guide-link--experiment-detail:focus-visible {
+    border-color: var(--ink, #332d27);
+    background: var(--paper-2, #fffaf0);
+    color: var(--ink, #332d27);
+  }
+}
+
+/* Import / Export:
+   shares the already-existing DATA heading line, so no vertical space is added. */
+.app > .sidebar .data-section-title {
+  position: relative;
+  padding-right: 58px;
+}
+
+.context-guide-link--data {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  padding: 0 2px;
+  color: inherit;
+  transform: translateY(-50%);
+  font: 700 8px/1 "Courier New", ui-monospace, monospace;
+  letter-spacing: .06em;
+  opacity: .72;
+}
+
+.context-guide-link--data:hover,
+.context-guide-link--data:focus-visible {
+  color: var(--ink, #332d27);
+  opacity: 1;
+}
+
+/* Very narrow panels keep the book affordance without risking title overlap. */
+@media (max-width: 420px) {
+  .context-guide-link--time-machine span:not(.context-guide-external),
+  .context-guide-link--experiment-modal span:not(.context-guide-external) {
+    display: none;
+  }
+
+  .context-guide-link--time-machine,
+  .context-guide-link--experiment-modal {
+    gap: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+@media (max-width: 767px) {
+  .context-guide-link--experiment-modal {
+    top: 22px;
+    right: 62px;
+  }
+
+  .app > .sidebar .data-section-title {
+    padding-right: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .context-guide-link {
+    transition: none;
+  }
+}
+
+
+/* Experiments modal header alignment polish.
+   Align GUIDE and Close on the same visual centerline without changing header
+   height, modal padding, or the rule position. */
+.experiment-modal__header {
+  position: relative;
+}
+
+.context-guide-link--experiment-modal {
+  top: 30px;
+  right: 78px;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 7px;
+  align-items: center;
+}
+
+.experiment-modal__close {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  .context-guide-link--experiment-modal {
+    top: 24px;
+    right: 64px;
+  }
+}
+
+
+/* Portal safety
+   React-owned elements are never portal containers directly.
+   Each host receives a dedicated leaf slot; Portal mounts only inside that slot.
+   display:contents keeps the slot from introducing its own box or layout space. */
+.context-guide-portal-slot {
+  display: contents;
+}
