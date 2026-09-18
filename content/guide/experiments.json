@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:1f29950bb68265051c7fc528e7352f21ff15ce2af10df54cef9a766015e45313",
-        "reviewedAgainstFingerprint": "v1:1f29950bb68265051c7fc528e7352f21ff15ce2af10df54cef9a766015e45313",
-        "reviewedKoFingerprint": "v1:d29a3bee5b2e9c5fc2c7ae4688663e920b17efe712c62714436a1612cdd16c15"
+        "translatedFromFingerprint": "v1:5d557ce2b1e99186da82367492a010d05095c3ec4bd9421053ded004834566b5",
+        "reviewedAgainstFingerprint": "v1:5d557ce2b1e99186da82367492a010d05095c3ec4bd9421053ded004834566b5",
+        "reviewedKoFingerprint": "v1:0903f707865cc0451f52ae2915243649dac95d6d69a7353247a9f7bd7268fd89"
       }
     }
   },
@@ -256,20 +256,6 @@
           "text": "실험은 상위 포뮬러에 연결된 별도의 작업 문서입니다. 실험 안의 변경 사항은 포뮬러나 타임머신 기록을 조용히 대체하지 않습니다."
         }
       }
-    },
-    {
-      "blockId": "next-formula-drop",
-      "type": "link",
-      "content": {
-        "en": {
-          "text": "Next: Formula Drop"
-        },
-        "ko": {
-          "text": "다음: Formula Drop"
-        }
-      },
-      "href": "/guide/en/formula-drop",
-      "kind": "internal"
     }
   ]
 }
