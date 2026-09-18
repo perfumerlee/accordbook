@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "guideId": "data-backup",
+  "slug": "data-backup",
+  "order": 7,
+  "metadata": {
+    "lastUpdated": "2026-09-16",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Data & Backup",
+      "subtitle": "Understand where your notebook lives and how to keep a recoverable copy of your work.",
+      "seo": {
+        "title": "Data & Backup — Accordbook Guide",
+        "description": "Learn how Accordbook stores your working notebook, what Autosave protects, and how Notebook Backup helps preserve Formula history and Experiments."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "데이터와 백업",
+      "subtitle": "노트북이 어디에 저장되는지 이해하고 작업을 복구할 수 있는 사본을 보관하세요.",
+      "seo": {
+        "title": "데이터와 백업 — Accordbook Guide",
+        "description": "Accordbook의 작업 노트북 저장 위치, 자동 저장의 역할, 포뮬러 기록과 실험을 보존하는 노트북 백업을 알아봅니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:07de239b0b42fae3aefc151b61e0a74d2a6e64f690a21a3d5c04433dd0aa206b",
+        "reviewedAgainstFingerprint": "v1:07de239b0b42fae3aefc151b61e0a74d2a6e64f690a21a3d5c04433dd0aa206b",
+        "reviewedKoFingerprint": "v1:409790d9923c227d1a179ce0f604eefc426fd3110af8201391d76ff7999626a3"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "data-backup-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Accordbook keeps your working notebook close to the work itself. Autosave protects the current local state, while a Notebook Backup gives you a separate copy that can be used to recover the notebook later."
+        },
+        "ko": {
+          "text": "Accordbook은 작업 노트북을 작업이 이루어지는 곳 가까이에 보관합니다. 자동 저장은 현재 로컬 상태를 보호하고, 노트북 백업은 나중에 노트북을 복구할 수 있는 별도 사본을 만들어줍니다."
+        }
+      }
+    },
+    {
+      "blockId": "where-data-lives",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Where Your Notebook Lives"
+        },
+        "ko": {
+          "text": "노트북은 어디에 저장되나요"
+        }
+      }
+    },
+    {
+      "blockId": "local-notebook",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Your working notebook is stored locally in the browser you use for Accordbook. Formulas, saved history, and Experiments remain part of that local notebook until you intentionally export, back up, or use another feature that moves data outside it."
+        },
+        "ko": {
+          "text": "작업 노트북은 Accordbook을 사용하는 브라우저에 로컬로 저장됩니다. 포뮬러, 저장된 기록, 실험은 직접 내보내거나 백업하거나 다른 기능으로 노트북 밖으로 옮기기 전까지 이 로컬 노트북에 남습니다."
+        }
+      }
+    },
+    {
+      "blockId": "private-by-default",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Private by default means Accordbook does not require your normal working notebook to live on an Accordbook server. You choose when to export, share, or otherwise move the work."
+        },
+        "ko": {
+          "text": "기본적으로 비공개라는 것은 평소 작업 노트북을 Accordbook 서버에 저장할 필요가 없다는 뜻입니다. 언제 작업을 내보내고 공유하거나 다른 곳으로 옮길지는 직접 선택합니다."
+        }
+      }
+    },
+    {
+      "blockId": "autosave-is-not-backup",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Autosave Is Not a Backup"
+        },
+        "ko": {
+          "text": "자동 저장은 백업이 아닙니다"
+        }
+      }
+    },
+    {
+      "blockId": "autosave",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Autosave keeps changes in the current local notebook as you work. It protects you from having to save every edit manually, but it does not create a separate recovery file outside the browser."
+        },
+        "ko": {
+          "text": "자동 저장은 작업하는 동안 현재 로컬 노트북에 변경 사항을 보관합니다. 수정할 때마다 직접 저장하지 않아도 되지만, 브라우저 밖에 별도의 복구 파일을 만들지는 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "three-layers",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Autosave keeps the current state. Time Machine keeps intentional Formula Versions. Notebook Backup preserves the notebook as a portable recovery copy."
+        },
+        "ko": {
+          "text": "자동 저장은 현재 상태를 보관합니다. 타임머신은 직접 저장한 포뮬러 버전을 보관합니다. 노트북 백업은 노트북 전체를 이동 가능한 복구 사본으로 보존합니다."
+        }
+      }
+    },
+    {
+      "blockId": "back-up-notebook",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Back Up the Notebook"
+        },
+        "ko": {
+          "text": "노트북 백업하기"
+        }
+      }
+    },
+    {
+      "blockId": "backup-scope",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "A Notebook Backup preserves more than a single Formula. It includes the active and archived notebook, saved Versions, Experiments, and the notebook information needed to restore that work later."
+        },
+        "ko": {
+          "text": "노트북 백업은 포뮬러 하나보다 더 많은 내용을 보존합니다. 현재 노트북과 보관된 노트북, 저장된 버전, 실험, 그리고 나중에 작업을 복원하는 데 필요한 노트북 정보를 포함합니다."
+        }
+      }
+    },
+    {
+      "blockId": "backup-care",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "A Notebook Backup can contain your Formula history and Experiments. Treat the backup file with the same care as the notebook itself."
+        },
+        "ko": {
+          "text": "노트북 백업에는 포뮬러 기록과 실험이 포함될 수 있습니다. 백업 파일도 노트북 자체와 같은 주의로 관리하세요."
+        }
+      }
+    },
+    {
+      "blockId": "when-to-back-up",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "When to Make a Backup"
+        },
+        "ko": {
+          "text": "언제 백업해야 하나요"
+        }
+      }
+    },
+    {
+      "blockId": "backup-practice",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Create a fresh Notebook Backup after work you would not want to repeat, and before actions that could remove or replace local browser data. A recent backup is especially useful before restoring another notebook, clearing site data, or moving your work to a different browser or device."
+        },
+        "ko": {
+          "text": "다시 하고 싶지 않은 작업을 마친 뒤, 로컬 브라우저 데이터를 삭제하거나 교체할 수 있는 작업을 하기 전에 새 노트북 백업을 만드세요. 다른 노트북을 복원하거나 사이트 데이터를 지우거나 다른 브라우저 또는 기기로 작업을 옮기기 전에는 최신 백업이 특히 유용합니다."
+        }
+      }
+    },
+    {
+      "blockId": "restore-carefully",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Restore Carefully"
+        },
+        "ko": {
+          "text": "복원은 신중하게"
+        }
+      }
+    },
+    {
+      "blockId": "restore",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Restore backup rebuilds the notebook from the selected backup file. It is different from importing a Formula: Restore replaces the current Notebook data instead of adding one new Formula."
+        },
+        "ko": {
+          "text": "백업 복원은 선택한 백업 파일을 바탕으로 노트북을 다시 구성합니다. 포뮬러 가져오기와는 다릅니다. 복원은 새 포뮬러 하나를 추가하는 대신 현재 노트북 데이터를 교체합니다."
+        }
+      }
+    },
+    {
+      "blockId": "restore-warning",
+      "type": "warning",
+      "content": {
+        "en": {
+          "text": "Restoring a Notebook Backup replaces the current Notebook data. Create a current backup first if there is work you may need later."
+        },
+        "ko": {
+          "text": "노트북 백업을 복원하면 현재 노트북 데이터가 교체됩니다. 나중에 다시 필요할 수 있는 작업이 있다면 먼저 최신 백업을 만드세요."
+        }
+      }
+    },
+    {
+      "blockId": "keep-copy-separate",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Keep a Copy Separate"
+        },
+        "ko": {
+          "text": "별도의 장소에 사본 보관하기"
+        }
+      }
+    },
+    {
+      "blockId": "off-device-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "A backup stored only on the same device can still be lost with that device. Keep at least one recent copy somewhere separate from the browser or device where you normally work."
+        },
+        "ko": {
+          "text": "같은 기기에만 저장한 백업은 그 기기와 함께 사라질 수 있습니다. 평소 작업하는 브라우저나 기기와 분리된 장소에 최신 사본을 하나 이상 보관하세요."
+        }
+      }
+    },
+    {
+      "blockId": "next-faq",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: FAQ"
+        },
+        "ko": {
+          "text": "다음: 자주 묻는 질문"
+        }
+      },
+      "href": "/guide/en/faq",
+      "kind": "internal"
+    }
+  ]
+}
