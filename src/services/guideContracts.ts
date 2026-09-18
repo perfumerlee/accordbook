@@ -1,6 +1,5 @@
 import type { GuideBlock, GuideDocument, GuideLocale, GuideDevice, GuideMedia, GuideMediaVariant, GuideValidationIssue, GuideValidationResult } from '../models/guide'
 import { guideLocaleStatuses, isGuideDesktopScale } from '../models/guide'
-import { validateGuideTranslationMetadata } from './guideTranslation'
 
 const id = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const devices: GuideDevice[] = ['desktop', 'tablet', 'mobile']
@@ -57,7 +56,7 @@ export function validateGuideDocument(value: GuideDocument): GuideValidationResu
   if (!value || !id.test(value.guideId)) issues.push(issue('guideId', 'must be lowercase URL-safe'))
   if (!value || !id.test(value.slug)) issues.push(issue('slug', 'must be lowercase URL-safe'))
   if (!value || !value.locales?.en) issues.push(issue('locales.en', 'English locale is required'))
-  for (const locale of ['en', 'ko'] as const) { const content = value?.locales?.[locale]; if (!content) continue; if (!guideLocaleStatuses.includes(content.status)) issues.push(issue(`locales.${locale}.status`, 'unsupported status')); if (locale === 'en' && content.status === 'NOT_TRANSLATED') issues.push(issue(`locales.${locale}.status`, 'English cannot be NOT_TRANSLATED')); if (content.status === 'PUBLISHED' && (!content.title?.trim() || !content.subtitle?.trim() || !content.seo?.title?.trim() || !content.seo?.description?.trim())) issues.push(issue(`locales.${locale}`, 'published locale requires title, subtitle, and SEO metadata')); if (content.translation && !validateGuideTranslationMetadata(content.translation)) issues.push(issue(`locales.${locale}.translation`, 'invalid translation metadata')) }
+  for (const locale of ['en', 'ko'] as const) { const content = value?.locales?.[locale]; if (!content) continue; if (!guideLocaleStatuses.includes(content.status)) issues.push(issue(`locales.${locale}.status`, 'unsupported status')); if (locale === 'en' && content.status === 'NOT_TRANSLATED') issues.push(issue(`locales.${locale}.status`, 'English cannot be NOT_TRANSLATED')); if (content.status === 'PUBLISHED' && (!content.title?.trim() || !content.subtitle?.trim() || !content.seo?.title?.trim() || !content.seo?.description?.trim())) issues.push(issue(`locales.${locale}`, 'published locale requires title, subtitle, and SEO metadata')) }
   const ids = new Set<string>(); for (const [index, block] of (value?.blocks || []).entries()) { if (ids.has(block.blockId)) issues.push(issue(`blocks.${index}.blockId`, 'duplicate blockId')); ids.add(block.blockId); validateBlock(block, `blocks.${index}`, issues); if (value?.locales?.ko?.status === 'PUBLISHED' && textTypes.has(block.type) && !hasText((block as { content?: { ko?: unknown } }).content?.ko)) issues.push(issue(`blocks.${index}.content.ko`, 'Korean text is required when KO is published')) }
   return issues.length ? { ok: false, issues } : { ok: true, value, issues: [] }
 }
