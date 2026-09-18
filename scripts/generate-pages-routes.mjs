@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+﻿import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { readArchives, renderPage, sitemap } from './formula-drop-archive.mjs'
@@ -47,7 +47,7 @@ export async function generatePages(root = process.cwd()) {
   await writeFile(join(root,'dist/operator/formula-storage/index.html'),operatorShell)
 
   await mkdir(join(root,'dist/operator/guide'),{recursive:true})
-  await writeFile(join(root,'dist/operator/guide/index.html'),operatorShell)
+  await writeFile(join(root,'dist/operator/guide/index.html'),operatorRedirectShell(shell, '/guide/'))
 
   // Compatibility alias for the common "oparator" typo.
   // GitHub Pages serves static paths before React can correct the route, so a
