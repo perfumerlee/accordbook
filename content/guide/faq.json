@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "guideId": "faq",
+  "slug": "faq",
+  "order": 8,
+  "metadata": {
+    "lastUpdated": "2026-09-16",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "FAQ",
+      "subtitle": "Quick answers to common questions about working in Accordbook.",
+      "seo": {
+        "title": "FAQ — Accordbook Guide",
+        "description": "Find quick answers about Formula files, Autosave, Time Machine, Experiments, backups, imports, and other common Accordbook workflows."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "자주 묻는 질문",
+      "subtitle": "Accordbook 작업 중 자주 묻는 질문에 대한 간단한 답변입니다.",
+      "seo": {
+        "title": "자주 묻는 질문 — Accordbook Guide",
+        "description": "포뮬러 파일, 자동 저장, 타임머신, 실험, 백업, 가져오기 등 Accordbook의 주요 작업에 대한 답변을 확인하세요."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:7fe30754152f4f9864a97050294274c0282f8ae1c2fac8a955665ef96d0893fd",
+        "reviewedAgainstFingerprint": "v1:7fe30754152f4f9864a97050294274c0282f8ae1c2fac8a955665ef96d0893fd",
+        "reviewedKoFingerprint": "v1:37d69cdcc0d339a16500885ed1f9f5f78d3412015f06ab62f43d490c7c5c61bd"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "faq-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "This chapter collects short answers to questions that often come up while working in Accordbook. For deeper workflows, follow the related Guide chapters."
+        },
+        "ko": {
+          "text": "이 장에서는 Accordbook을 사용하면서 자주 나오는 질문에 짧게 답합니다. 더 자세한 작업 흐름은 관련 Guide 장을 확인하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-account-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Do I need an account to use Accordbook?"
+        },
+        "ko": {
+          "text": "Accordbook을 사용하려면 계정이 필요한가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-account-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. Normal Accordbook notebook work does not require an account. Your working notebook is stored locally in the browser, although some features, such as Licensed Formula verification, may require an online connection."
+        },
+        "ko": {
+          "text": "아니요. 일반적인 Accordbook 노트북 작업에는 계정이 필요하지 않습니다. 작업 노트북은 브라우저에 로컬로 저장되지만, 라이선스 포뮬러 확인과 같은 일부 기능에는 온라인 연결이 필요할 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-storage-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Where is my work stored?"
+        },
+        "ko": {
+          "text": "내 작업은 어디에 저장되나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-storage-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Your working notebook is stored locally in the browser you use for Accordbook. It does not automatically appear in another browser, browser profile, or device; use a Notebook Backup when you need a recoverable copy outside the current browser."
+        },
+        "ko": {
+          "text": "작업 노트북은 Accordbook을 사용하는 브라우저에 로컬로 저장됩니다. 다른 브라우저, 브라우저 프로필, 기기에는 자동으로 나타나지 않으므로 현재 브라우저 밖에 복구 가능한 사본이 필요할 때는 노트북 백업을 사용하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-autosave-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Is Autosave the same as a backup?"
+        },
+        "ko": {
+          "text": "자동 저장은 백업과 같은 것인가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-autosave-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. Autosave keeps the current local working state saved as you edit. A Notebook Backup creates a separate file that can be stored outside the browser and used to restore the notebook later."
+        },
+        "ko": {
+          "text": "아니요. 자동 저장은 편집하는 동안 현재 로컬 작업 상태를 저장합니다. 노트북 백업은 브라우저 밖에 보관하고 나중에 노트북을 복원할 수 있는 별도 파일을 만듭니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-layers-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What is the difference between Autosave, Time Machine, and Notebook Backup?"
+        },
+        "ko": {
+          "text": "자동 저장, 타임머신, 노트북 백업은 어떻게 다른가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-layers-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Autosave preserves the current local state. Time Machine preserves intentional Formula Versions inside the notebook. Notebook Backup creates a portable recovery copy of the notebook, including saved history and Experiments."
+        },
+        "ko": {
+          "text": "자동 저장은 현재 로컬 상태를 보존합니다. 타임머신은 노트북 안에 직접 저장한 포뮬러 버전을 보존합니다. 노트북 백업은 저장된 기록과 실험을 포함한 노트북의 이동 가능한 복구 사본을 만듭니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-export-history-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Does exporting a Formula include its Time Machine history?"
+        },
+        "ko": {
+          "text": "포뮬러를 내보내면 타임머신 기록도 포함되나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-export-history-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. Export current formula creates a portable .accordbook file for the Formula itself. Time Machine history and Experiments remain notebook-level data and are not included in a single Formula export."
+        },
+        "ko": {
+          "text": "아니요. 현재 포뮬러 내보내기는 포뮬러 자체를 위한 이동 가능한 .accordbook 파일을 만듭니다. 타임머신 기록과 실험은 노트북 수준의 데이터로 남으며, 포뮬러 하나를 내보낼 때는 포함되지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-import-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What happens when I import a Formula?"
+        },
+        "ko": {
+          "text": "포뮬러를 가져오면 어떻게 되나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-import-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Importing a compatible .accordbook file creates a new local Formula. It does not overwrite an existing Formula, and a single Formula import does not restore Time Machine history or Experiments."
+        },
+        "ko": {
+          "text": "호환되는 .accordbook 파일을 가져오면 새로운 로컬 포뮬러가 만들어집니다. 기존 포뮬러를 덮어쓰지 않으며, 포뮬러 하나를 가져와도 타임머신 기록이나 실험은 복원되지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-restore-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Is Restore backup the same as Import formula?"
+        },
+        "ko": {
+          "text": "백업 복원은 포뮬러 가져오기와 같은 것인가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-restore-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. Import formula adds a new Formula to the notebook. Restore backup replaces the current Notebook data with the contents of the selected Notebook Backup after confirmation."
+        },
+        "ko": {
+          "text": "아니요. 포뮬러 가져오기는 노트북에 새 포뮬러를 추가합니다. 백업 복원은 확인 후 선택한 노트북 백업의 내용으로 현재 노트북 데이터를 교체합니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-pdf-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Can I use a PDF as a backup?"
+        },
+        "ko": {
+          "text": "PDF를 백업으로 사용할 수 있나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-pdf-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. Print current formula creates a fixed document for reading, printing, or sharing. It cannot be imported back into Accordbook as an editable Formula."
+        },
+        "ko": {
+          "text": "아니요. 현재 포뮬러 인쇄는 읽거나 인쇄하거나 공유하기 위한 고정 문서를 만듭니다. 이를 편집 가능한 포뮬러로 Accordbook에 다시 가져올 수는 없습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-experiment-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What is the difference between a Formula and an Experiment?"
+        },
+        "ko": {
+          "text": "포뮬러와 실험은 어떻게 다른가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-experiment-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "A Formula is the main working document. An Experiment creates a separate space where a BASE and Variants can explore several directions without silently replacing the parent Formula."
+        },
+        "ko": {
+          "text": "포뮬러는 주 작업 문서입니다. 실험은 별도의 공간을 만들어 BASE와 시안으로 여러 방향을 검토하며, 원래 포뮬러를 조용히 바꾸지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-base-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What is BASE in Experiments?"
+        },
+        "ko": {
+          "text": "실험에서 BASE는 무엇인가요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-base-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "BASE is the read-only snapshot used as the starting reference for an Experiment. It can be created from the current Formula or a saved Version, and later changes to the parent Formula do not rewrite that BASE."
+        },
+        "ko": {
+          "text": "BASE는 실험의 시작 기준으로 사용하는 읽기 전용 스냅샷입니다. 현재 포뮬러나 저장된 버전으로 만들 수 있으며, 이후 원래 포뮬러를 변경해도 BASE는 다시 쓰이지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-variant-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Can I create a Variant from another Variant?"
+        },
+        "ko": {
+          "text": "다른 시안에서 시안을 만들 수 있나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-variant-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Yes. A Variant can branch from another Variant when one direction leads to a more specific test. The BASE remains the Experiment's reference point while the branches carry the changes."
+        },
+        "ko": {
+          "text": "네. 한 방향을 더 구체적으로 시험하고 싶다면 다른 시안에서 새 시안을 분기할 수 있습니다. BASE는 실험의 기준점으로 남고, 분기된 시안에 변경 사항이 담깁니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-site-data-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What happens if I clear Accordbook site data?"
+        },
+        "ko": {
+          "text": "Accordbook 사이트 데이터를 지우면 어떻게 되나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-site-data-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Clearing Accordbook's site data can remove the local notebook stored in that browser. Create a Notebook Backup before clearing site data if the notebook contains work you want to keep."
+        },
+        "ko": {
+          "text": "Accordbook 사이트 데이터를 지우면 해당 브라우저에 저장된 로컬 노트북이 삭제될 수 있습니다. 보관하고 싶은 작업이 있다면 사이트 데이터를 지우기 전에 노트북 백업을 만드세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-transfer-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "How do I move my notebook to another browser or device?"
+        },
+        "ko": {
+          "text": "노트북을 다른 브라우저나 기기로 옮기려면 어떻게 하나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-transfer-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Create a Notebook Backup in the current browser, move that backup file to the new environment, then use Restore backup there. Remember that Restore replaces the Notebook data already present in the destination browser."
+        },
+        "ko": {
+          "text": "현재 브라우저에서 노트북 백업을 만들고, 백업 파일을 새 환경으로 옮긴 다음 그곳에서 백업 복원을 사용하세요. 복원하면 대상 브라우저에 이미 있는 노트북 데이터가 교체된다는 점을 기억하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-sync-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Can Accordbook sync automatically across devices?"
+        },
+        "ko": {
+          "text": "Accordbook은 기기 간 자동 동기화를 지원하나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-sync-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Not currently. The working notebook is local to the browser, so it does not automatically synchronize between devices. Use Notebook Backup and Restore when you need to move the notebook."
+        },
+        "ko": {
+          "text": "현재는 지원하지 않습니다. 작업 노트북은 브라우저에 로컬로 저장되므로 기기 간에 자동으로 동기화되지 않습니다. 노트북을 옮길 때는 노트북 백업과 복원을 사용하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-back-link",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Back to Guide"
+        },
+        "ko": {
+          "text": "Guide로 돌아가기"
+        }
+      },
+      "href": "/guide/en",
+      "kind": "internal"
+    }
+  ]
+}
