@@ -150,20 +150,6 @@
           "text": "Accordbook은 작업 중인 Formula를 로컬에 자동 저장합니다. 자동 저장은 현재 작업 상태를 보존하며, Time Machine Version을 의도적으로 저장하는 것과는 다릅니다."
         }
       }
-    },
-    {
-      "blockId": "next-time-machine",
-      "type": "link",
-      "content": {
-        "en": {
-          "text": "Next: Time Machine"
-        },
-        "ko": {
-          "text": "다음: Time Machine"
-        }
-      },
-      "href": "/guide/en/time-machine",
-      "kind": "internal"
     }
   ]
 }
