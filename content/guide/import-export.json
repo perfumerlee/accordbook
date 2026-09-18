@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "guideId": "import-export",
+  "slug": "import-export",
+  "order": 6,
+  "metadata": {
+    "lastUpdated": "2026-09-16",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Import & Export",
+      "subtitle": "Move Formula work between files, notebooks, and people without losing the working document.",
+      "seo": {
+        "title": "Import & Export — Accordbook Guide",
+        "description": "Learn how Accordbook Formula files, notebook backups, PDFs, and licensed Formula imports serve different purposes."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "가져오기와 내보내기",
+      "subtitle": "작업 중인 포뮬러를 파일과 노트북 사이에서 옮기고 작업 문서를 보존합니다.",
+      "seo": {
+        "title": "가져오기와 내보내기 — Accordbook Guide",
+        "description": "포뮬러 파일, 노트북 백업, PDF, 라이선스 포뮬러 가져오기의 용도를 구분하는 방법을 안내합니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:d3a6d7bb1c7da0b9d51b5f5fda25eee258e5322ac599f41cf8c61c1a14ee0867",
+        "reviewedAgainstFingerprint": "v1:d3a6d7bb1c7da0b9d51b5f5fda25eee258e5322ac599f41cf8c61c1a14ee0867",
+        "reviewedKoFingerprint": "v1:cb25b00d3ff1a2e78c4d40c51cf01658467d8c54ea9cac6c82e9540c4e353b83"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "import-export-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Accordbook can move a Formula beyond the current notebook in several different ways. The important distinction is whether you want to continue working with the data, keep a backup, or create something meant only to be read or shared."
+        },
+        "ko": {
+          "text": "Accordbook에서는 여러 방식으로 포뮬러를 현재 노트북 밖으로 옮길 수 있습니다. 데이터를 계속 편집할지, 백업을 보관할지, 읽거나 공유하기 위한 문서를 만들지 구분하는 것이 중요합니다."
+        }
+      }
+    },
+    {
+      "blockId": "accordbook-files",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Accordbook Files Keep the Work Editable"
+        },
+        "ko": {
+          "text": "Accordbook 파일은 작업을 편집 가능한 상태로 유지합니다"
+        }
+      }
+    },
+    {
+      "blockId": "working-file",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "An .accordbook file carries structured Formula data that Accordbook can read again. Use this format when the Formula needs to remain part of an editable workflow rather than becoming a fixed document."
+        },
+        "ko": {
+          "text": ".accordbook 파일에는 Accordbook이 다시 읽을 수 있는 구조화된 포뮬러 데이터가 담깁니다. 포뮬러를 고정 문서가 아닌 편집 가능한 작업 흐름으로 유지하려면 이 형식을 사용합니다."
+        }
+      }
+    },
+    {
+      "blockId": "file-principle",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "If you expect to continue editing the work later, keep an Accordbook file. "
+        },
+        "ko": {
+          "text": "나중에 작업을 계속 편집할 예정이라면 Accordbook 파일을 보관합니다. "
+        }
+      }
+    },
+    {
+      "blockId": "export-formula",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Export a Formula"
+        },
+        "ko": {
+          "text": "포뮬러 내보내기"
+        }
+      }
+    },
+    {
+      "blockId": "formula-export",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Exporting the current Formula creates a portable Accordbook file, usually named from the Formula title, such as accordbook-my-formula.accordbook. It can be opened in Accordbook again. A Formula export contains that Formula's editable data; notebook-level history, archive items, and Experiments remain with the notebook."
+        },
+        "ko": {
+          "text": "현재 포뮬러를 내보내면 이동 가능한 Accordbook 파일이 만들어지며, 보통 accordbook-my-formula.accordbook처럼 포뮬러 제목을 바탕으로 이름이 정해집니다. 이 파일은 Accordbook에서 다시 열 수 있습니다. 포뮬러 내보내기에는 해당 포뮬러의 편집 데이터만 포함되고, 노트북 수준의 기록과 보관 항목, 실험은 노트북에 남습니다."
+        }
+      }
+    },
+    {
+      "blockId": "formula-file-actions",
+      "type": "screenshot",
+      "media": {
+        "figureId": "formula-file-actions",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/import-export/en/desktop/formula-file-actions.png",
+              "alt": "Accordbook showing the actions for exporting an editable Formula file.",
+              "caption": "Use a Formula .accordbook file when you want the Formula to remain editable in Accordbook.",
+              "viewport": "1440x900"
+            }
+          },
+          "ko": {
+            "desktop": {
+              "src": "assets/import-export/ko/desktop/formula-file-actions.png",
+              "alt": "편집 가능한 포뮬러 파일을 내보내는 Accordbook의 작업 메뉴.",
+              "caption": "포뮬러를 계속 편집하려면 .accordbook 파일로 내보냅니다.",
+              "viewport": "1440x900"
+            }
+          }
+        }
+      }
+    },
+    {
+      "blockId": "import-formula",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Import a Formula"
+        },
+        "ko": {
+          "text": "포뮬러 가져오기"
+        }
+      }
+    },
+    {
+      "blockId": "formula-import",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open a compatible .accordbook Formula file from the Import menu to bring its Formula into your notebook. Accordbook checks the file before creating a new local Formula, so the imported copy does not silently replace the work already in the notebook. The imported Formula receives its own local identity."
+        },
+        "ko": {
+          "text": "가져오기 메뉴에서 호환되는 .accordbook 포뮬러 파일을 열어 노트북에 추가합니다. Accordbook은 새 로컬 포뮬러를 만들기 전에 파일을 확인하므로, 가져온 복사본이 노트북의 기존 작업을 조용히 대체하지 않습니다. 가져온 포뮬러에는 별도의 로컬 식별 정보가 부여됩니다."
+        }
+      }
+    },
+    {
+      "blockId": "import-safety",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Import creates one Formula from the selected file. It is not the same as restoring an entire notebook backup."
+        },
+        "ko": {
+          "text": "가져오기는 선택한 파일에서 포뮬러 하나를 만듭니다. 노트북 전체 백업을 복원하는 것과는 다릅니다."
+        }
+      }
+    },
+    {
+      "blockId": "notebook-backup",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Back Up the Notebook"
+        },
+        "ko": {
+          "text": "노트북 백업하기"
+        }
+      }
+    },
+    {
+      "blockId": "backup-file",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Backup notebook creates an Accordbook backup file for the notebook as a whole. The backup can include active and archived Formulas, Time Machine Versions, Experiments, settings, and notebook metadata."
+        },
+        "ko": {
+          "text": "노트북 백업은 노트북 전체를 위한 Accordbook 백업 파일을 만듭니다. 백업에는 현재 포뮬러와 보관된 포뮬러, 타임머신 버전, 실험, 설정, 노트북 메타데이터가 포함될 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "restore-warning",
+      "type": "warning",
+      "content": {
+        "en": {
+          "text": "Restoring a Notebook Backup replaces the current Notebook data. Make sure the current work is backed up before continuing."
+        },
+        "ko": {
+          "text": "노트북 백업을 복원하면 현재 노트북 데이터가 교체됩니다. 계속하기 전에 현재 작업을 먼저 백업하세요."
+        }
+      }
+    },
+    {
+      "blockId": "licensed-formulas",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Open a Licensed Formula"
+        },
+        "ko": {
+          "text": "라이선스 포뮬러 열기"
+        }
+      }
+    },
+    {
+      "blockId": "licensed-import",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "A licensed Formula is an Accordbook file with controlled access. Select the file from Import, then provide the requested buyer name, last four phone digits, and PIN. After verification, Accordbook adds the licensed Formula as a new local Formula."
+        },
+        "ko": {
+          "text": "라이선스 포뮬러는 접근이 제한된 Accordbook 파일입니다. 가져오기에서 파일을 선택한 뒤 요청된 구매자 이름, 휴대전화 뒤 네 자리, PIN을 입력합니다. 확인이 끝나면 Accordbook이 라이선스 포뮬러를 새 로컬 포뮬러로 추가합니다."
+        }
+      }
+    },
+    {
+      "blockId": "licensed-access",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Licensed Formula access requires verification. Repeated failed attempts can temporarily lock the import; the interface shows when you can try again."
+        },
+        "ko": {
+          "text": "라이선스 포뮬러를 열려면 확인이 필요합니다. 여러 번 실패하면 가져오기가 일시적으로 잠길 수 있으며, 다시 시도할 수 있는 시점은 화면에 표시됩니다."
+        }
+      }
+    },
+    {
+      "blockId": "next-data-backup",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Data & Backup"
+        },
+        "ko": {
+          "text": "다음: 데이터와 백업"
+        }
+      },
+      "href": "/guide/en/data-backup",
+      "kind": "internal"
+    }
+  ]
+}
