@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:7ca5e85638121be4c84375c78b463a054ca9db6e0745bab11f8bfa04767285e1",
-        "reviewedAgainstFingerprint": "v1:7ca5e85638121be4c84375c78b463a054ca9db6e0745bab11f8bfa04767285e1",
-        "reviewedKoFingerprint": "v1:f17b871421cf7421b0a004194c1d710d85f719f9f38ded656941a4e887fc2785"
+        "translatedFromFingerprint": "v1:5269166c5f92eaf699030eba625d72d91df4b180051746c55a9507feb2a1ab04",
+        "reviewedAgainstFingerprint": "v1:5269166c5f92eaf699030eba625d72d91df4b180051746c55a9507feb2a1ab04",
+        "reviewedKoFingerprint": "v1:d8eae279c79626798e3a6e47872140caef631f88a3510c9d9095012a88712747"
       }
     }
   },
@@ -243,20 +243,6 @@
           "text": "포뮬러는 완성되지 않아도 유용할 수 있습니다. Accordbook은 현재 작업 상태를 명확히 보존하도록 설계되어, 이전 판단의 맥락을 잃지 않고 다음 변경을 이어갈 수 있습니다."
         }
       }
-    },
-    {
-      "blockId": "next-time-machine",
-      "type": "link",
-      "content": {
-        "en": {
-          "text": "Next: Time Machine"
-        },
-        "ko": {
-          "text": "다음: 타임머신"
-        }
-      },
-      "href": "/guide/en/time-machine",
-      "kind": "internal"
     }
   ]
 }
