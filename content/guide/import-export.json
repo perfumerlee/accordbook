@@ -130,6 +130,9 @@
               "viewport": "1440x900"
             }
           }
+        },
+        "presentation": {
+          "desktopScale": 0.7
         }
       }
     },
