@@ -37,6 +37,18 @@ export function resolveGuideRoute(pathname: string): GuideRoute {
   return { kind: 'GUIDE_NOT_FOUND' }
 }
 
+export function isLocalizableGuideHref(href: string) {
+  if (href === '/guide' || href === '/guide/') return true
+
+  const match = href.match(
+    /^\/guide\/(en|ko)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?\/?$/,
+  )
+  if (!match) return false
+
+  const slug = match[2]
+  return slug === undefined || id.test(slug)
+}
+
 export function resolveGuideHrefForLocale(
   href: string,
   locale: 'en' | 'ko',
@@ -45,9 +57,11 @@ export function resolveGuideHrefForLocale(
     return `/guide/${locale}/`
   }
 
-  const match = href.match(/^\/guide\/(?:en|ko)(\/.*)?$/)
+  const match = href.match(
+    /^\/guide\/(?:en|ko)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?\/?$/,
+  )
   if (!match) return href
 
-  const suffix = match[1] ?? '/'
-  return `/guide/${locale}${suffix}`
+  const slug = match[1]
+  return slug ? `/guide/${locale}/${slug}/` : `/guide/${locale}/`
 }
