@@ -3,22 +3,190 @@
   "guideId": "time-machine",
   "slug": "time-machine",
   "order": 3,
-  "metadata": { "lastUpdated": "2026-09-14", "productVersion": "1.07" },
+  "metadata": {
+    "lastUpdated": "2026-09-14",
+    "productVersion": "1.07"
+  },
   "locales": {
-    "en": { "status": "PUBLISHED", "title": "Time Machine", "subtitle": "Save meaningful stages of a Formula and return to them later.", "seo": { "title": "Time Machine — Accordbook Guide", "description": "Save Formula Versions, inspect history, compare changes, and restore an earlier stage in Accordbook." } },
-    "ko": { "status": "PUBLISHED", "title": "Time Machine", "subtitle": "Formula의 중요한 단계를 저장하고 나중에 돌아갑니다.", "seo": { "title": "Time Machine — Accordbook Guide", "description": "Accordbook에서 Formula Version을 저장하고 변경 사항을 확인하며 이전 단계로 복원하는 방법입니다." } }
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Time Machine",
+      "subtitle": "Save meaningful stages of a Formula and return to them later.",
+      "seo": {
+        "title": "Time Machine — Accordbook Guide",
+        "description": "Save Formula Versions, inspect history, compare changes, and restore an earlier stage in Accordbook."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "Time Machine",
+      "subtitle": "Formula의 중요한 단계를 저장하고 나중에 돌아갑니다.",
+      "seo": {
+        "title": "Time Machine — Accordbook Guide",
+        "description": "Accordbook에서 Formula Version을 저장하고 변경 사항을 확인하며 이전 단계로 복원하는 방법입니다."
+      }
+    }
   },
   "blocks": [
-    { "blockId": "time-machine-intro", "type": "paragraph", "content": { "en": { "text": "Autosave keeps the current working Formula available. Time Machine is for deliberate milestones: each Save Version creates a historical snapshot you can inspect later." }, "ko": { "text": "자동 저장은 현재 작업 중인 Formula를 보존합니다. Time Machine은 의도적으로 남기는 중요한 단계에 사용합니다. Save Version을 선택하면 나중에 확인할 수 있는 기록용 snapshot이 만들어집니다." } } },
-    { "blockId": "open-time-machine", "type": "step", "step": 1, "content": { "en": { "text": "Open Time Machine from the TIME MACHINE action in the Formula editor." }, "ko": { "text": "Formula 편집기의 TIME MACHINE 버튼에서 Time Machine을 엽니다." } } },
-    { "blockId": "save-version", "type": "step", "step": 2, "content": { "en": { "text": "Choose + SAVE VERSION, add an optional Version note, and select Save Version. Save a stage when it has a clear meaning for your work." }, "ko": { "text": "+ SAVE VERSION을 선택하고 필요하면 Version note를 입력한 뒤 Save Version을 선택합니다. 작업에서 의미가 분명한 단계마다 저장합니다." } } },
-    { "blockId": "timeline-figure", "type": "screenshot", "media": { "figureId": "time-machine-timeline", "variants": { "en": { "desktop": { "src": "assets/time-machine/en/desktop/timeline.png", "alt": "Time Machine timeline showing CURRENT and two saved versions", "caption": "The timeline keeps CURRENT alongside saved Versions.", "viewport": "1440x900" }, "mobile": { "src": "assets/time-machine/en/mobile/timeline.png", "alt": "Time Machine timeline in the mobile presentation showing CURRENT and saved Versions", "caption": "The same history is presented as a focused mobile panel.", "viewport": "390x844" } } } } },
-    { "blockId": "current-timeline", "type": "heading", "level": 2, "content": { "en": { "text": "CURRENT and the timeline" }, "ko": { "text": "CURRENT와 timeline" } } },
-    { "blockId": "current-explanation", "type": "paragraph", "content": { "en": { "text": "CURRENT is the editable Formula as it is now. Saved Versions are read-only historical points. Select a Version in the timeline to open its detail view." }, "ko": { "text": "CURRENT는 지금 편집 중인 Formula입니다. 저장된 Version은 읽기 전용 기록 지점입니다. timeline에서 Version을 선택하면 상세 화면이 열립니다." } } },
-    { "blockId": "version-detail", "type": "screenshot", "media": { "figureId": "time-machine-version-detail", "variants": { "en": { "desktop": { "src": "assets/time-machine/en/desktop/version-detail.png", "alt": "Time Machine Version Detail showing a read-only saved Formula snapshot", "caption": "Version Detail shows the saved Formula as a read-only snapshot.", "viewport": "1440x900" } } } } },
-    { "blockId": "compare-version", "type": "heading", "level": 2, "content": { "en": { "text": "Compare and restore" }, "ko": { "text": "비교와 복원" } } },
-    { "blockId": "compare-restore", "type": "paragraph", "content": { "en": { "text": "Use Compare when you need to examine how a saved Version differs from the current Formula. Restore replaces the current Formula contents with the selected Version while keeping the Version history. Review the selected Version carefully before restoring." }, "ko": { "text": "저장된 Version과 현재 Formula의 차이를 확인하려면 Compare를 사용합니다. Restore는 Version 기록을 유지하면서 현재 Formula의 내용을 선택한 Version으로 바꿉니다. 복원하기 전에 선택한 Version을 주의 깊게 확인합니다." } } },
-    { "blockId": "restore-warning", "type": "warning", "content": { "en": { "text": "Restore changes the current Formula contents. It does not create a separate Formula identity." }, "ko": { "text": "Restore는 현재 Formula의 내용을 변경합니다. 별도의 Formula를 새로 만드는 기능은 아닙니다." } } },
-    { "blockId": "next-formula-drop", "type": "link", "content": { "en": { "text": "Next: Formula Drop" }, "ko": { "text": "다음: Formula Drop" } }, "href": "/guide/en/formula-drop", "kind": "internal" }
+    {
+      "blockId": "time-machine-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Autosave keeps the current working Formula available. Time Machine is for deliberate milestones: each Save Version creates a historical snapshot you can inspect later."
+        },
+        "ko": {
+          "text": "자동 저장은 현재 작업 중인 Formula를 보존합니다. Time Machine은 의도적으로 남기는 중요한 단계에 사용합니다. Save Version을 선택하면 나중에 확인할 수 있는 기록용 snapshot이 만들어집니다."
+        }
+      }
+    },
+    {
+      "blockId": "open-time-machine",
+      "type": "step",
+      "step": 1,
+      "content": {
+        "en": {
+          "text": "Open Time Machine from the TIME MACHINE action in the Formula editor."
+        },
+        "ko": {
+          "text": "Formula 편집기의 TIME MACHINE 버튼에서 Time Machine을 엽니다."
+        }
+      }
+    },
+    {
+      "blockId": "save-version",
+      "type": "step",
+      "step": 2,
+      "content": {
+        "en": {
+          "text": "Choose + SAVE VERSION, add an optional Version note, and select Save Version. Save a stage when it has a clear meaning for your work."
+        },
+        "ko": {
+          "text": "+ SAVE VERSION을 선택하고 필요하면 Version note를 입력한 뒤 Save Version을 선택합니다. 작업에서 의미가 분명한 단계마다 저장합니다."
+        }
+      }
+    },
+    {
+      "blockId": "timeline-figure",
+      "type": "screenshot",
+      "media": {
+        "figureId": "time-machine-timeline",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/time-machine/en/desktop/timeline.png",
+              "alt": "Time Machine timeline showing CURRENT and two saved versions",
+              "caption": "The timeline keeps CURRENT alongside saved Versions.",
+              "viewport": "1440x900"
+            },
+            "mobile": {
+              "src": "assets/time-machine/en/mobile/timeline.png",
+              "alt": "Time Machine timeline in the mobile presentation showing CURRENT and saved Versions",
+              "caption": "The same history is presented as a focused mobile panel.",
+              "viewport": "390x844"
+            }
+          }
+        },
+        "presentation": {
+          "desktopScale": 0.7
+        }
+      }
+    },
+    {
+      "blockId": "current-timeline",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "CURRENT and the timeline"
+        },
+        "ko": {
+          "text": "CURRENT와 timeline"
+        }
+      }
+    },
+    {
+      "blockId": "current-explanation",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "CURRENT is the editable Formula as it is now. Saved Versions are read-only historical points. Select a Version in the timeline to open its detail view."
+        },
+        "ko": {
+          "text": "CURRENT는 지금 편집 중인 Formula입니다. 저장된 Version은 읽기 전용 기록 지점입니다. timeline에서 Version을 선택하면 상세 화면이 열립니다."
+        }
+      }
+    },
+    {
+      "blockId": "version-detail",
+      "type": "screenshot",
+      "media": {
+        "figureId": "time-machine-version-detail",
+        "variants": {
+          "en": {
+            "desktop": {
+              "src": "assets/time-machine/en/desktop/version-detail.png",
+              "alt": "Time Machine Version Detail showing a read-only saved Formula snapshot",
+              "caption": "Version Detail shows the saved Formula as a read-only snapshot.",
+              "viewport": "1440x900"
+            }
+          }
+        },
+        "presentation": {
+          "desktopScale": 0.7
+        }
+      }
+    },
+    {
+      "blockId": "compare-version",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Compare and restore"
+        },
+        "ko": {
+          "text": "비교와 복원"
+        }
+      }
+    },
+    {
+      "blockId": "compare-restore",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Use Compare when you need to examine how a saved Version differs from the current Formula. Restore replaces the current Formula contents with the selected Version while keeping the Version history. Review the selected Version carefully before restoring."
+        },
+        "ko": {
+          "text": "저장된 Version과 현재 Formula의 차이를 확인하려면 Compare를 사용합니다. Restore는 Version 기록을 유지하면서 현재 Formula의 내용을 선택한 Version으로 바꿉니다. 복원하기 전에 선택한 Version을 주의 깊게 확인합니다."
+        }
+      }
+    },
+    {
+      "blockId": "restore-warning",
+      "type": "warning",
+      "content": {
+        "en": {
+          "text": "Restore changes the current Formula contents. It does not create a separate Formula identity."
+        },
+        "ko": {
+          "text": "Restore는 현재 Formula의 내용을 변경합니다. 별도의 Formula를 새로 만드는 기능은 아닙니다."
+        }
+      }
+    },
+    {
+      "blockId": "next-formula-drop",
+      "type": "link",
+      "content": {
+        "en": {
+          "text": "Next: Formula Drop"
+        },
+        "ko": {
+          "text": "다음: Formula Drop"
+        }
+      },
+      "href": "/guide/en/formula-drop",
+      "kind": "internal"
+    }
   ]
 }
