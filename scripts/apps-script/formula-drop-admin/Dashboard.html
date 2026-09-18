@@ -11,6 +11,12 @@
     .eyebrow, th { font: 700 12px monospace; letter-spacing: .12em; text-transform: uppercase; color: #895437; }
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .card { border: 1px solid #c8bdad; padding: 18px; background: #f5f0e7; }
+    .measurement-round { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin: 18px 0 24px; padding: 20px 22px; border: 1px solid #9e7c62; background: #f8f2e9; box-shadow: 0 6px 18px rgba(48, 42, 38, .06); }
+    .measurement-round h3 { margin: 4px 0 7px; font-size: 21px; font-weight: normal; }
+    .measurement-round p { margin: 0; color: #75695e; line-height: 1.5; }
+    .measurement-round .round-meta { margin-top: 8px; color: #895437; font: 12px monospace; letter-spacing: .02em; }
+    .measurement-round .round-start { white-space: nowrap; border-color: #302a26; background: #302a26; color: #f5f0e7; font: 700 12px monospace; letter-spacing: .06em; }
+    .measurement-round .round-start:hover, .measurement-round .round-start:focus { background: #51463f; color: #fffaf1; }
     .num { font-size: 30px; margin-top: 8px; }
     table { width: 100%; border-collapse: collapse; background: #f5f0e7; }
     th, td { text-align: left; padding: 12px; border-bottom: 1px solid #d8cdbd; }
@@ -55,12 +61,14 @@
       table { font-size: 13px; display: block; overflow: auto; white-space: nowrap; }
       h1 { font-size: 26px; }
       .status-meta { grid-template-columns: 1fr; }
+      .measurement-round { grid-template-columns: 1fr; }
+      .measurement-round .round-start { width: 100%; }
     }
   </style>
 </head>
 <body>
   <main>
-    <div class="eyebrow">Accordbook Formula Drop Admin · v13</div>
+    <div class="eyebrow">Accordbook Formula Drop Admin · v14</div>
     <h1>Formula Drop 운영 대시보드</h1>
     <p id="state" class="muted">Formula Drop 데이터를 불러오는 중…</p>
     <section id="app"></section>
@@ -112,6 +120,34 @@
       return `<div class="card"><div class="eyebrow">${label}</div><div class="num">${value}</div></div>`;
     }
 
+    function formatRoundStart(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(date);
+    }
+
+    function measurementRoundCard(dropId, resetAt) {
+      const started = formatRoundStart(resetAt);
+      return `<section class="measurement-round" aria-label="측정 라운드">
+        <div>
+          <div class="eyebrow">MEASUREMENT ROUND</div>
+          <h3>개선 후 행동을 새로 측정합니다.</h3>
+          <p>원본 이벤트는 삭제하지 않고, 버튼을 누른 시점 이후 데이터만 대시보드 수치로 다시 집계합니다.</p>
+          <div class="round-meta">${started ? `CURRENT ROUND · ${esc(started)} KST부터 집계 중` : '새 라운드를 시작하면 현재 시각부터 수치가 0에서 다시 시작됩니다.'}</div>
+        </div>
+        <button class="round-start" onclick="resetMetrics('${esc(dropId)}')">새 측정 라운드 시작</button>
+      </section>`;
+    }
+
     function renderDashboard(data) {
       $('state').textContent = data.active.length ? '활성 Drop' : '활성 상태의 Formula Drop이 없습니다.';
       const active = data.active[0];
@@ -135,6 +171,7 @@
       html += data.drops.map((drop) => `<tr><td><button onclick="showDetail('${esc(drop.dropId)}')">${esc(drop.dropId)}</button></td><td>${esc(drop.title)}</td><td>${esc(statusLabel(drop.status, 'raw'))}</td><td>${esc(statusLabel(drop.effectiveStatus, 'effective'))}</td><td>${drop.metrics.uniqueVisitors}</td><td>${drop.metrics.uniqueDownloaders}</td><td>${drop.metrics.uniqueImporters}</td><td>${percent(drop.metrics.visitToImport)}</td></tr>`).join('');
       html += '</table>';
       $('app').innerHTML = html;
+      if (active) $('app').querySelector('.cards')?.insertAdjacentHTML('beforebegin', measurementRoundCard(active.dropId));
     }
 
     function showDetail(dropId) {
@@ -145,7 +182,7 @@
     }
 
     function resetMetrics(dropId) {
-      if (!confirm('이 DROP의 수치를 지금부터 새로 집계할까요? 기존 이벤트 원본은 삭제되지 않습니다.')) return;
+      if (!confirm('새 측정 라운드를 시작할까요?\n\n현재 시각 이전의 이벤트는 삭제되지 않고 그대로 보존됩니다. 대시보드 수치만 지금부터 0에서 다시 집계합니다.')) return;
       google.script.run
         .withSuccessHandler((result) => result.ok ? showDetail(dropId) : alert('수치를 초기화할 수 없습니다: ' + result.error))
         .withFailureHandler(() => alert('수치 초기화에 실패했습니다.'))
@@ -181,7 +218,7 @@
         ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
-      $('app').insertAdjacentHTML('afterbegin', `<button onclick="resetMetrics('${esc(data.drop.dropId)}')">이 DROP 수치 초기화</button>`);
+      $('app').insertAdjacentHTML('afterbegin', measurementRoundCard(data.drop.dropId, data.metricsResetAt));
       refreshLicenseStatus(data.drop.dropId);
       $('license-status-' + data.drop.dropId).closest('section').insertAdjacentHTML('afterend', '<section class="publication" id="publication"><h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2><p role="status">저장소 상태 확인 중…</p></section>');
       loadPublication(data.drop.dropId);
