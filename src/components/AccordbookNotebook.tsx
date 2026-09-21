@@ -36,6 +36,7 @@ import PaidFormulaExport from './PaidFormulaExport'
 import { resolveCas, type ResolverCandidate } from '../services/casResolver'
 import type { ResolverResult } from '../services/casResolver'
 import FirstStartModal from './FirstStartModal'
+import { browserLanguage, savedLanguage } from '../i18n/language'
 import { starterFormulas, type StarterFormulaTemplate } from '../data/starterFormulas'
 import { createStarterFormula } from '../services/starterFormulaLifecycle'
 import { StarterFormulaPicker } from './StarterFormulaPicker'
@@ -176,6 +177,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   const [backupReminder, setBackupReminder] = useState(() => readBackupReminderState())
   useEffect(() => { document.documentElement.lang = language }, [language])
   useEffect(() => { const savedLocale = localStorage.getItem('accordbook.locale'); if ((savedLocale === 'en' || savedLocale === 'ko') && savedLocale !== language) setLanguage(savedLocale) }, [formulas])
+  useEffect(() => { if (!savedLanguage() && browserLanguage() === 'ko' && language === 'en') setLanguage('en') }, [language])
   useEffect(() => { if (storage) void ensureTimeMachineIntegrity(storage) }, [storage])
   useEffect(() => { if (!introComplete || !hydrationComplete || welcomeClosed || formulas.length !== 1 || archive.length !== 0) { setWelcomeReady(false); return } const timer = window.setTimeout(() => setWelcomeReady(true), 260); return () => window.clearTimeout(timer) }, [introComplete, hydrationComplete, welcomeClosed, formulas.length, archive.length])
   const dropParams = new URLSearchParams(window.location.search)

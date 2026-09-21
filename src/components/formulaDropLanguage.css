@@ -1,0 +1,52 @@
+.formula-drop-language-scope { position: relative; }
+.formula-drop-language-scope.is-ko { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif; }
+.formula-drop-language-scope.is-ko .formula-drop-detail,
+.formula-drop-language-scope.is-ko .download-help-modal { font-family: inherit; }
+.formula-drop-language-scope.is-ko .formula-drop-cover-download > strong,
+.formula-drop-language-scope.is-ko .formula-drop-cover-download > p,
+.formula-drop-language-scope.is-ko .formula-drop-subtitle,
+.formula-drop-language-scope.is-ko .formula-drop-composition-row,
+.formula-drop-language-scope.is-ko .formula-drop-notes p,
+.formula-drop-language-scope.is-ko .formula-drop-open > div > p,
+.formula-drop-language-scope.is-ko .download-help-modal h2,
+.formula-drop-language-scope.is-ko .download-help-modal h3,
+.formula-drop-language-scope.is-ko .download-help-intro,
+.formula-drop-language-scope.is-ko .download-help-steps li p,
+.formula-drop-language-scope.is-ko .download-help-warning,
+.formula-drop-language-scope.is-ko .formula-access-details dt,
+.formula-drop-language-scope.is-ko .formula-access-copy,
+.formula-drop-language-scope.is-ko .formula-access-feedback { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif; }
+.formula-drop-language-scope.is-ko .formula-access-details h3 { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif; letter-spacing: .04em; }
+/* The Drop stylesheet has several legacy `font:` shorthands. Re-assert the
+   Korean editorial face across every visible copy surface, then keep only
+   identifiers and numeric values technical/monospace. */
+.formula-drop-language-scope.is-ko .formula-drop-detail *,
+.formula-drop-language-scope.is-ko .download-help-modal * { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif !important; }
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-language-switch,
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-language-switch *,
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-rail strong,
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-composition-index,
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-cover-download-meta,
+.formula-drop-language-scope.is-ko .formula-drop-detail .formula-drop-access dd,
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-file strong,
+.formula-drop-language-scope.is-ko .download-help-modal .formula-access-details dd { font-family: "Courier New", monospace !important; }
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-file { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif !important; font-size: 14px; line-height: 1.65; }
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-steps li { padding-block: 19px; }
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-steps li strong { font-size: 14px; line-height: 1.45; letter-spacing: .01em; }
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-steps li p { font-size: 16px; line-height: 1.7; color: #75695d; }
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-intro,
+.formula-drop-language-scope.is-ko .download-help-modal .download-help-warning { font-size: 16px; line-height: 1.75; color: #75695d; }
+.formula-drop-language-scope.is-ko .formula-drop-cover-download-button:disabled,
+.formula-drop-language-scope.is-ko .formula-drop-open .formula-drop-button:disabled,
+.formula-drop-language-scope.is-ko .formula-drop-mobile-download button:disabled { font-size: 0; }
+.formula-drop-language-scope.is-ko .formula-drop-cover-download-button:disabled::after,
+.formula-drop-language-scope.is-ko .formula-drop-open .formula-drop-button:disabled::after,
+.formula-drop-language-scope.is-ko .formula-drop-mobile-download button:disabled::after { content: '준비 중…'; font: 700 11px/1.2 "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, serif; letter-spacing: .03em; }
+.formula-drop-language-scope.is-ko .formula-drop-footer,
+.formula-drop-language-scope.is-ko .formula-drop-footer a { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, "Times New Roman", serif !important; font-size: 13px; line-height: 1.7; letter-spacing: .015em; }
+.formula-drop-language-scope.is-ko .formula-drop-footer { color: #5f5145; }
+.formula-drop-language-scope.is-ko .formula-drop-footer a { color: #4f3e59; text-underline-offset: 3px; }
+.formula-drop-language-switch { position: absolute; z-index: 5; top: 20px; right: 24px; display: flex; gap: 6px; align-items: center; font: 12px/1 monospace; }
+.formula-drop-language-switch button { border: 1px solid transparent; background: transparent; color: inherit; padding: 5px 6px; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.formula-drop-language-switch button.active { border-color: currentColor; text-decoration: none; font-weight: 700; }
+@media (max-width: 480px) { .formula-drop-language-switch { top: 14px; right: 14px; } }

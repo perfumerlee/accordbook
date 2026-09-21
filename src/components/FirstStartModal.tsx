@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { StarterFormulaTemplate } from '../data/starterFormulas'
 import './FirstStartModal.css'
+import { browserLanguage, savedLanguage } from '../i18n/language'
 
-type Props = { language: 'en' | 'ko'; starters: StarterFormulaTemplate[]; onCreate: () => void; onImport: (file: File) => void; onStarter: (starter: StarterFormulaTemplate) => void; onClose: () => void; onLanguageChange: (language: 'en' | 'ko') => void }
+type Props = { language: 'en' | 'ko'; starters: StarterFormulaTemplate[]; onCreate: () => void; onImport: (file: File) => void; onStarter: (starter: StarterFormulaTemplate) => void; onClose: () => void; onLanguageChange: (language: 'en' | 'ko') => void; showKoreanHint?: boolean }
 
 function GuideBookIcon() {
   return <svg className="first-start-guide-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -11,12 +12,13 @@ function GuideBookIcon() {
   </svg>
 }
 
-export default function FirstStartModal({ language, starters, onCreate, onImport, onStarter, onClose, onLanguageChange }: Props) {
+export default function FirstStartModal({ language, starters, onCreate, onImport, onStarter, onClose, onLanguageChange, showKoreanHint = false }: Props) {
   const [view, setView] = useState<'welcome' | 'starters'>('welcome')
   const createRef = useRef<HTMLButtonElement>(null)
   const welcomeFocusClaimed = useRef(false)
   const modalRef = useRef<HTMLElement>(null)
   const ko = language === 'ko'
+  showKoreanHint = showKoreanHint || (!savedLanguage() && browserLanguage() === 'ko' && language === 'en')
   const focusWorkspace = () => { const target = document.querySelector<HTMLElement>('.formula-stage'); if (target) { target.tabIndex = -1; target.focus({ preventScroll: true }) } }
 
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function FirstStartModal({ language, starters, onCreate, onImport
       <p className="first-start-kicker">Accordbook</p>
       <h2 id="first-start-title">{ko ? 'Accordbook에 오신 것을 환영합니다.' : 'Welcome to Accordbook'}</h2>
       <p className="first-start-subtitle">{ko ? '조향사를 위한 포뮬러 노트입니다.' : 'A formula notebook for perfumers.'}</p>
+      {showKoreanHint && !ko && <p className="first-start-language-hint" role="status">한국어로 볼 수 있어요 · <button type="button" onClick={() => onLanguageChange('ko')}>한국어로 전환</button></p>}
 
       <div className="first-start-options">
         <button ref={createRef} type="button" className="first-start-option first-start-primary" onClick={onCreate}>

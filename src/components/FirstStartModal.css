@@ -100,3 +100,5 @@
   .first-start-backdrop, .first-start-modal { animation: none; }
   .first-start-guide-arrow { transition: none; }
 }
+.first-start-language-hint { margin: 12px 0 0; font-size: 12px; color: #725083; }
+.first-start-language-hint button { border: 0; padding: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }

@@ -3,6 +3,7 @@ import type { FormulaDropDownload } from '../services/formulaDropPublicApi'
 import { readFormulaDropAccess } from '../services/formulaDropAccess'
 import FormulaAccessDetails from './FormulaAccessDetails'
 import './downloadHelpModal.css'
+import { useFormulaDropLanguage } from './FormulaDropLanguage'
 
 type Props={
   mode:'download-success'|'help'
@@ -16,6 +17,8 @@ type Props={
 type Step={title:string;description:string}
 
 export default function DownloadHelpModal({mode,title,fileName,download:providedDownload,dropSlug,onClose}:Props){
+  const { language } = useFormulaDropLanguage()
+  const ko = language === 'ko'
   const download=providedDownload??readFormulaDropAccess()?.download
   const dialog=useRef<HTMLDivElement>(null)
   const closeRef=useRef<HTMLButtonElement>(null)
@@ -46,24 +49,24 @@ export default function DownloadHelpModal({mode,title,fileName,download:provided
 
   const steps:Step[]=mode==='download-success'
     ?[
-      {title:'Downloaded ✓',description:'The Formula file has been saved to your device.'},
-      {title:'Import formula',description:'Continue to Accordbook and select the file you just downloaded.'},
-      {title:'Unlock',description:'Use the access details below when Accordbook asks for them.'},
+      {title:ko?'다운로드 완료 ✓':'Downloaded ✓',description:ko?'포뮬러 파일이 기기에 저장되었습니다.':'The Formula file has been saved to your device.'},
+      {title:ko?'포뮬러 가져오기':'Import formula',description:ko?'Accordbook으로 이동해 방금 다운로드한 파일을 선택하세요.':'Continue to Accordbook and select the file you just downloaded.'},
+      {title:ko?'잠금 해제':'Unlock',description:ko?'Accordbook에서 요청하면 아래 접근 정보를 입력하세요.':'Use the access details below when Accordbook asks for them.'},
     ]
     :[
-      {title:'Open Accordbook',description:'Continue to Accordbook from this guide.'},
-      {title:'Select the file',description:'Choose the downloaded .accordbook file, usually found in your Downloads folder.'},
-      {title:'Unlock',description:'Enter the access details supplied with the Formula.'},
+      {title:ko?'Accordbook 열기':'Open Accordbook',description:ko?'이 안내에서 Accordbook으로 이동하세요.':'Continue to Accordbook from this guide.'},
+      {title:ko?'파일 선택':'Select the file',description:ko?'다운로드 폴더 등에 저장된 .accordbook 파일을 선택하세요.':'Choose the downloaded .accordbook file, usually found in your Downloads folder.'},
+      {title:ko?'잠금 해제':'Unlock',description:ko?'포뮬러와 함께 제공된 접근 정보를 입력하세요.':'Enter the access details supplied with the Formula.'},
     ]
 
   return <div className="download-help-backdrop" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)onClose()}}>
     <section ref={dialog} className="download-help-modal" role="dialog" aria-modal="true" aria-labelledby="download-help-title">
-      <button ref={closeRef} className="download-help-close" type="button" aria-label="Close" onClick={onClose}>×</button>
-      <p className="formula-drop-kicker">{mode==='download-success'?'Formula Drop · Next step':'Opening guide'}</p>
-      <h2 id="download-help-title">{mode==='download-success'?'FORMULA DOWNLOADED':'HOW TO OPEN AN .ACCORDBOOK FILE'}</h2>
+      <button ref={closeRef} className="download-help-close" type="button" aria-label={ko?'닫기':'Close'} onClick={onClose}>×</button>
+      <p className="formula-drop-kicker">{mode==='download-success'?(ko?'Formula Drop · 다음 단계':'Formula Drop · Next step'):(ko?'열기 안내':'Opening guide')}</p>
+      <h2 id="download-help-title">{mode==='download-success'?(ko?'포뮬러 다운로드 완료':'FORMULA DOWNLOADED'):(ko?' .ACCORDBOOK 파일 여는 방법':'HOW TO OPEN AN .ACCORDBOOK FILE')}</h2>
       <h3>{title}</h3>
-      {mode==='download-success'&&<p className="download-help-intro">Your file is ready. Now import it into Accordbook.</p>}
-      {fileName&&<p className="download-help-file">DOWNLOADED FILE<br/><strong>{fileName}</strong></p>}
+      {mode==='download-success'&&<p className="download-help-intro">{ko?'파일이 준비되었습니다. 이제 Accordbook으로 가져오세요.':'Your file is ready. Now import it into Accordbook.'}</p>}
+      {fileName&&<p className="download-help-file">{ko?'다운로드한 파일':'DOWNLOADED FILE'}<br/><strong>{fileName}</strong></p>}
 
       <ol className="download-help-steps">
         {steps.map((step,index)=><li key={step.title}>
@@ -73,14 +76,14 @@ export default function DownloadHelpModal({mode,title,fileName,download:provided
       </ol>
 
       {mode==='download-success'&&download&&<div className="download-help-access">
-        <p className="download-help-warning"><strong>ACCESS DETAILS READY</strong><br/>You’ll need these when the file opens.</p>
+        <p className="download-help-warning"><strong>{ko?'ACCESS DETAILS 준비 완료':'ACCESS DETAILS READY'}</strong><br/>{ko?'파일을 열 때 필요합니다.':'You’ll need these when the file opens.'}</p>
         <FormulaAccessDetails download={download}/>
       </div>}
 
       <a className="formula-drop-button download-help-open" href={openUrl}>
-        {mode==='download-success'?'CONTINUE TO IMPORT →':'OPEN ACCORDBOOK →'}
+        {mode==='download-success'?(ko?'가져오기로 계속 →':'CONTINUE TO IMPORT →'):(ko?'ACCORD­BOOK 열기 →':'OPEN ACCORDBOOK →')}
       </a>
-      <button className="download-help-dismiss" type="button" onClick={onClose}>CLOSE</button>
+      <button className="download-help-dismiss" type="button" onClick={onClose}>{ko?'닫기':'CLOSE'}</button>
     </section>
   </div>
 }
