@@ -3,6 +3,7 @@ import type { Language } from './messages'
 export const LANGUAGE_STORAGE_KEY = 'accordbook.locale'
 export const DROP_LANGUAGE_STORAGE_KEY = 'accordbook.drop.locale'
 export const DROP_LANGUAGE_SESSION_KEY = 'accordbook.drop.session.locale'
+export const DROP_LANGUAGE_HINT_SESSION_KEY = 'accordbook.drop.language-hint-seen'
 export function savedLanguage(): Language | undefined {
   if (typeof window === 'undefined') return undefined
   const value = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)

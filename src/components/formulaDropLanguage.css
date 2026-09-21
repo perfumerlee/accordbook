@@ -47,12 +47,19 @@
 .formula-drop-language-scope.is-ko .formula-drop-footer { color: #5f5145; }
 .formula-drop-language-scope.is-ko .formula-drop-footer a { color: #4f3e59; text-underline-offset: 3px; }
 .formula-drop-language-switch { position: absolute; z-index: 5; top: 20px; right: 24px; display: flex; gap: 6px; align-items: center; font: 12px/1 monospace; }
+.formula-drop-language-control { position: relative; z-index: 6; }
+.formula-drop-language-hint { position: absolute; top: calc(100% + 9px); left: 50%; width: max-content; padding: 6px 9px; border: 1px solid rgba(185,168,144,.9); background: var(--ref-paper-2, #fffaf0); color: #634371; font: 12px/1.35 ui-sans-serif, sans-serif; white-space: nowrap; transform: translateX(-50%); }
+.formula-drop-language-hint::before { content: ''; position: absolute; top: -5px; left: 50%; width: 8px; height: 8px; border-top: 1px solid rgba(185,168,144,.9); border-left: 1px solid rgba(185,168,144,.9); background: var(--ref-paper-2, #fffaf0); transform: translateX(-50%) rotate(45deg); }
 .formula-drop-language-switch button { border: 1px solid transparent; background: transparent; color: inherit; padding: 5px 6px; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .formula-drop-language-switch button.active { border-color: currentColor; text-decoration: none; font-weight: 700; }
 @media (max-width: 480px) { .formula-drop-language-switch { top: 14px; right: 14px; } }
+@media (max-width: 480px) {
+  .formula-drop-language-hint { left: 50%; }
+}
 .formula-drop-language-scope .formula-drop-header { align-items: center; flex-wrap: wrap; gap: 16px; }
 .formula-drop-header-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px 20px; margin-left: auto; }
-.formula-drop-header .formula-drop-language-switch { position: static; display: flex; gap: 4px; flex-shrink: 0; }
+.formula-drop-header .formula-drop-language-control { flex-shrink: 0; }
+.formula-drop-header .formula-drop-language-switch { position: static; display: flex; gap: 4px; }
 .formula-drop-header .formula-drop-language-switch button { min-width: 40px; min-height: 40px; }
 .formula-drop-language-scope.is-ko .formula-drop-intro,
 .formula-drop-language-scope.is-ko .formula-drop-featured,
