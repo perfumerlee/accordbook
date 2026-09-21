@@ -64,4 +64,5 @@
 .formula-drop-language-scope.is-ko .formula-drop-intro,
 .formula-drop-language-scope.is-ko .formula-drop-featured,
 .formula-drop-language-scope.is-ko .formula-drop-index { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, serif; }
+.formula-drop-language-scope:has(.formula-drop-access) .formula-drop-mobile-download { display: none; }
 @media(max-width:480px) { .formula-drop-header-actions { width: 100%; justify-content: space-between; margin-left: 0; } }
