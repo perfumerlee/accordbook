@@ -2,6 +2,7 @@ import type { Language } from './messages'
 
 export const LANGUAGE_STORAGE_KEY = 'accordbook.locale'
 export const DROP_LANGUAGE_STORAGE_KEY = 'accordbook.drop.locale'
+export const DROP_LANGUAGE_SESSION_KEY = 'accordbook.drop.session.locale'
 export function savedLanguage(): Language | undefined {
   if (typeof window === 'undefined') return undefined
   const value = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
@@ -14,6 +15,11 @@ export function initialLanguage(): Language { return savedLanguage() ?? browserL
 export function savedDropLanguage(): Language | undefined {
   if (typeof window === 'undefined') return undefined
   const value = window.localStorage.getItem(DROP_LANGUAGE_STORAGE_KEY)
+  return value === 'ko' || value === 'en' ? value : undefined
+}
+export function savedDropSessionLanguage(): Language | undefined {
+  if (typeof window === 'undefined') return undefined
+  const value = window.sessionStorage.getItem(DROP_LANGUAGE_SESSION_KEY)
   return value === 'ko' || value === 'en' ? value : undefined
 }
 export function initialDropLanguage(): Language { return savedDropLanguage() ?? browserLanguage() }

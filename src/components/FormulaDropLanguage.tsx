@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Language } from '../i18n/messages'
-import { initialDropLanguage, DROP_LANGUAGE_STORAGE_KEY } from '../i18n/language'
+import { initialDropLanguage, DROP_LANGUAGE_SESSION_KEY, DROP_LANGUAGE_STORAGE_KEY } from '../i18n/language'
 import './formulaDropLanguage.css'
 
 const copy: Record<string, string> = {
@@ -22,7 +22,8 @@ const DropLanguageContext = createContext<DropLanguageContextValue | null>(null)
 export function useFormulaDropLanguage() { return useContext(DropLanguageContext) ?? { language: initialDropLanguage(), setLanguage: (_language: Language) => undefined } }
 export function FormulaDropLanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => initialDropLanguage())
-  const setLanguage = (next: Language) => { setLanguageState(next); window.localStorage.setItem(DROP_LANGUAGE_STORAGE_KEY, next) }
+  const setLanguage = (next: Language) => { setLanguageState(next); window.localStorage.setItem(DROP_LANGUAGE_STORAGE_KEY, next); window.sessionStorage.setItem(DROP_LANGUAGE_SESSION_KEY, next) }
+  useEffect(() => { window.sessionStorage.setItem(DROP_LANGUAGE_SESSION_KEY, language) }, [language])
   const value = useMemo(() => ({ language, setLanguage }), [language])
   useEffect(() => { const root = document.querySelector<HTMLElement>('.formula-drop-language-scope'); if (!root) return; const apply = () => translateDropText(root, language); const observer = new MutationObserver(apply); apply(); observer.observe(root, { childList: true, subtree: true }); return () => observer.disconnect() }, [language])
   return <DropLanguageContext.Provider value={value}><div className={`formula-drop-language-scope ${language === 'ko' ? 'is-ko' : 'is-en'}`}><div className="formula-drop-language-switch" aria-label="Language"><button type="button" aria-label="English" aria-pressed={language === 'en'} className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button><span aria-hidden="true">/</span><button type="button" aria-label="한국어" aria-pressed={language === 'ko'} className={language === 'ko' ? 'active' : ''} onClick={() => setLanguage('ko')}>KO</button></div>{children}</div></DropLanguageContext.Provider>

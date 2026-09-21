@@ -76,14 +76,13 @@ export default function DownloadHelpModal({mode,title,fileName,download:provided
       </ol>
 
       {mode==='download-success'&&download&&<div className="download-help-access">
-        <p className="download-help-warning"><strong>{ko?'ACCESS DETAILS 준비 완료':'ACCESS DETAILS READY'}</strong><br/>{ko?'파일을 열 때 필요합니다.':'You’ll need these when the file opens.'}</p>
+        <p className="download-help-warning"><strong>{ko?'접근 정보 준비 완료':'ACCESS DETAILS READY'}</strong><br/>{ko?'파일을 열 때 필요합니다.':'You’ll need these when the file opens.'}</p>
         <FormulaAccessDetails download={download}/>
       </div>}
 
       <a className="formula-drop-button download-help-open" href={openUrl}>
         {mode==='download-success'?(ko?'가져오기로 계속 →':'CONTINUE TO IMPORT →'):(ko?'ACCORD­BOOK 열기 →':'OPEN ACCORDBOOK →')}
       </a>
-      <button className="download-help-dismiss" type="button" onClick={onClose}>{ko?'닫기':'CLOSE'}</button>
     </section>
   </div>
 }

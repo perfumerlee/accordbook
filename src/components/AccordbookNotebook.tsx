@@ -36,7 +36,7 @@ import PaidFormulaExport from './PaidFormulaExport'
 import { resolveCas, type ResolverCandidate } from '../services/casResolver'
 import type { ResolverResult } from '../services/casResolver'
 import FirstStartModal from './FirstStartModal'
-import { browserLanguage, savedLanguage } from '../i18n/language'
+import { browserLanguage, savedLanguage, savedDropLanguage, savedDropSessionLanguage } from '../i18n/language'
 import { starterFormulas, type StarterFormulaTemplate } from '../data/starterFormulas'
 import { createStarterFormula } from '../services/starterFormulaLifecycle'
 import { StarterFormulaPicker } from './StarterFormulaPicker'
@@ -183,7 +183,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   const dropParams = new URLSearchParams(window.location.search)
   const dropSlug = dropParams.get('drop') ?? ''
   const dropInbound = dropParams.get('from') === 'drop' && /^\d{4}-\d{3}$/.test(dropSlug)
-  const dropHandoff = dropInbound ? readFormulaDropAccess() : undefined
+  const dropHandoff = useMemo(() => dropInbound ? readFormulaDropAccess() : undefined, [dropInbound, dropSlug])
   const validDropInbound = Boolean(dropHandoff && dropHandoff.dropSlug === dropSlug)
   useEffect(() => {
     if (!dropInbound || !hydrationComplete) return
@@ -195,11 +195,21 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
       return
     }
     if (dropInboundDismissed) return
-    const banner = document.createElement('aside'); banner.className = 'drop-inbound-guidance'; banner.setAttribute('role', 'status')
-    const handoff = dropHandoff; banner.innerHTML = '<strong>YOU DOWNLOADED A FORMULA DROP</strong>' + (handoff.title ? `<b class="drop-inbound-title">${handoff.title}</b>` : '') + '<span>Open the downloaded .accordbook file using the access details below.</span><div class="drop-inbound-access"><b>ACCESS DETAILS</b><span>NAME: ' + handoff.download.accessName + '</span><span>LAST 4 DIGITS: ' + handoff.download.accessLast4 + '</span><span>PIN: ' + handoff.download.accessPin + '</span></div>'
-    const open = document.createElement('button'); open.type = 'button'; open.textContent = 'OPEN .ACCORDBOOK FILE'; open.addEventListener('click', () => formulaFileRef.current?.click())
-    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'COPY ACCESS DETAILS'; copy.addEventListener('click', () => { if (handoff) void navigator.clipboard.writeText(formatFormulaDropAccessDetails(handoff.download)).then(() => { copy.textContent = 'ACCESS DETAILS COPIED' }) })
-    const close = document.createElement('button'); close.type = 'button'; close.className = 'drop-inbound-dismiss'; close.textContent = 'Dismiss'; close.addEventListener('click', () => { clearFormulaDropAccess(); setDropInboundDismissed(true); banner.remove() })
+    const ko = (savedDropSessionLanguage() ?? savedDropLanguage() ?? browserLanguage()) === 'ko'
+    const banner = document.createElement('aside'); banner.className = 'drop-inbound-guidance' + (ko ? ' drop-inbound-guidance-ko' : ''); banner.lang = ko ? 'ko' : 'en'; banner.setAttribute('role', 'status')
+    const handoff = dropHandoff
+    const add = (parent: HTMLElement, tag: string, text: string, className = '') => { const node = document.createElement(tag); node.textContent = text; node.className = className; parent.append(node); return node }
+    add(banner, 'strong', ko ? 'Formula Drop을 다운로드했습니다' : 'YOU DOWNLOADED A FORMULA DROP')
+    if (handoff.title) add(banner, 'b', handoff.title, 'drop-inbound-title')
+    add(banner, 'span', ko ? '아래 접근 정보를 사용해 다운로드한 .accordbook 파일을 여세요.' : 'Open the downloaded .accordbook file using the access details below.')
+    const access = add(banner, 'div', '', 'drop-inbound-access')
+    add(access, 'b', ko ? '접근 정보' : 'ACCESS DETAILS')
+    add(access, 'span', (ko ? '이름: ' : 'NAME: ') + handoff.download.accessName)
+    add(access, 'span', (ko ? '끝 4자리: ' : 'LAST 4 DIGITS: ') + handoff.download.accessLast4)
+    add(access, 'span', 'PIN: ' + handoff.download.accessPin)
+    const open = document.createElement('button'); open.type = 'button'; open.textContent = ko ? '.accordbook 파일 열기' : 'OPEN .ACCORDBOOK FILE'; open.addEventListener('click', () => formulaFileRef.current?.click())
+    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = ko ? '접근 정보 복사' : 'COPY ACCESS DETAILS'; copy.addEventListener('click', () => { if (handoff) void navigator.clipboard.writeText(formatFormulaDropAccessDetails(handoff.download)).then(() => { copy.textContent = ko ? '접근 정보가 복사되었습니다' : 'ACCESS DETAILS COPIED' }).catch(() => { copy.textContent = ko ? '복사 실패 — 다시 시도하세요' : 'Copy failed — try again' }) })
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'drop-inbound-dismiss'; close.textContent = ko ? '닫기' : 'Dismiss'; close.setAttribute('aria-label', ko ? '닫기' : 'Close'); close.addEventListener('click', () => { clearFormulaDropAccess(); setDropInboundDismissed(true); banner.remove() })
     banner.append(copy, open, close); document.body.append(banner)
     return () => banner.remove()
   }, [dropInbound, validDropInbound, dropHandoff, dropInboundDismissed, hydrationComplete])
