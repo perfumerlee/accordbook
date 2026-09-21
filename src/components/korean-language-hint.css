@@ -1,0 +1,12 @@
+.language-toggle .lang-btn:nth-of-type(2)::after { content: 'KO'; }
+.language-toggle:has(.korean-language-hint), .first-start-language-wrap { position: relative; }
+.korean-language-hint { position: absolute; top: calc(100% + 7px); right: 0; width: max-content; padding: 5px 8px; border: 1px solid #cdb9d5; background: #fbf5e8; color: #634371; font: 12px/1.5 ui-sans-serif, sans-serif; letter-spacing: 0; white-space: nowrap; z-index: 2; }
+.korean-language-hint::before { content: ''; position: absolute; top: -4px; right: 18px; width: 6px; height: 6px; border-top: 1px solid #cdb9d5; border-left: 1px solid #cdb9d5; background: #fbf5e8; transform: rotate(45deg); }
+.first-start-modal:has(.korean-language-hint) { padding-top: 108px; }
+.header-tools:has(.korean-language-hint), .tablet-utility-row:has(.korean-language-hint) { padding-bottom: 38px; }
+@media (max-width: 767px) {
+  .language-toggle .korean-language-hint { left: 0; right: auto; }
+  /* Point at KO: toggle padding + EN width + gap + half the KO width. */
+  .language-toggle .korean-language-hint::before { left: calc(3px + 42px + 3px + 21px - 3px); right: auto; }
+}
+@media print { .korean-language-hint { display: none; } }

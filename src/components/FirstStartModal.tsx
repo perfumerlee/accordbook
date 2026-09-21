@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { StarterFormulaTemplate } from '../data/starterFormulas'
 import './FirstStartModal.css'
-import { browserLanguage, savedLanguage } from '../i18n/language'
+import KoreanLanguageHint from './KoreanLanguageHint'
 
 type Props = { language: 'en' | 'ko'; starters: StarterFormulaTemplate[]; onCreate: () => void; onImport: (file: File) => void; onStarter: (starter: StarterFormulaTemplate) => void; onClose: () => void; onLanguageChange: (language: 'en' | 'ko') => void; showKoreanHint?: boolean }
 
@@ -18,7 +18,7 @@ export default function FirstStartModal({ language, starters, onCreate, onImport
   const welcomeFocusClaimed = useRef(false)
   const modalRef = useRef<HTMLElement>(null)
   const ko = language === 'ko'
-  showKoreanHint = showKoreanHint || (!savedLanguage() && browserLanguage() === 'ko' && language === 'en')
+
   const focusWorkspace = () => { const target = document.querySelector<HTMLElement>('.formula-stage'); if (target) { target.tabIndex = -1; target.focus({ preventScroll: true }) } }
 
   useEffect(() => {
@@ -49,14 +49,12 @@ export default function FirstStartModal({ language, starters, onCreate, onImport
   }, [])
 
   return <div className="first-start-backdrop"><section ref={modalRef} tabIndex={-1} className="first-start-modal" role="dialog" aria-modal="true" aria-labelledby="first-start-title">
-    <div className="first-start-top-actions"><div className="first-start-language" aria-label={ko ? '언어 선택' : 'Language selection'}><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => onLanguageChange('en')}>EN</button><span aria-hidden="true">|</span><button type="button" className={language === 'ko' ? 'active' : ''} aria-pressed={language === 'ko'} onClick={() => onLanguageChange('ko')}>KO</button></div><button className="first-start-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={() => { onClose(); window.requestAnimationFrame(focusWorkspace) }}>×</button></div>
+    <div className="first-start-top-actions"><div className="first-start-language-wrap"><div className="first-start-language" role="group" aria-label={ko ? '언어 선택' : 'Language selection'}><button type="button" className={language === 'en' ? 'active' : ''} aria-label="English" aria-pressed={language === 'en'} onClick={() => onLanguageChange('en')}>EN</button><span aria-hidden="true">|</span><button type="button" className={language === 'ko' ? 'active' : ''} aria-label="한국어" aria-pressed={language === 'ko'} onClick={() => onLanguageChange('ko')}>KO</button></div>{showKoreanHint && !ko && <KoreanLanguageHint />}</div><button className="first-start-close" type="button" aria-label={ko ? '닫기' : 'Close'} onClick={() => { onClose(); window.requestAnimationFrame(focusWorkspace) }}>×</button></div>
 
     {view === 'welcome' ? <>
       <p className="first-start-kicker">Accordbook</p>
       <h2 id="first-start-title">{ko ? 'Accordbook에 오신 것을 환영합니다.' : 'Welcome to Accordbook'}</h2>
       <p className="first-start-subtitle">{ko ? '조향사를 위한 포뮬러 노트입니다.' : 'A formula notebook for perfumers.'}</p>
-      {showKoreanHint && !ko && <p className="first-start-language-hint" role="status">한국어로 볼 수 있어요 · <button type="button" onClick={() => onLanguageChange('ko')}>한국어로 전환</button></p>}
-
       <div className="first-start-options">
         <button ref={createRef} type="button" className="first-start-option first-start-primary" onClick={onCreate}>
           <strong>{ko ? '새 포뮬러 만들기' : 'Create a new formula'}</strong>

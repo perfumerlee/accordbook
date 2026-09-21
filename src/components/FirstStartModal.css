@@ -7,6 +7,7 @@
 .first-start-language button.active { background: #fffaf0; color: #30291f; font-weight: 700; box-shadow: 0 1px 3px rgba(48,41,31,.16); }
 .first-start-language > span { color: #c2ae91; user-select: none; }
 .first-start-top-actions .first-start-close { position: static; }
+.first-start-language-wrap { position: relative; display: flex; align-items: center; }
 .first-start-kicker { position: absolute; top: 30px; left: 38px; margin: 0; color: #a56943; font: 11px ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; }
 .first-start-modal h2 { margin: 0; font: 400 clamp(27px, 6vw, 38px)/1.12 Georgia, serif; }
 .first-start-subtitle { margin: 10px 0 26px; color: #806f5d; font: 15px/1.5 Georgia, serif; }
@@ -100,5 +101,3 @@
   .first-start-backdrop, .first-start-modal { animation: none; }
   .first-start-guide-arrow { transition: none; }
 }
-.first-start-language-hint { margin: 12px 0 0; font-size: 12px; color: #725083; }
-.first-start-language-hint button { border: 0; padding: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }

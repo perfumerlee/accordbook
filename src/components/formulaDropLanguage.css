@@ -50,3 +50,11 @@
 .formula-drop-language-switch button { border: 1px solid transparent; background: transparent; color: inherit; padding: 5px 6px; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .formula-drop-language-switch button.active { border-color: currentColor; text-decoration: none; font-weight: 700; }
 @media (max-width: 480px) { .formula-drop-language-switch { top: 14px; right: 14px; } }
+.formula-drop-language-scope .formula-drop-header { align-items: center; flex-wrap: wrap; gap: 16px; }
+.formula-drop-header-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px 20px; margin-left: auto; }
+.formula-drop-header .formula-drop-language-switch { position: static; display: flex; gap: 4px; flex-shrink: 0; }
+.formula-drop-header .formula-drop-language-switch button { min-width: 40px; min-height: 40px; }
+.formula-drop-language-scope.is-ko .formula-drop-intro,
+.formula-drop-language-scope.is-ko .formula-drop-featured,
+.formula-drop-language-scope.is-ko .formula-drop-index { font-family: "Noto Serif KR", "Nanum Myeongjo", Batang, Georgia, serif; }
+@media(max-width:480px) { .formula-drop-header-actions { width: 100%; justify-content: space-between; margin-left: 0; } }

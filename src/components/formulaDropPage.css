@@ -12,3 +12,4 @@
 @media(max-width:767px){.drop-inbound-guidance .drop-inbound-dismiss{top:14px;right:18px;width:28px;height:28px}.drop-inbound-guidance .drop-inbound-dismiss::before{font-size:29px}}
 .drop-inbound-guidance .drop-inbound-dismiss::before{font-size:30px}
 @media(max-width:767px){.drop-inbound-guidance .drop-inbound-dismiss::before{font-size:29px}}
+.formula-drop-rail{grid-template-columns:max-content minmax(0,1fr);gap:7px 14px}.formula-drop-rail>span{grid-column:1}.formula-drop-rail>strong{grid-column:2}.formula-drop-rail>span:not(:first-child){margin-top:0}@media(max-width:767px){.formula-drop-rail{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 12px;line-height:1.45}.formula-drop-rail>span:not(:first-child)::before{content:none}.formula-drop-rail>strong{margin-right:0;min-width:0;overflow-wrap:anywhere}.formula-drop-rail>span,.formula-drop-rail>strong{align-self:start}}

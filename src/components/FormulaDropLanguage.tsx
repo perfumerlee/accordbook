@@ -14,7 +14,7 @@ function translateDropText(root: HTMLElement, language: Language) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
   const nodes: Text[] = []; let node: Node | null
   while ((node = walker.nextNode())) nodes.push(node as Text)
-  nodes.forEach(text => { const value = text.nodeValue ?? ''; const trimmed = value.trim(); const translated = table[trimmed] ?? (language === 'ko' && /^PREPARING(?:…|\.\.\.)$/.test(trimmed) ? '준비 중…' : undefined); if (translated) text.nodeValue = value.replace(trimmed, translated) })
+  nodes.forEach(text => { const value = text.nodeValue ?? ''; const trimmed = value.trim(); const dynamic = language === 'ko' ? (trimmed.startsWith('No.') ? `번호${trimmed.slice(3)}` : trimmed.startsWith('Available until ') ? `이용 가능 기간 ${trimmed.slice(16)}` : trimmed.startsWith('View Formula') ? `포뮬러 보기${trimmed.slice('View Formula'.length)}` : trimmed.startsWith('View') ? `보기${trimmed.slice('View'.length)}` : undefined) : undefined; const translated = table[trimmed] ?? dynamic ?? (language === 'ko' && /^PREPARING(?:…|\.\.\.)$/.test(trimmed) ? '준비 중…' : undefined); if (translated) text.nodeValue = value.replace(trimmed, translated) })
 }
 
 type DropLanguageContextValue = { language: Language; setLanguage: (language: Language) => void }
@@ -26,5 +26,5 @@ export function FormulaDropLanguageProvider({ children }: { children: ReactNode 
   useEffect(() => { window.sessionStorage.setItem(DROP_LANGUAGE_SESSION_KEY, language) }, [language])
   const value = useMemo(() => ({ language, setLanguage }), [language])
   useEffect(() => { const root = document.querySelector<HTMLElement>('.formula-drop-language-scope'); if (!root) return; const apply = () => translateDropText(root, language); const observer = new MutationObserver(apply); apply(); observer.observe(root, { childList: true, subtree: true }); return () => observer.disconnect() }, [language])
-  return <DropLanguageContext.Provider value={value}><div className={`formula-drop-language-scope ${language === 'ko' ? 'is-ko' : 'is-en'}`}><div className="formula-drop-language-switch" aria-label="Language"><button type="button" aria-label="English" aria-pressed={language === 'en'} className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button><span aria-hidden="true">/</span><button type="button" aria-label="한국어" aria-pressed={language === 'ko'} className={language === 'ko' ? 'active' : ''} onClick={() => setLanguage('ko')}>KO</button></div>{children}</div></DropLanguageContext.Provider>
+  return <DropLanguageContext.Provider value={value}><div className={`formula-drop-language-scope ${language === 'ko' ? 'is-ko' : 'is-en'}`}>{children}</div></DropLanguageContext.Provider>
 }

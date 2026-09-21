@@ -31,7 +31,7 @@ if (import.meta.hot) {
 
 root.render(
   <StrictMode>
-    {isRev30Preview ? <Rev30Preview /> : operatorGuideRoute ? <><GuideEditor /><GuideLegacyRecovery /><GuidePublishProtocolCheck /></> : guideRoute ? <GuidePage /> : route.kind === 'drop-index' ? <FormulaDropIndexPage /> : route.kind === 'drop-detail' ? <FormulaDropLanguageProvider><FormulaDropDetailPage dropId={route.dropId} /></FormulaDropLanguageProvider> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
+    {isRev30Preview ? <Rev30Preview /> : operatorGuideRoute ? <><GuideEditor /><GuideLegacyRecovery /><GuidePublishProtocolCheck /></> : guideRoute ? <GuidePage /> : route.kind === 'drop-index' ? <FormulaDropLanguageProvider><FormulaDropIndexPage /></FormulaDropLanguageProvider> : route.kind === 'drop-detail' ? <FormulaDropLanguageProvider><FormulaDropDetailPage dropId={route.dropId} /></FormulaDropLanguageProvider> : route.kind === 'formula-storage' ? <LocalFormulaVaultPage /> : <ProductionWithIntro />}
   </StrictMode>,
 )
 
