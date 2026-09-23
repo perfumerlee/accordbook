@@ -15,12 +15,31 @@ const base='https://127.0.0.1:5178';
   await context.route('https://script.google.com/**',async route=>{
    const body=JSON.parse(route.request().postData()||'{}'); let result;
    if(body.action==='get-drop') result={ok:true,drop};
-   else if(body.action==='resolve-drop-package'){resolutions++;result=mode==='failure'?{ok:false,error:'package_unavailable'}:{ok:true,package:{dropId:drop.dropId,fileName:'test.accordbook',packageType:'accordbook-formula',title,packageText:mode==='paid'?'{"type":"accordbook-paid-package"}':mode==='malformed'?'{}':text}};}
+  else if(body.action==='create-drop-handoff') result={ok:true,handoff:{token:'a'.repeat(64),expiresAt:Date.now()+600000}};
+  else if(body.action==='resolve-drop-handoff') result={ok:true,dropId:drop.dropId,expiresAt:Date.now()+600000};
+  else if(body.action==='resolve-drop-package'){resolutions++;result=mode==='failure'?{ok:false,error:'package_unavailable'}:{ok:true,package:{dropId:drop.dropId,fileName:'test.accordbook',packageType:'accordbook-formula',title,packageText:mode==='paid'?'{"type":"accordbook-paid-package"}':mode==='malformed'?'{}':text}};}
    else if(body.action==='get-download') result={ok:true,accepted:true,duplicate:false,download:{fileName:'test.accordbook',fileUrl:base+'/formula-drops/2026-001/ACBK-DROP-2026-001-McintoshApple.accordbook'}};
    else {events.push(body);result={ok:true,accepted:true,duplicate:false};}
    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(result),headers:{'access-control-allow-origin':'*'}});
   });
   const page=await context.newPage();
+  const directPage=await context.newPage();
+  await directPage.goto(base+'/?from=drop&drop=DROP-2026-001');
+  await directPage.waitForTimeout(250);
+  assert.equal(await directPage.locator('.drop-direct-dialog').count(),0);
+  await directPage.goto(base+'/?from=drop&handoff='+'a'.repeat(64));
+  await directPage.getByRole('button',{name:'포뮬러 가져오기',exact:true}).waitFor();
+  assert.equal(await directPage.locator('.drop-direct-dialog').getAttribute('lang'),'ko');
+  assert.ok(!events.some(e=>e.eventType==='drop_open_in_accordbook_click'));
+  await directPage.reload();
+  await directPage.getByRole('button',{name:'포뮬러 가져오기',exact:true}).waitFor();
+  await directPage.getByRole('button',{name:'닫기',exact:true}).click();
+  assert.ok(!new URL(directPage.url()).searchParams.has('from'));
+  assert.ok(!new URL(directPage.url()).searchParams.has('drop'));
+  await directPage.goto(base+'/?drop=DROP-2026-001');
+  await directPage.waitForTimeout(250);
+  assert.equal(await directPage.locator('.drop-direct-dialog').count(),0);
+  await directPage.close();
   await page.goto(base+'/drop/2026-001');
   const cta=page.getByRole('link',{name:'Accordbook에서 열기',exact:true}).first();
   await cta.waitFor();
@@ -51,22 +70,23 @@ const base='https://127.0.0.1:5178';
   await page.locator('.formula-drop-cover-download').getByRole('button').click();
   assert.ok(await (await topDownload).path());
   await page.goto(base+'/drop/2026-001');await cta.waitFor();
-  assert.equal(await cta.getAttribute('href'),'/?from=drop&drop=DROP-2026-001');await cta.click();
+  await cta.click();
   await page.getByRole('button',{name:'포뮬러 가져오기',exact:true}).waitFor();
   assert.match(await page.locator('.drop-direct-dialog').innerText(),/11 원료 · 1000 parts/);
-  assert.equal(await page.locator('.formula-list .formula-item').count(),1);
+  const formulaCountBeforeImport=await page.locator('.formula-list .formula-item').count();
+  assert.ok(formulaCountBeforeImport>=1);
   assert.equal(await page.evaluate(()=>localStorage.getItem('accordbook.locale')),'en');
   const box=await page.locator('.drop-direct-dialog').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=viewport.width);
   await page.screenshot({path:require('node:path').join(require('node:os').tmpdir(),'drop-handoff-'+viewport.width+'.png')});
   await page.getByRole('button',{name:'포뮬러 가져오기',exact:true}).click();
   await page.waitForFunction(()=>!location.search.includes('from=drop'));
-  assert.equal(await page.locator('.formula-list .formula-item').count(),2);
+  assert.equal(await page.locator('.formula-list .formula-item').count(),formulaCountBeforeImport+1);
   assert.ok(events.some(e=>e.eventType==='import_success' && e.source==='direct_handoff'));
   const before=resolutions;await page.reload();await page.locator('.formula-name').waitFor();assert.equal(resolutions,before);
-  for(const bad of ['failure','paid','malformed']) {mode=bad;await page.goto(base+'/?from=drop&drop=DROP-2026-001&keep=1#note');await page.getByRole('heading',{name:'포뮬러를 불러오지 못했습니다'}).waitFor();await page.getByRole('button',{name:'.accordbook 파일 다운로드',exact:true}).waitFor();}
+  for(const bad of ['failure','paid','malformed']) {mode=bad;await page.goto(base+'/?from=drop&handoff='+'a'.repeat(64)+'&keep=1#note');await page.getByRole('heading',{name:'포뮬러를 불러오지 못했습니다'}).waitFor();await page.getByRole('button',{name:'.accordbook 파일 다운로드',exact:true}).waitFor();}
   const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'.accordbook 파일 다운로드',exact:true}).click();const download=await downloadPromise;assert.deepEqual(JSON.parse(fs.readFileSync(await download.path(),'utf8')).formula,JSON.parse(text).formula);
   await page.getByRole('button',{name:'닫기',exact:true}).click();assert.match(page.url(),/keep=1#note$/);
-  const prior=resolutions;await page.goto(base+'/?from=drop&drop=bad');await page.getByRole('heading',{name:'포뮬러를 불러오지 못했습니다'}).waitFor();assert.equal(resolutions,prior);
+  const prior=resolutions;await page.goto(base+'/?from=drop&drop=bad');await page.waitForTimeout(250);assert.equal(await page.locator('.drop-direct-dialog').count(),0);assert.equal(resolutions,prior);
   await page.evaluate(()=>localStorage.setItem('accordbook.drop.locale','en'));await page.goto(base+'/drop/2026-001');await page.getByRole('link',{name:'OPEN IN ACCORDBOOK',exact:true}).first().waitFor();
   await auditHierarchy('en');
   console.log('PASS',viewport.width+'x'+viewport.height,'CTA, confirmation, import, locale, cleanup, reload, invalid ID, paid/malformed rejection, fallback');

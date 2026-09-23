@@ -6,6 +6,7 @@ import { parseFreeFormulaDropPackage, type FormulaDropPackage, validateFormulaDr
 export type FormulaDropDownload = { fileName: string; fileUrl: string; accessName?: string; accessLast4?: string; accessPin?: string }
 export type FormulaDropImportResolution = { dropId: string }
 export type FormulaDropPackageResolution = FormulaDropPackage
+export type FormulaDropHandoff = { token: string; expiresAt: number }
 const endpoint = getFormulaDropApiEndpoint
 function isDrop(value: unknown): value is PublicFormulaDrop { if (!value || typeof value !== 'object') return false; const item = value as Record<string, unknown>; return typeof item.dropId === 'string' && typeof item.slug === 'string' && typeof item.title === 'string' && (item.status === 'ACTIVE' || item.status === 'EXPIRED') && !('fileUrl' in item) && !('licenseId' in item) && !('publicAccessPin' in item) }
 async function post(body: object, signal?: AbortSignal): Promise<unknown> { const url = endpoint(); if (!url) throw new Error('unconfigured'); const response = await fetch(url, { method: 'POST', redirect: 'follow', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(body), signal: signal ?? AbortSignal.timeout(10000) }); if (!response.ok) throw new Error('unavailable'); return JSON.parse(await dropResponseText(response, 32_000_000)) }
@@ -28,4 +29,17 @@ export async function resolveFormulaDropPackage(dropId: string, signal?: AbortSi
   if (value.dropId !== dropId || value.packageType !== 'accordbook-formula') throw new Error('drop_package_mismatch')
   if (typeof value.fileName !== 'string' || typeof value.packageText !== 'string' || typeof value.title !== 'string') throw new Error('invalid_drop_package')
   return parseFreeFormulaDropPackage(dropId, value.packageText, value.fileName, value.title)
+}
+export async function createFormulaDropHandoff(dropId: string): Promise<FormulaDropHandoff> {
+  if (!validateFormulaDropId(dropId)) throw new Error('invalid_drop_id')
+  const result = await post({ action: 'create-drop-handoff', dropId }) as { ok?: boolean; handoff?: unknown; error?: string }
+  const handoff = result.handoff as Record<string, unknown> | undefined
+  if (result.ok !== true || !handoff || typeof handoff.token !== 'string' || !/^[0-9a-f]{64}$/.test(handoff.token) || typeof handoff.expiresAt !== 'number') throw new Error(result.error || 'handoff_unavailable')
+  return { token: handoff.token, expiresAt: handoff.expiresAt }
+}
+export async function resolveFormulaDropHandoff(token: string): Promise<{ dropId: string; expiresAt: number }> {
+  if (!/^[0-9a-f]{64}$/.test(token)) throw new Error('invalid_handoff')
+  const result = await post({ action: 'resolve-drop-handoff', token }) as { ok?: boolean; dropId?: unknown; expiresAt?: unknown; error?: string }
+  if (result.ok !== true || typeof result.dropId !== 'string' || !validateFormulaDropId(result.dropId) || typeof result.expiresAt !== 'number') throw new Error(result.error || 'invalid_handoff')
+  return { dropId: result.dropId, expiresAt: result.expiresAt }
 }

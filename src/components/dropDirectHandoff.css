@@ -2,6 +2,12 @@
 .drop-direct-dialog::backdrop { background: #0007; }
 .drop-direct-dialog h2 { font-size: 18px; overflow-wrap: anywhere; }
 .drop-direct-dialog .btn { display: block; width: 100%; min-height: 44px; margin-top: 12px; white-space: normal; }
+.drop-direct-progress { margin: 18px 0 4px; }
+.drop-direct-progress-track { display: block; position: relative; height: 4px; overflow: hidden; background: #ded6c8; }
+.drop-direct-progress-track span { display: block; width: 38%; height: 100%; background: #39352e; animation: drop-direct-progress-slide 1.35s ease-in-out infinite; }
+.drop-direct-progress small { display: block; margin-top: 8px; color: #6c655b; font: 11px/1.4 'Courier New', monospace; letter-spacing: .02em; }
+@keyframes drop-direct-progress-slide { from { transform: translateX(-120%); } to { transform: translateX(285%); } }
+@media (prefers-reduced-motion: reduce) { .drop-direct-progress-track span { animation: none; width: 100%; } }
 .formula-drop-cover-download a.formula-drop-button { display: block; box-sizing: border-box; min-height: 44px; text-align: center; margin-bottom: 12px; }
 .formula-drop-page .formula-drop-secondary { background: var(--ink) !important; color: var(--paper) !important; box-shadow: none; }
 .formula-drop-page .formula-drop-button:link,

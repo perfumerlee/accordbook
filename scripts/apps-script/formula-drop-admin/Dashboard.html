@@ -10,6 +10,10 @@
     h2 { margin-top: 34px; border-top: 1px solid #c8bdad; padding-top: 22px; }
     .eyebrow, th { font: 700 12px monospace; letter-spacing: .12em; text-transform: uppercase; color: #895437; }
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .dashboard-section { margin-top: 24px; padding: 18px; border: 1px solid #c8bdad; background: #f8f2e9; }
+    .dashboard-section h3 { margin: 0 0 14px; font-size: 20px; font-weight: normal; }
+    .dashboard-section .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .dashboard-note { color: #75695e; margin: 0 0 14px; }
     .card { border: 1px solid #c8bdad; padding: 18px; background: #f5f0e7; }
     .measurement-round { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin: 18px 0 24px; padding: 20px 22px; border: 1px solid #9e7c62; background: #f8f2e9; box-shadow: 0 6px 18px rgba(48, 42, 38, .06); }
     .measurement-round h3 { margin: 4px 0 7px; font-size: 21px; font-weight: normal; }
@@ -63,6 +67,7 @@
       .status-meta { grid-template-columns: 1fr; }
       .measurement-round { grid-template-columns: 1fr; }
       .measurement-round .round-start { width: 100%; }
+      .dashboard-section .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -155,16 +160,27 @@
 
       let html = '<button onclick="createDraft()">새 Formula Drop 만들기</button>';
       if (active) {
-        html += `<h2>활성 Drop</h2><p><b>${esc(active.dropId)}</b> · ${esc(active.title)} · ${esc(statusLabel(active.effectiveStatus, 'effective'))}</p><div class="cards">
+        html += `<h2>활성 Drop</h2><p><b>${esc(active.dropId)}</b> · ${esc(active.title)} · ${esc(statusLabel(active.effectiveStatus, 'effective'))}</p><p class="dashboard-note">측정 모델: ${esc(metrics.measurementModel || 'DOWNLOAD ONLY')}</p><div class="cards">
           ${metricCard('고유 방문자', metrics.uniqueVisitors)}
+          ${metricCard('고유 열기 사용자', metrics.uniqueOpenUsers)}
           ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
           ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
-          ${metricCard('방문 → 다운로드', percent(metrics.visitToDownload))}
-          ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
+        </div><section class="dashboard-section"><h3>전환율</h3><div class="cards">
           ${metricCard('방문 → Import', percent(metrics.visitToImport))}
+          ${metricCard('열기 → Import', metrics.directMetricsAvailable ? percent(metrics.openToImport) : 'N/A')}
+          ${metricCard('다운로드 → 수동 Import', percent(metrics.downloadToImport))}
+          ${metricCard('Handoff 실패', metrics.handoffFailureEvents)}
+        </div></section><section class="dashboard-section"><h3>Direct Handoff</h3><p class="dashboard-note">OPEN → READY → IMPORT · import_success만 최종 성공으로 집계합니다.</p><div class="cards">
+          ${metricCard('OPEN 사용자', metrics.uniqueOpenUsers)}
+          ${metricCard('READY 사용자', metrics.uniqueReadyUsers)}
+          ${metricCard('직접 Import 사용자', metrics.uniqueDirectImportUsers)}
+          ${metricCard('실패 사용자', metrics.uniqueHandoffFailureUsers)}
+        </div></section><section class="dashboard-section"><h3>파일 다운로드</h3><div class="cards">
+          ${metricCard('다운로드 사용자', metrics.uniqueDownloaders)}
+          ${metricCard('수동 Import 사용자', metrics.uniqueManualImportUsers)}
           ${metricCard('전체 다운로드', metrics.totalDownloads)}
           ${metricCard('Import 실패', metrics.importFailures)}
-        </div>`;
+        </div></section>`;
       }
 
       html += `<h2>최근 Drop</h2><table><tr><th>Drop</th><th>제목</th><th>관리 설정</th><th>현재 공개 상태</th><th>방문자</th><th>다운로드</th><th>Import</th><th>방문 → Import</th></tr>`;
@@ -206,6 +222,7 @@
       const statusMessage = statusMismatchMessage(data.drop.status, data.drop.effectiveStatus);
       $('app').innerHTML = `<button onclick="loadDashboard()">← 대시보드로 돌아가기</button> ${actions}<h2>${esc(data.drop.dropId)}</h2><p>${esc(data.drop.title)}</p><div class="status-meta"><div><div class="eyebrow">관리 설정</div><strong>${esc(statusLabel(data.drop.status, 'raw'))}</strong><small>Admin에서 지정한 상태</small></div><div><div class="eyebrow">현재 공개 상태</div><strong>${esc(statusLabel(data.drop.effectiveStatus, 'effective'))}</strong><small>기간을 반영한 실제 공개 상태</small></div></div>${statusMessage ? `<p class="status-note">${esc(statusMessage)}</p>` : ''}<section class="card" style="margin-top:24px"><div class="eyebrow">LICENSE</div><p id="license-status-${esc(data.drop.dropId)}">STATUS · 확인 중…</p><p id="license-warning-${esc(data.drop.dropId)}" class="status-note" hidden></p><button id="license-refresh-${esc(data.drop.dropId)}" onclick="refreshLicenseStatus('${esc(data.drop.dropId)}')">상태 새로고침</button><div id="license-actions-${esc(data.drop.dropId)}"></div></section><div class="cards">
         ${metricCard('고유 방문자', metrics.uniqueVisitors)}
+        ${metricCard('고유 열기 사용자', metrics.uniqueOpenUsers)}
         ${metricCard('고유 다운로드 사용자', metrics.uniqueDownloaders)}
         ${metricCard('고유 Import 사용자', metrics.uniqueImporters)}
         ${metricCard('전체 조회', metrics.totalViews)}
@@ -217,7 +234,10 @@
         ${metricCard('방문 → 다운로드', percent(metrics.visitToDownload))}
         ${metricCard('다운로드 → Import', percent(metrics.downloadToImport))}
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
-      </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>Import 실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
+        ${metricCard('열기 → Import', metrics.directMetricsAvailable ? percent(metrics.openToImport) : 'N/A')}
+        ${metricCard('다운로드 → 수동 Import', percent(metrics.downloadToImport))}
+        ${metricCard('Handoff 실패', metrics.handoffFailureEvents)}
+      </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
       $('app').insertAdjacentHTML('afterbegin', measurementRoundCard(data.drop.dropId, data.metricsResetAt));
       refreshLicenseStatus(data.drop.dropId);
       $('license-status-' + data.drop.dropId).closest('section').insertAdjacentHTML('afterend', '<section class="publication" id="publication"><h2>PUBLIC ARCHIVE / SOCIAL PREVIEW</h2><p role="status">저장소 상태 확인 중…</p></section>');

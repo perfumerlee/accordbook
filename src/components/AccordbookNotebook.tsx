@@ -20,6 +20,8 @@ import { printCurrentFormula } from '../services/printFormula'
 import { trackBackupExported, trackDilutionApplied, trackFormulaCompleted, trackFormulaCreated, trackPrintOpened } from '../services/analytics'
 import { downloadFormulaFile, FormulaFileError, importFormula, parseFormulaFile } from '../services/formulaFile'
 import { clearFormulaDropAccess, formatFormulaDropAccessDetails, readFormulaDropAccess } from '../services/formulaDropAccess'
+import { createFormulaDropEvent, sendFormulaDropEvent } from '../services/formulaDropEvents'
+import { getRememberedFormulaDropImport } from '../services/formulaDropIdentity'
 import type { FormulaFile } from '../models/formulaFile'
 import { parsePaidFormulaPackage, type PaidFormulaPackage } from '../services/paidFormulaPackage'
 import PaidFormulaImport from './PaidFormulaImport'
@@ -193,8 +195,9 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   useEffect(() => { if (storage) void ensureTimeMachineIntegrity(storage) }, [storage])
   useEffect(() => { if (!introComplete || !hydrationComplete || welcomeClosed || formulas.length !== 1 || archive.length !== 0) { setWelcomeReady(false); return } const timer = window.setTimeout(() => setWelcomeReady(true), 260); return () => window.clearTimeout(timer) }, [introComplete, hydrationComplete, welcomeClosed, formulas.length, archive.length])
   const dropParams = new URLSearchParams(window.location.search)
-  const dropSlug = dropParams.get('drop') ?? ''
-  const directDropInbound = dropParams.get('from') === 'drop' && !/^\d{4}-\d{3}$/.test(dropSlug)
+  const handoffToken = dropParams.get('handoff') ?? ''
+  const dropSlug = dropParams.get('drop') ?? handoffToken
+  const directDropInbound = dropParams.get('from') === 'drop' && /^[0-9a-f]{64}$/.test(handoffToken)
   const dropInbound = dropParams.get('from') === 'drop' && /^\d{4}-\d{3}$/.test(dropSlug)
   const dropHandoff = useMemo(() => dropInbound ? readFormulaDropAccess() : undefined, [dropInbound, dropSlug])
   const validDropInbound = Boolean(dropHandoff && dropHandoff.dropSlug === dropSlug)
@@ -325,13 +328,15 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   const exportJson = async () => { if (!storage) return; try { await flush(); const backup = await createBackup(storage); downloadBackup(backup); setBackupReminder(markBackupSuccess()); trackBackupExported() } catch { setBackupReminder(readBackupReminderState()) } }
   const exportFormula = async () => { if (active) { const latest = await flushProvenance() ?? active; const exported = await appendRevision(latest, 'exported'); setActive(exported); setFormulas((all) => all.map((f) => f.id === exported.id ? exported : f)); await persist(exported); await downloadFormulaFile(exported) } }
   const [paidImport, setPaidImport] = useState<PaidFormulaPackage>()
-  const finishFormulaImport = async (shared: FormulaFile) => {
+  const finishFormulaImport = async (shared: FormulaFile, source: 'direct_handoff' | 'manual_file' = 'manual_file') => {
     if (!storage) throw new Error('Storage unavailable')
     const imported = await importFormula(storage, shared, prefix)
     clearPendingMaterialFocus(); clearFormulaDropAccess(); newOriginFlowId.current = undefined; setOriginPromptId(undefined); setDropInboundDismissed(true)
     setFormulas(all => [...all, imported]); setActive(imported); setWelcomeClosed(true)
     setNotebookOpen(true); setArchiveOpen(false); setImportOpen(false); setFormulaSearchQuery('')
     localStorage.setItem(ACTIVE_KEY, imported.id)
+    const rememberedDrop = source === 'manual_file' ? getRememberedFormulaDropImport() : undefined
+    if (rememberedDrop) void sendFormulaDropEvent(createFormulaDropEvent(rememberedDrop.dropId, 'import_success', { source: 'manual_file' }))
     trackFormulaCreated('import')
   }
   const importFormulaFile = async (file: File) => {
@@ -343,7 +348,7 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
         setPaidImport(parsePaidFormulaPackage(text)); setWelcomeClosed(true); setImportOpen(false)
         return
       }
-      await finishFormulaImport(parseFormulaFile(text))
+      await finishFormulaImport(parseFormulaFile(text), 'manual_file')
     } catch { window.alert(language === 'ko' ? '유효한 포뮬러 파일을 가져올 수 없습니다.' : 'Unable to import this formula file.') }
   }
   const importJson = async (file: File) => { if (!storage) return; try { const backup = parseBackup(await file.text()); if (!window.confirm(language === 'ko' ? '이 백업을 가져오면 현재 노트북의 데이터가 대체됩니다.' : 'Importing this backup will replace the current notebook.')) return; clearPendingMaterialFocus(); newOriginFlowId.current = undefined; setOriginPromptId(undefined); await importBackup(storage, backup); savePinnedFormulaIds([]); setPinnedFormulaIds([]); const settings = await storage.settings.get(); const list = await storage.formulas.list(); setPrefix(settings?.formulaIdPrefix ?? 'ACC'); setLanguage(settings?.language ?? 'en'); setFormulas(list); setArchive(await storage.archive.list()); const saved = localStorage.getItem(ACTIVE_KEY); const selected = list.find((f) => f.id === saved) ?? list[0]; setActive(selected); if (selected) localStorage.setItem(ACTIVE_KEY, selected.id) } catch (error) { if (error instanceof BackupImportError) window.alert(error.message); else window.alert(language === 'ko' ? '가져오기에 실패했습니다.' : 'Import failed.') } }

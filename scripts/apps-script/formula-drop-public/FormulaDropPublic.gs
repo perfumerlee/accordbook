@@ -6,6 +6,8 @@ const FORMULA_DROP_HEADERS = ['dropId', 'year', 'sequence', 'title', 'subtitle',
 const FORMULA_DROP_EVENT_HEADERS = ['eventId', 'timestamp', 'dropId', 'visitorId', 'sessionId', 'eventType', 'source', 'referrerHost', 'failureReason'];
 const EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed', 'drop_open_in_accordbook_click', 'drop_handoff_load_success', 'drop_handoff_load_failure', 'drop_handoff_import_success'];
 const FORMULA_DROP_ALLOWED_PACKAGE_HOSTS = ['accordbook.org'];
+const FORMULA_DROP_HANDOFF_TTL_MS = 10 * 60 * 1000;
+const FORMULA_DROP_HANDOFF_PREFIX = 'FORMULA_DROP_HANDOFF_';
 function allowedPackageUrl_(value) { return typeof value === 'string' && /^https:\/\/accordbook\.org\/formula-drops\/\d{4}-\d{3}\/[A-Za-z0-9_-]+\.accordbook$/.test(value); }
 function buildFormulaDropFileName_(dropId, existingFileName, title) { if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '')) return ''; const source = String(existingFileName || '').trim().replace(/\.accordbook$/i, '').replace(/^ACBK-DROP-(?:\d{4}-)?\d{3}[-_]?/i, '').replace(/^DROP-(?:\d{4}-)?\d{3}[-_]?/i, '') || String(title || '').trim(); const stem = source.normalize('NFC').replace(/[\\/:*?"<>|]+/g, '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'formula-drop'; return 'ACBK-DROP-' + dropId.slice(5) + '-' + stem + '.accordbook'; }
 function downloadDrop_(row) {
@@ -41,6 +43,26 @@ function validRequest_(input) {
 }
 function dropExists_(sheet, dropId) { const count = sheet.getLastRow() - 1; if (count <= 0) return false; return sheet.getRange(2, 1, count, 1).getValues().some(row => row[0] === dropId); }
 function eventExists_(sheet, eventId) { const count = sheet.getLastRow() - 1; if (count <= 0) return false; return sheet.getRange(2, 1, count, 1).getValues().some(row => row[0] === eventId); }
+function createDropHandoff_(input) {
+  if (!input || !/^DROP-[0-9]{4}-[0-9]{3}$/.test(input.dropId || '')) return json_({ ok: false, error: 'invalid_request' });
+  const sheet = spreadsheet_().getSheetByName(FORMULA_DROPS_SHEET_NAME); if (!sheet) return json_({ ok: false, error: 'not_found' }); headers_(sheet, FORMULA_DROP_HEADERS);
+  const row = findDropRow_(sheet, input.dropId); const drop = row && publicDrop_(row); if (!drop || drop.status !== 'ACTIVE') return json_({ ok: false, error: 'not_found' });
+  const token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  PropertiesService.getScriptProperties().setProperty(FORMULA_DROP_HANDOFF_PREFIX + token, JSON.stringify({ dropId: input.dropId, expiresAt: Date.now() + FORMULA_DROP_HANDOFF_TTL_MS }));
+  return json_({ ok: true, handoff: { token, expiresAt: Date.now() + FORMULA_DROP_HANDOFF_TTL_MS } });
+}
+function resolveDropHandoff_(input) {
+  if (!input || typeof input.token !== 'string' || !/^[0-9a-f]{64}$/.test(input.token)) return json_({ ok: false, error: 'invalid_handoff' });
+  const key = FORMULA_DROP_HANDOFF_PREFIX + input.token; const raw = PropertiesService.getScriptProperties().getProperty(key);
+  if (!raw) return json_({ ok: false, error: 'invalid_handoff' });
+  let record; try { record = JSON.parse(raw); } catch (_) { PropertiesService.getScriptProperties().deleteProperty(key); return json_({ ok: false, error: 'invalid_handoff' }); }
+  if (!record || typeof record.dropId !== 'string' || !/^DROP-[0-9]{4}-[0-9]{3}$/.test(record.dropId) || typeof record.expiresAt !== 'number' || Date.now() >= record.expiresAt) {
+    PropertiesService.getScriptProperties().deleteProperty(key); return json_({ ok: false, error: 'expired_handoff' });
+  }
+  const sheet = spreadsheet_().getSheetByName(FORMULA_DROPS_SHEET_NAME); if (!sheet) return json_({ ok: false, error: 'not_found' }); headers_(sheet, FORMULA_DROP_HEADERS);
+  const row = findDropRow_(sheet, record.dropId); const drop = row && publicDrop_(row); if (!drop || drop.status !== 'ACTIVE') return json_({ ok: false, error: 'not_found' });
+  return json_({ ok: true, dropId: record.dropId, expiresAt: record.expiresAt });
+}
 function doPost(e) {
   let lock;
   try {
@@ -50,6 +72,8 @@ function doPost(e) {
     if (input.action === 'get-drop') return readDrop_(input);
     if (input.action === 'get-download') return getDownload_(input);
     if (input.action === 'resolve-import-drop') return resolveImportDrop_(input);
+    if (input.action === 'create-drop-handoff') return createDropHandoff_(input);
+    if (input.action === 'resolve-drop-handoff') return resolveDropHandoff_(input);
     if (input.action === 'resolve-drop-package') return resolveDropPackage_(input);
     if (!validRequest_(input)) return json_({ ok: false, error: 'invalid_request' });
     const ss = spreadsheet_(); const drops = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); const events = ss.getSheetByName(FORMULA_DROP_EVENTS_SHEET_NAME);
@@ -82,7 +106,15 @@ function resolveDropPackage_(input) {
   const row = findDropRow_(sheet, input.dropId); const drop = row && publicDrop_(row); if (!drop || drop.status !== 'ACTIVE') return json_({ ok: false, error: 'not_found' });
   const fileName = buildFormulaDropFileName_(String(row[0] || '').trim(), String(row[9] || '').trim(), String(row[3] || '').trim()); const fileUrl = String(row[10] || '').trim();
   if (!allowedPackageUrl_(fileUrl) || fileUrl.length > 2000 || fileUrl.split('/')[4] !== input.dropId.slice(5)) return json_({ ok: false, error: 'package_unavailable' });
-  const response = UrlFetchApp.fetch(fileUrl, { followRedirects: false, muteHttpExceptions: true }); const text = response.getContentText();
+  let response;
+  try { response = UrlFetchApp.fetch(fileUrl, { followRedirects: false, muteHttpExceptions: true }); }
+  catch (error) {
+    // Keep raw exceptions (which may contain URLs) out of public responses.
+    const message = String(error && error.message || '');
+    const authorization = /script.external_request|permission|authorization|권한|승인/i.test(message);
+    return json_({ ok: false, error: authorization ? 'package_fetch_authorization_required' : 'package_fetch_failed' });
+  }
+  const text = response.getContentText();
   if (response.getResponseCode() !== 200 || response.getContent().length > 16000000) return json_({ ok: false, error: 'invalid_drop_package' });
   try {
     const parsed = JSON.parse(text);
@@ -95,4 +127,37 @@ function resolveDropPackage_(input) {
     });
   } catch (_) { return json_({ ok: false, error: 'invalid_drop_package' }); }
   return json_({ ok: true, package: { dropId: input.dropId, fileName, packageText: text, packageType: 'accordbook-formula', title: String(row[3] || '') } });
+}
+
+// Run once from the Apps Script editor as the deployment owner after adding
+// UrlFetchApp. This triggers authorization without changing Sheets or events.
+function checkFormulaDropResolver() {
+  const output = resolveDropPackage_({ dropId: 'DROP-2026-001' });
+  const result = JSON.parse(output.getContent());
+  const summary = { ok: result.ok, error: result.error || null };
+  if (result.ok && result.package) {
+    const parsed = JSON.parse(result.package.packageText);
+    summary.packageType = parsed.type;
+    summary.formatVersion = parsed.formatVersion;
+    summary.materialCount = parsed.formula.rows.length;
+    summary.totalParts = parsed.formula.rows.reduce(function (sum, row) { return sum + (typeof row.parts === 'number' ? row.parts : 0); }, 0);
+  }
+  console.log(JSON.stringify(summary));
+  return summary;
+}
+
+// Run this directly from the Apps Script editor to request the UrlFetch scope.
+// The call is intentionally outside the resolver catch so Apps Script can show
+// its OAuth consent dialog instead of returning a masked resolver error.
+function authorizeFormulaDropFetch() {
+  const response = UrlFetchApp.fetch('https://accordbook.org/formula-drops/2026-001/ACBK-DROP-2026-001-McintoshApple.accordbook', {
+    followRedirects: false,
+    muteHttpExceptions: true,
+  });
+  const result = {
+    status: response.getResponseCode(),
+    bytes: response.getContent().length,
+  };
+  console.log(JSON.stringify(result));
+  return result;
 }

@@ -15,6 +15,16 @@ function fixture(url = 'https://accordbook.org/formula-drops/2026-001/ACBK-DROP-
   return { fetch, context, resolve: (dropId = 'DROP-2026-001') => context.resolveDropPackage_({dropId}) }
 }
 describe('executable Apps Script resolver boundary', () => {
+  it('reports missing external-request authorization without exposing exception details', () => {
+    const f = fixture();
+    f.fetch.mockImplementation(() => { throw new Error('Required permission: https://www.googleapis.com/auth/script.external_request'); });
+    expect(f.resolve()).toEqual({ ok: false, error: 'package_fetch_authorization_required' });
+  });
+  it('reports fetch exceptions without exposing URLs', () => {
+    const f = fixture();
+    f.fetch.mockImplementation(() => { throw new Error('DNS failed for private URL'); });
+    expect(f.resolve()).toEqual({ ok: false, error: 'package_fetch_failed' });
+  });
   it('resolves the allowed Drop asset without redirects', () => { const f = fixture(); expect(f.resolve().ok).toBe(true); expect(f.fetch).toHaveBeenCalledWith(expect.any(String), { followRedirects: false, muteHttpExceptions: true }) })
   it.each(['https://untrusted.example/a','http://accordbook.org/a','https://accordbook.org.evil.test/a','https://accordbook.org@evil.test/a','https://accordbook.org:444/a','https://accordbook.org/formula-drops/2026-002/x.accordbook'])('rejects %s before fetching', url => { const f=fixture(url); expect(f.resolve().ok).toBe(false); expect(f.fetch).not.toHaveBeenCalled() })
   it('rejects invalid IDs before fetching', () => { const f=fixture(); expect(f.resolve('../x').ok).toBe(false); expect(f.fetch).not.toHaveBeenCalled() })
