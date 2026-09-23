@@ -1,0 +1,20 @@
+{
+  "dropId": "DROP-2026-001",
+  "title": "Mcintosh Apple / Simplified Study",
+  "notes": "A simplified study of McIntosh Apple, focusing on its core fruity character.",
+  "total": 1000,
+  "provenance": { "originType": "reference", "source": "Formula Drop", "dropId": "DROP-2026-001" },
+  "rows": [
+    { "material": "Verdox", "parts": 298 },
+    { "material": "Benzyl benzoate", "parts": 190 },
+    { "material": "Dimethyl benzyl carbinyl butyrate", "parts": 122 },
+    { "material": "Dihydromyrcenol", "parts": 99 },
+    { "material": "Fructone", "parts": 46 },
+    { "material": "Aldehyde C-14", "parts": 45 },
+    { "material": "Isocyclocitral", "parts": 40 },
+    { "material": "Allyl amyl glycolate", "parts": 25 },
+    { "material": "Galaxolide @50% in IPM", "parts": 23 },
+    { "material": "Hexyl acetate", "parts": 18 },
+    { "material": "DPG", "parts": 94 }
+  ]
+}

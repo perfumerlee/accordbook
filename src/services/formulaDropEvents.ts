@@ -1,6 +1,6 @@
 import { createFormulaDropEventId, getFormulaDropAttribution, getOrCreateFormulaDropSessionId, getOrCreateFormulaDropVisitorId } from './formulaDropIdentity'
 import { getFormulaDropApiEndpoint } from './formulaDropEndpoint'
-export const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'] as const
+export const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed', 'drop_open_in_accordbook_click', 'drop_handoff_load_success', 'drop_handoff_load_failure', 'drop_handoff_import_success'] as const
 export type FormulaDropEventType = typeof FORMULA_DROP_EVENT_TYPES[number]
 export type FormulaDropEventPayload = { eventId: string; dropId: string; visitorId: string; sessionId: string; eventType: FormulaDropEventType; source: string; referrerHost: string; failureReason?: string }
 type Result = { ok: true; accepted: boolean; duplicate: boolean } | { ok: false; error: string }
@@ -12,7 +12,7 @@ export function createFormulaDropEvent(dropId: string, eventType: FormulaDropEve
 export async function sendFormulaDropEvent(payload: FormulaDropEventPayload): Promise<Result> {
   const url = endpoint(); if (!url) return { ok: false, error: 'endpoint_unconfigured' }
   try {
-    const response = await fetch(url, { method: 'POST', redirect: 'follow', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ action: 'event', ...payload }), signal: AbortSignal.timeout(10000) })
+    const response = await fetch(url, { method: 'POST', keepalive: true, redirect: 'follow', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ action: 'event', ...payload }), signal: AbortSignal.timeout(10000) })
     if (!response.ok) return { ok: false, error: 'transport_failed' }
     const result = await response.json() as Result
     return result && typeof result === 'object' ? result : { ok: false, error: 'invalid_response' }

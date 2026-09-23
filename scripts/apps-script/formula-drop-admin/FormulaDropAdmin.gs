@@ -17,7 +17,7 @@ const FORMULA_DROP_EVENTS_HEADERS = [
   'source', 'referrerHost', 'failureReason',
 ];
 const FORMULA_DROP_STATUSES = ['DRAFT', 'SCHEDULED', 'ACTIVE', 'EXPIRED'];
-const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'];
+const FORMULA_DROP_EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed', 'drop_open_in_accordbook_click', 'drop_handoff_load_success', 'drop_handoff_load_failure', 'drop_handoff_import_success'];
 
 const FORMULA_DROPS_HEADER_NOTES = [
   '역할:\nFormula Drop의 영구 고유 식별자\n\n형식:\nDROP-YYYY-NNN\n\n예:\nDROP-2026-001\n\n필수:\nYES\n\n기록 주체:\nAdmin / Apps Script\n\n변경 규칙:\n생성 후 변경 금지.\n연도별 sequence는 001부터 증가.\n재사용 금지.\nPaid Formula packageId와 혼동하지 않음.',

@@ -4,12 +4,16 @@ const FORMULA_DROPS_SHEET_NAME = 'FormulaDrops';
 const FORMULA_DROP_EVENTS_SHEET_NAME = 'FormulaDropEvents';
 const FORMULA_DROP_HEADERS = ['dropId', 'year', 'sequence', 'title', 'subtitle', 'description', 'status', 'startAt', 'expiresAt', 'fileName', 'fileUrl', 'licenseId', 'publicAccessName', 'publicAccessLast4', 'publicAccessPin', 'createdAt', 'updatedAt'];
 const FORMULA_DROP_EVENT_HEADERS = ['eventId', 'timestamp', 'dropId', 'visitorId', 'sessionId', 'eventType', 'source', 'referrerHost', 'failureReason'];
-const EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed'];
+const EVENT_TYPES = ['view', 'download', 'import_attempt', 'import_success', 'import_failed', 'drop_open_in_accordbook_click', 'drop_handoff_load_success', 'drop_handoff_load_failure', 'drop_handoff_import_success'];
+const FORMULA_DROP_ALLOWED_PACKAGE_HOSTS = ['accordbook.org'];
+function allowedPackageUrl_(value) { return typeof value === 'string' && /^https:\/\/accordbook\.org\/formula-drops\/\d{4}-\d{3}\/[A-Za-z0-9_-]+\.accordbook$/.test(value); }
 function buildFormulaDropFileName_(dropId, existingFileName, title) { if (!/^DROP-\d{4}-\d{3}$/.test(dropId || '')) return ''; const source = String(existingFileName || '').trim().replace(/\.accordbook$/i, '').replace(/^ACBK-DROP-(?:\d{4}-)?\d{3}[-_]?/i, '').replace(/^DROP-(?:\d{4}-)?\d{3}[-_]?/i, '') || String(title || '').trim(); const stem = source.normalize('NFC').replace(/[\\/:*?"<>|]+/g, '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'formula-drop'; return 'ACBK-DROP-' + dropId.slice(5) + '-' + stem + '.accordbook'; }
 function downloadDrop_(row) {
   const publicDrop = publicDrop_(row); if (!publicDrop || publicDrop.status !== 'ACTIVE') return null;
   const fileName = buildFormulaDropFileName_(String(row[0] || '').trim(), String(row[9] || '').trim(), String(row[3] || '').trim()); const fileUrl = String(row[10] || '').trim(); const accessName = String(row[12] || '').trim(); const accessLast4 = row[13]; const accessPin = row[14];
-  if (!fileName || fileName.length > 255 || !/^https:\/\/[^\s]+$/i.test(fileUrl) || fileUrl.length > 2000 || !accessName || !/^\d{4}$/.test(String(accessLast4)) || !/^\d{6}$/.test(String(accessPin))) return null;
+  if (!fileName || fileName.length > 255 || !allowedPackageUrl_(fileUrl) || fileUrl.length > 2000) return null;
+  if (!String(row[11] || '').trim()) return { fileName, fileUrl };
+  if (!accessName || !/^\d{4}$/.test(String(accessLast4)) || !/^\d{6}$/.test(String(accessPin))) return null;
   return { fileName, fileUrl, accessName, accessLast4: String(accessLast4), accessPin: String(accessPin) };
 }
 function findDropRow_(sheet, dropId) { const count = sheet.getLastRow() - 1; if (count <= 0) return null; const rows = sheet.getRange(2, 1, count, FORMULA_DROP_HEADERS.length).getValues(); return rows.find(row => row[0] === dropId) || null; }
@@ -46,6 +50,7 @@ function doPost(e) {
     if (input.action === 'get-drop') return readDrop_(input);
     if (input.action === 'get-download') return getDownload_(input);
     if (input.action === 'resolve-import-drop') return resolveImportDrop_(input);
+    if (input.action === 'resolve-drop-package') return resolveDropPackage_(input);
     if (!validRequest_(input)) return json_({ ok: false, error: 'invalid_request' });
     const ss = spreadsheet_(); const drops = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); const events = ss.getSheetByName(FORMULA_DROP_EVENTS_SHEET_NAME);
     if (!drops || !events) return json_({ ok: false, error: 'unavailable' }); headers_(drops, FORMULA_DROP_HEADERS); headers_(events, FORMULA_DROP_EVENT_HEADERS);
@@ -70,4 +75,24 @@ function getDownload_(input) {
   const ss = spreadsheet_(); const drops = ss.getSheetByName(FORMULA_DROPS_SHEET_NAME); const events = ss.getSheetByName(FORMULA_DROP_EVENTS_SHEET_NAME); if (!drops || !events) return json_({ ok: false, error: 'temporarily_unavailable' }); headers_(drops, FORMULA_DROP_HEADERS); headers_(events, FORMULA_DROP_EVENT_HEADERS);
   const row = findDropRow_(drops, input.dropId); const download = row && downloadDrop_(row); if (!download) return json_({ ok: false, error: 'not_available' });
   let lock; try { lock = LockService.getScriptLock(); lock.waitLock(10000); const duplicate = eventExists_(events, input.eventId); if (!duplicate) events.appendRow([input.eventId, new Date(), input.dropId, input.visitorId, input.sessionId, 'download', input.source, input.referrerHost || '', '']); SpreadsheetApp.flush(); return json_({ ok: true, accepted: true, duplicate, download }); } catch (_) { return json_({ ok: false, error: 'temporarily_unavailable' }); } finally { if (lock && lock.hasLock()) lock.releaseLock(); }
+}
+function resolveDropPackage_(input) {
+  if (!input || !/^DROP-\d{4}-\d{3}$/.test(input.dropId || '')) return json_({ ok: false, error: 'invalid_request' });
+  const sheet = spreadsheet_().getSheetByName(FORMULA_DROPS_SHEET_NAME); if (!sheet) return json_({ ok: false, error: 'not_found' }); headers_(sheet, FORMULA_DROP_HEADERS);
+  const row = findDropRow_(sheet, input.dropId); const drop = row && publicDrop_(row); if (!drop || drop.status !== 'ACTIVE') return json_({ ok: false, error: 'not_found' });
+  const fileName = buildFormulaDropFileName_(String(row[0] || '').trim(), String(row[9] || '').trim(), String(row[3] || '').trim()); const fileUrl = String(row[10] || '').trim();
+  if (!allowedPackageUrl_(fileUrl) || fileUrl.length > 2000 || fileUrl.split('/')[4] !== input.dropId.slice(5)) return json_({ ok: false, error: 'package_unavailable' });
+  const response = UrlFetchApp.fetch(fileUrl, { followRedirects: false, muteHttpExceptions: true }); const text = response.getContentText();
+  if (response.getResponseCode() !== 200 || response.getContent().length > 16000000) return json_({ ok: false, error: 'invalid_drop_package' });
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed || parsed.type !== 'accordbook-formula' || parsed.formatVersion !== 2) return json_({ ok: false, error: 'package_type_mismatch' });
+    if (!parsed.formula || parsed.formula.name !== String(row[3] || '') || typeof parsed.formula.notes !== 'string' || !Array.isArray(parsed.formula.rows) || !parsed.provenance || typeof parsed.provenance !== 'object' || Array.isArray(parsed.provenance)) throw new Error('invalid_formula');
+    parsed.formula.rows.forEach(function (r) {
+      if (!r || typeof r.material !== 'string' || !(r.parts === '' || typeof r.parts === 'number' && isFinite(r.parts))) throw new Error('invalid_row');
+      if (r.cas !== undefined && typeof r.cas !== 'string' || r.marked !== undefined && typeof r.marked !== 'boolean') throw new Error('invalid_row');
+      if (r.dilution !== undefined && (!r.dilution || typeof r.dilution.enabled !== 'boolean' || typeof r.dilution.percent !== 'number' || !isFinite(r.dilution.percent) || typeof r.dilution.solvent !== 'string')) throw new Error('invalid_dilution');
+    });
+  } catch (_) { return json_({ ok: false, error: 'invalid_drop_package' }); }
+  return json_({ ok: true, package: { dropId: input.dropId, fileName, packageText: text, packageType: 'accordbook-formula', title: String(row[3] || '') } });
 }

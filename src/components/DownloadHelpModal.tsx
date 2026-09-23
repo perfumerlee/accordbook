@@ -69,13 +69,13 @@ export default function DownloadHelpModal({mode,title,fileName,download:provided
       {fileName&&<p className="download-help-file">{ko?'다운로드한 파일':'DOWNLOADED FILE'}<br/><strong>{fileName}</strong></p>}
 
       <ol className="download-help-steps">
-        {steps.map((step,index)=><li key={step.title}>
+        {steps.filter((_step,index)=>index<2 || Boolean(download?.accessPin)).map((step,index)=><li key={step.title}>
           <span>{String(index+1).padStart(2,'0')}</span>
           <div><strong>{step.title}</strong><p>{step.description}</p></div>
         </li>)}
       </ol>
 
-      {mode==='download-success'&&download&&<div className="download-help-access">
+      {mode==='download-success'&&download?.accessPin&&<div className="download-help-access">
         <p className="download-help-warning"><strong>{ko?'접근 정보 준비 완료':'ACCESS DETAILS READY'}</strong><br/>{ko?'파일을 열 때 필요합니다.':'You’ll need these when the file opens.'}</p>
         <FormulaAccessDetails download={download}/>
       </div>}
