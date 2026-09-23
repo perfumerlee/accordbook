@@ -33,10 +33,13 @@ export function createFormulaDropEventId(): string { return `evt_${uuid()}` }
 type Attribution = { source: string; referrerHost: string }
 function cleanSource(value: string | undefined): string { const normalized = value?.trim().toLowerCase() ?? ''; return SOURCE.test(normalized) ? normalized : 'direct' }
 function cleanHost(value: string | undefined): string { if (!value) return ''; try { const host = new URL(value).hostname.toLowerCase(); return HOST.test(host) ? host : '' } catch { const host = value.toLowerCase().trim(); return HOST.test(host) ? host : '' } }
+function isPrivateDevHost(host: string): boolean { if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.localhost')) return true; const match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/); if (!match) return false; const octets = match.slice(1).map(Number); if (octets.some(value => value > 255)) return false; return octets[0] === 10 || (octets[0] === 192 && octets[1] === 168) || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31); }
 function readContexts(): Record<string, Attribution> { try { const parsed = JSON.parse(storage('session')?.getItem(SOURCE_KEY) ?? '{}'); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {} } catch { return {} } }
 export function getFormulaDropAttribution(dropId: string, sourceParam?: string, referrer?: string): Attribution {
   const contexts = readContexts(); const provided = sourceParam !== undefined; const explicit = provided && SOURCE.test(sourceParam.trim().toLowerCase())
   const current = contexts[dropId]
+  const runtimeHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : ''
+  if (isPrivateDevHost(runtimeHost)) { const value = { source: 'local_dev', referrerHost: runtimeHost }; contexts[dropId] = value; try { storage('session')?.setItem(SOURCE_KEY, JSON.stringify(contexts)) } catch { /* best effort */ } return value }
   const value = { source: provided ? cleanSource(sourceParam) : current?.source ?? 'direct', referrerHost: provided ? cleanHost(referrer) : current?.referrerHost ?? cleanHost(referrer) }
   contexts[dropId] = value
   try { storage('session')?.setItem(SOURCE_KEY, JSON.stringify(contexts)) } catch { /* best effort */ }
