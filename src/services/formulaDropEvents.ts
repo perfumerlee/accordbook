@@ -6,7 +6,7 @@ export type FormulaDropEventPayload = { eventId: string; dropId: string; visitor
 type Result = { ok: true; accepted: boolean; duplicate: boolean } | { ok: false; error: string }
 const endpoint = getFormulaDropApiEndpoint
 export function createFormulaDropEvent(dropId: string, eventType: FormulaDropEventType, options: { source?: string; referrer?: string; failureReason?: string; eventId?: string } = {}): FormulaDropEventPayload {
-  const runtimeReferrer = options.referrer ?? (typeof window !== 'undefined' ? window.location.href : undefined)
+  const runtimeReferrer = options.referrer ?? (typeof window !== 'undefined' && window.location ? window.location.href : undefined)
   const attribution = getFormulaDropAttribution(dropId, options.source, runtimeReferrer)
   return { eventId: options.eventId ?? createFormulaDropEventId(), dropId, visitorId: getOrCreateFormulaDropVisitorId(), sessionId: getOrCreateFormulaDropSessionId(), eventType, source: attribution.source, referrerHost: attribution.referrerHost, ...(options.failureReason ? { failureReason: options.failureReason } : {}) }
 }

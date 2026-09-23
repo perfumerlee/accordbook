@@ -337,6 +337,10 @@
   .mobile-detail-actions .mobile-detail-remove { margin-top: 0; color: #8b4d35; }
   .mobile-detail-confirm { width: 100%; min-height: 42px; margin-top: 16px; padding: 9px 12px; border: 1px solid #8f765d; background: #75624d; color: #fffaf0; font: 14px Georgia, serif; }
   .notebook, .note-header, .title-area, .page-box, .header-tools, .summary-grid, .metrics, .editor-actions, .notes, .footer { min-width: 0; max-width: 100%; box-sizing: border-box; }
+}
+
+/* Drawer controls and menus share the same layout on phones and tablets. */
+@media screen and (max-width: 1199px) {
   .sidebar .formula-list { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto !important; }
   .sidebar .archive-panel.open { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto !important; }
   .sidebar:has(.archive-panel.open) .formula-list, .sidebar:has(.export-menu.open) .formula-list { display: none; }
@@ -352,6 +356,9 @@
   .data-actions .export-menu { position: static; width: 100%; min-width: 0; box-sizing: border-box; margin-top: 6px; padding: 4px 0 0; border: 0; border-top: 1px solid rgba(185,168,144,.55); border-radius: 0; background: transparent; box-shadow: none; }
   .data-actions .export-menu::before { display: none; }
   .data-actions .export-menu .btn { box-sizing: border-box; min-width: 0; white-space: normal; }
+}
+
+@media (max-width: 767px) {
   .mobile-detail-sheet, .mobile-detail-sheet * { box-sizing: border-box; max-width: 100%; }
 }
 
@@ -421,4 +428,71 @@ html[lang="ko"] .app .title-primary > label {
 
 @media(max-width:767px){.material-suggestions{width:min(280px,calc(100vw - 120px));max-width:calc(100vw - 120px)}}
 @media(max-width:420px){.material-suggestions{width:min(260px,calc(100vw - 112px));max-width:calc(100vw - 112px)}}
+
+/* Preserve the original sidebar top breathing room, while giving the brand
+   subtitle a little more separation from the Formula ID controls. */
+@media (max-width: 1199px) {
+  .app > .sidebar { padding: 16px 18px 16px; }
+  .app > .sidebar .brand-sub { margin-bottom: 24px; }
+  .app > .sidebar .new-btn { margin-bottom: 8px; }
+}
+
+/* Short drawer viewports: let the library own the flexible height instead of
+   inheriting the desktop 100vh minimum from productionLayout.css. */
+@media (max-width: 1199px) and (max-height: 700px) {
+  .app > .sidebar { height: 100dvh; min-height: 0 !important; max-height: 100dvh; padding-top: 16px; padding-bottom: 10px; }
+  .app > .sidebar .brand { margin-bottom: 2px; }
+  .app > .sidebar .brand-sub { margin-bottom: 14px; }
+  .app > .sidebar .side-title { padding-top: 7px; padding-bottom: 7px; }
+  .app > .sidebar .new-btn { margin-bottom: 4px; }
+  .app > .sidebar .library-notebook-title,
+  .app > .sidebar .archive-section-heading { min-height: 36px; margin-top: 4px; }
+  .app > .sidebar .formula-search { margin: 6px 0 6px; }
+  .app > .sidebar .formula-search input { min-height: 34px; padding-top: 6px; padding-bottom: 6px; }
+  .app > .sidebar .data-section-title { padding-top: 6px; padding-bottom: 5px; }
+  .app > .sidebar .data-actions { gap: 4px; }
+  .app > .sidebar .data-actions > .btn { min-height: 34px; padding-top: 6px; padding-bottom: 6px; }
+  .app > .sidebar .privacy { display: none; }
+  .app > .sidebar .formula-list { flex: 1 1 auto; min-height: 0; overflow-y: auto !important; }
+}
+
+/* Shared phone/tablet drawer: keep the library scroll independent of the page. */
+@media screen and (max-width: 1199px) {
+  html.responsive-drawer-open,
+  html.responsive-drawer-open body { overflow: hidden; overscroll-behavior: none; }
+  .app > .sidebar { height: 100dvh; min-height: 0 !important; max-height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto !important; overscroll-behavior: contain; }
+  .app > .sidebar > * { flex-shrink: 0; }
+  .app > .sidebar .formula-list,
+  .app > .sidebar .archive-panel.open { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto !important; overscroll-behavior: contain; }
+  .app > .sidebar:has(.archive-panel.open) .formula-list,
+  .app > .sidebar:has(.export-menu.open) .formula-list { display: none; }
+}
+
+/* Short landscape: reserve at least two readable 55px rows plus their 7px gap.
+   Utility controls share horizontal space; portrait and desktop are excluded. */
+@media screen and (min-width: 768px) and (max-width: 1199px) and (max-height: 600px) {
+  .app > .sidebar { width: min(360px, 86vw); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; column-gap: 8px; padding: 10px 18px; }
+  .app > .sidebar > * { grid-column: 1 / -1; min-width: 0; }
+  .app > .sidebar .brand-sub { margin-bottom: 4px; }
+  .app > .sidebar .side-title { margin: 2px 0; padding: 2px 0; }
+  .app > .sidebar .prefix-row { grid-column: 1; }
+  .app > .sidebar .prefix-row input { padding: 6px 8px; }
+  .app > .sidebar .prefix-save-btn { width: 54px; min-width: 54px; flex-basis: 54px; }
+  .app > .sidebar .new-btn { grid-column: 2; margin: 0; }
+  .app > .sidebar .prefix-row .btn,
+  .app > .sidebar .new-btn { min-height: 36px; padding: 6px 8px; }
+  .app > .sidebar .library-notebook-title,
+  .app > .sidebar .archive-section-heading { min-height: 32px; }
+  .app > .sidebar .formula-search { margin: 2px 0 6px; }
+  .app > .sidebar .formula-list,
+  .app > .sidebar .archive-panel.open { min-height: 117px; }
+  .app > .sidebar { grid-template-rows: auto auto auto auto auto auto minmax(117px, 1fr) auto auto auto; }
+  .app > .sidebar:has(.archive-panel.open) { grid-template-rows: auto auto auto auto auto auto auto minmax(117px, 1fr) auto auto; }
+  .app > .sidebar:has(.library-notebook-title[aria-expanded="false"]):not(:has(.archive-panel.open)),
+  .app > .sidebar:has(.export-menu.open) { grid-template-rows: none; }
+  .app > .sidebar .data-actions { grid-template-columns: 1.4fr 1fr 1fr; gap: 4px; }
+  .app > .sidebar .data-actions > .btn:first-child { grid-column: auto; }
+  .app > .sidebar .data-actions .btn { min-height: 36px; padding: 6px 4px; }
+  .app > .sidebar .data-actions:has(.export-menu.open) { grid-template-columns: 1fr; }
+}
 

@@ -81,6 +81,12 @@ export default defineConfig(({ mode }) => {
     port: 5173,
     strictPort: true,
     https,
+    // Keep the HMR socket on the same scheme as the local page. Without an
+    // explicit wss endpoint, HTTPS localhost sessions can report a failed
+    // WebSocket connection even though the app itself loaded successfully.
+    hmr: https
+      ? { protocol: 'wss', host: 'localhost', port: 5173, clientPort: 5173 }
+      : { protocol: 'ws', host: 'localhost', port: 5173, clientPort: 5173 },
   },
   }
 })

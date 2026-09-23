@@ -162,6 +162,9 @@
     right: 62px;
   }
 
+}
+
+@media (max-width: 1199px) {
   .app > .sidebar .data-section-title {
     padding-right: 58px;
   }

@@ -38,7 +38,7 @@ function readContexts(): Record<string, Attribution> { try { const parsed = JSON
 export function getFormulaDropAttribution(dropId: string, sourceParam?: string, referrer?: string): Attribution {
   const contexts = readContexts(); const provided = sourceParam !== undefined; const explicit = provided && SOURCE.test(sourceParam.trim().toLowerCase())
   const current = contexts[dropId]
-  const runtimeHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : ''
+  const runtimeHost = typeof window !== 'undefined' && window.location ? window.location.hostname.toLowerCase() : ''
   if (isPrivateDevHost(runtimeHost)) { const value = { source: 'local_dev', referrerHost: runtimeHost }; contexts[dropId] = value; try { storage('session')?.setItem(SOURCE_KEY, JSON.stringify(contexts)) } catch { /* best effort */ } return value }
   const value = { source: provided ? cleanSource(sourceParam) : current?.source ?? 'direct', referrerHost: provided ? cleanHost(referrer) : current?.referrerHost ?? cleanHost(referrer) }
   contexts[dropId] = value
