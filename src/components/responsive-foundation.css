@@ -27,7 +27,7 @@
 .library-notebook-title:hover, .library-notebook-title:focus-visible { background: transparent; color: inherit; }
 .library-notebook-title:disabled { cursor: default; opacity: 1; }
 .section-count { color: rgba(80, 70, 55, 0.78); font: 11px/1 "Courier New", monospace; font-weight: 600; letter-spacing: .03em; }
-.archive-section-heading { width: 100%; margin-top: 18px; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.archive-section-heading { width: 100%; box-sizing: border-box; margin: 18px 0 8px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; line-height: normal; cursor: pointer; }
 .archive-section-heading:hover, .archive-section-heading:focus-visible { background: transparent; color: inherit; }
 .archive-section-heading.side-title { line-height: normal; }
 .material-focus-backdrop {
