@@ -468,6 +468,15 @@ html[lang="ko"] .app .title-primary > label {
   .app > .sidebar:has(.export-menu.open) .formula-list { display: none; }
 }
 
+/* Modal Time Machine drawer: keep the page fixed while preserving panel scroll. */
+@media screen and (max-width: 1839px) {
+  html.responsive-time-machine-open,
+  html.responsive-time-machine-open body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
 /* Short landscape: reserve at least two readable 55px rows plus their 7px gap.
    Utility controls share horizontal space; portrait and desktop are excluded. */
 @media screen and (min-width: 768px) and (max-width: 1199px) and (max-height: 600px) {

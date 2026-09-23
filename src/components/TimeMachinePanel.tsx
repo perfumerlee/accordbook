@@ -42,6 +42,11 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     query.addEventListener('change', change)
     return () => query.removeEventListener('change', change)
   }, [])
+  useEffect(() => {
+    const locked = isOpen && !companion
+    document.documentElement.classList.toggle('responsive-time-machine-open', locked)
+    return () => document.documentElement.classList.remove('responsive-time-machine-open')
+  }, [isOpen, companion])
   const cancelFocusFrame = () => { window.cancelAnimationFrame(focusFrameRef.current ?? 0); focusFrameRef.current = undefined }
   const cancelClose = () => { window.clearTimeout(closeTimerRef.current); closeTimerRef.current = undefined }
   const [batchOpen, setBatchOpen] = useState(false)
