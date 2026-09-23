@@ -169,8 +169,8 @@
           ${metricCard('방문 → Import', percent(metrics.visitToImport))}
           ${metricCard('열기 → Import', metrics.directMetricsAvailable ? percent(metrics.openToImport) : 'N/A')}
           ${metricCard('다운로드 → 수동 Import', percent(metrics.downloadToImport))}
-          ${metricCard('Handoff 실패', metrics.handoffFailureEvents)}
-        </div></section><section class="dashboard-section"><h3>Direct Handoff</h3><p class="dashboard-note">OPEN → READY → IMPORT · import_success만 최종 성공으로 집계합니다.</p><div class="cards">
+          ${metricCard('직접 연결 실패 (Handoff)', metrics.handoffFailureEvents)}
+        </div></section><section class="dashboard-section"><h3>직접 연결 (Handoff)</h3><p class="dashboard-note">OPEN → READY → IMPORT · import_success만 최종 성공으로 집계합니다.</p><div class="cards">
           ${metricCard('OPEN 사용자', metrics.uniqueOpenUsers)}
           ${metricCard('READY 사용자', metrics.uniqueReadyUsers)}
           ${metricCard('직접 Import 사용자', metrics.uniqueDirectImportUsers)}
@@ -236,7 +236,7 @@
         ${metricCard('방문 → Import', percent(metrics.visitToImport))}
         ${metricCard('열기 → Import', metrics.directMetricsAvailable ? percent(metrics.openToImport) : 'N/A')}
         ${metricCard('다운로드 → 수동 Import', percent(metrics.downloadToImport))}
-        ${metricCard('Handoff 실패', metrics.handoffFailureEvents)}
+        ${metricCard('직접 연결 실패 (Handoff)', metrics.handoffFailureEvents)}
       </div><h2>유입 경로별 분석</h2>${renderTable(data.sources, ['source', 'uniqueVisitors', 'uniqueDownloaders', 'uniqueImporters'])}<h2>실패 원인</h2>${renderTable(data.failures, ['reason', 'count'])}`;
       $('app').insertAdjacentHTML('afterbegin', measurementRoundCard(data.drop.dropId, data.metricsResetAt));
       refreshLicenseStatus(data.drop.dropId);
