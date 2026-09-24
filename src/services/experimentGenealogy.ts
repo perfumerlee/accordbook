@@ -26,6 +26,13 @@ export function getVariantAncestors(experiment: Experiment, variantId: string): 
   return result
 }
 
+/** Returns the root-to-selection path, excluding BASE. Invalid or cyclic ancestry is safely truncated. */
+export function getVariantPath(experiment: Experiment, variantId: string): ExperimentVariant[] {
+  const selected = experiment.variants.find((variant) => variant.variantId === variantId)
+  if (!selected) return []
+  return [...getVariantAncestors(experiment, variantId), selected]
+}
+
 export function getVariantSiblings(experiment: Experiment, variantId: string): ExperimentVariant[] {
   const variant = experiment.variants.find((item) => item.variantId === variantId)
   if (!variant) return []
@@ -50,7 +57,7 @@ export function getVariantDepth(experiment: Experiment, variantId: string): numb
 }
 
 export function canCreateBranchFrom(experiment: Experiment, variantId: string): boolean {
-  return getVariantDepth(experiment, variantId) === 1
+  return getVariantDepth(experiment, variantId) >= 1
 }
 
 export type VariantTreeNode = { variant: ExperimentVariant; children: VariantTreeNode[] }

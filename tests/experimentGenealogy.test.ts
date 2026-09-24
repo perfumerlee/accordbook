@@ -21,7 +21,7 @@ describe('Experiment genealogy helpers and policy', () => {
     expect(getVariantDepth(experiment, a2.variantId)).toBe(2)
     expect(buildVariantTree(experiment)[0].children).toHaveLength(2)
   })
-  it('does not reuse deleted child labels and blocks deeper creation', () => {
+  it('keeps sibling labels monotonic and allows deeper creation', () => {
     let experiment = createExperimentFromCurrent(formula())
     experiment = addVariantFromBase(experiment)
     const parent = experiment.variants[0]
@@ -31,7 +31,9 @@ describe('Experiment genealogy helpers and policy', () => {
     experiment = addVariantFromVariant(experiment, parent.variantId)
     expect(experiment.variants[1].label).toBe('A2')
     expect(canCreateBranchFrom(experiment, parent.variantId)).toBe(true)
-    expect(canCreateBranchFrom(experiment, experiment.variants[1].variantId)).toBe(false)
-    expect(() => addVariantFromVariant(experiment, experiment.variants[1].variantId)).toThrow('one level')
+    expect(canCreateBranchFrom(experiment, experiment.variants[1].variantId)).toBe(true)
+    const deep = addVariantFromVariant(experiment, experiment.variants[1].variantId)
+    expect(deep.variants[2].label).toBe('A2.1')
+    expect(getVariantDepth(deep, deep.variants[2].variantId)).toBe(3)
   })
 })

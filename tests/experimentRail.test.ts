@@ -26,7 +26,7 @@ describe('Rail families and compatibility', () => {
     const model=buildExperimentRail(fixture([['id-z',null,'A'],['id-a',null,'Z'],['id-b',null,'B']]))
     expect(model.baseIncluded).toBe(true)
     expect(model.families.map(f=>[f.parent.variantId,f.children.length])).toEqual([['id-z',0],['id-a',0],['id-b',0]])
-    expect(model.additionalLegacyCandidates).toEqual([])
+    expect(model.deepCandidates).toEqual([])
   })
   it('groups mixed creation order with the same model for either mode', () => {
     const value=mixed(), before=JSON.stringify(value)
@@ -57,7 +57,7 @@ describe('Rail families and compatibility', () => {
     const value=fixture([['a',null],['a1','a'],['deep','a1'],['orphan','missing'],['x','y'],['y','x']])
     const model=buildExperimentRail(value)
     expect(model.families[0].children.map(v=>v.variantId)).toEqual(['a1'])
-    expect(model.additionalLegacyCandidates.map(v=>v.variantId)).toEqual(['deep','orphan','x','y'])
+    expect(model.deepCandidates.map(v=>v.variant.variantId)).toEqual(['deep','orphan','x','y'])
     expect(deriveActiveRailFamily(value,'deep')?.variantId).toBe('a')
     expect(deriveActiveRailFamily(value,'orphan')).toBeNull()
     expect(deriveActiveRailFamily(value,'x')).toBeNull()
@@ -107,13 +107,13 @@ describe('Rail compare session contract (pure, not wired to current UI)', () => 
     expect(closeExperimentSheetSession(value,committed)).toEqual(committed)
     expect(session.committedIds).toEqual(['a','b'])
   })
-  it('rejects a fifth candidate without eviction, while allowing uncheck and replacement', () => {
-    const value=fixture(['a','b','c','d','e'].map(id=>[id,null]))
-    let session=enterCompareMode(value,selection(['a','b','c','d']))
-    expect(toggleComparisonDraft(value,session,'e').draftIds).toEqual(['a','b','c','d'])
+  it('rejects a sixth candidate without eviction, while allowing uncheck and replacement', () => {
+    const value=fixture(['a','b','c','d','e','f'].map(id=>[id,null]))
+    let session=enterCompareMode(value,selection(['a','b','c','d','e']))
+    expect(toggleComparisonDraft(value,session,'f').draftIds).toEqual(['a','b','c','d','e'])
     session=toggleComparisonDraft(value,session,'b')
-    expect(toggleComparisonDraft(value,session,'e').draftIds).toEqual(['a','c','d','e'])
-    expect(commitCompareDraft(value,{mode:'compare',committedIds:[],draftIds:['a','b','c','d','e']})).toBeNull()
+    expect(toggleComparisonDraft(value,session,'f').draftIds).toEqual(['a','c','d','e','f'])
+    expect(commitCompareDraft(value,{mode:'compare',committedIds:[],draftIds:['a','b','c','d','e','f']})).toBeNull()
   })
   it('removes stale IDs and duplicates without filling gaps or reordering valid IDs', () => {
     expect(reconcileComparisonIds(mixed(),['a1','b','missing','a1','base'])).toEqual(['a1','b'])
@@ -129,9 +129,9 @@ describe('Rail compare session contract (pure, not wired to current UI)', () => 
   it('deleting an unchecked candidate keeps selected membership intact', () => {
     expect(reconcileComparisonIds(removeVariant(mixed(),'c'),['a','b'])).toEqual(['a','b'])
   })
-  it('resets a new Experiment/Formula session to navigation and the existing first-four default', () => {
+  it('resets a new Experiment/Formula session to navigation and the existing first-five default', () => {
     const value=fixture(['y1','y2','y3','y4','y5'].map(id=>[id,null]))
-    expect(resetExperimentCompareSession(value)).toEqual({mode:'navigation',committedIds:['y1','y2','y3','y4'],draftIds:null})
+    expect(resetExperimentCompareSession(value)).toEqual({mode:'navigation',committedIds:['y1','y2','y3','y4','y5'],draftIds:null})
     expect(reconcileComparisonIds(value,['a','a1'])).toEqual([])
     expect(resetExperimentCompareSession(fixture([]))).toEqual({mode:'navigation',committedIds:[],draftIds:null})
   })

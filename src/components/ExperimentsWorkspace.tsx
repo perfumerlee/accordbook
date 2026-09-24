@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import type { Formula, FormulaVersion, FormulaSnapshotRow } from '../models/formula'
 import type { Experiment } from '../models/experiment'
@@ -9,7 +9,7 @@ import ExperimentComparisonSheet from './ExperimentComparisonSheet'
 import ExperimentGenealogyRail from './ExperimentGenealogyRail'
 import { buildExperimentRail, deriveActiveRailFamily } from '../services/experimentRail'
 import { classifyExperimentViewport, type ExperimentViewportMode } from '../services/experimentViewport'
-import { reconcileExperimentSelection, resolveSelectionAfterVariantDelete, type ExperimentCompareSession, resetExperimentCompareSession, reconcileCompareSession, enterCompareMode, cancelCompareMode, toggleComparisonDraft, commitCompareDraft, canOpenExperimentSheet } from '../services/experimentWorkspaceState'
+import { EXPERIMENT_COMPARE_LIMIT, reconcileExperimentSelection, resolveSelectionAfterVariantDelete, type ExperimentCompareSession, resetExperimentCompareSession, reconcileCompareSession, enterCompareMode, cancelCompareMode, toggleComparisonDraft, commitCompareDraft, canOpenExperimentSheet } from '../services/experimentWorkspaceState'
 import ExperimentModalShell from './ExperimentModalShell'
 import './experiments.css'
 import WideWorkspaceShell from './WideWorkspaceShell'
@@ -17,6 +17,9 @@ import { baseLabel, stateLabel, sourceOrder, displayDate } from './experimentPre
 import { branchMessages, experimentMessages, railCompareMessages } from '../i18n/messages'
 import { formatDilutionSuffix } from '../services/dilutionDisplay'
 import { canCreateBranchFrom, getVariantChildren, getVariantParent } from '../services/experimentGenealogy'
+import VariantEvaluations, { type EvaluationDrafts } from './VariantEvaluations'
+import BranchIntentFields, { type BranchIntentDraft } from './BranchIntentFields'
+import BranchRecord from './BranchRecord'
 
 type Props={formula:Formula;storage:AccordbookStorage;language:'en'|'ko';onClose:()=>void;onBeforeCreateCurrent:()=>Promise<Formula>}
 export default function ExperimentsWorkspace(props:Props){
@@ -24,6 +27,14 @@ export default function ExperimentsWorkspace(props:Props){
 }
 function ExperimentWorkspaceSession({formula,storage,language,onClose,onBeforeCreateCurrent}:Props){
  const t=experimentMessages[language]
+ const [evaluationDrafts,setEvaluationDrafts]=useState<EvaluationDrafts>({})
+ const hasEvaluationDrafts=Object.values(evaluationDrafts).some(draft=>draft&&(draft.observation.trim()||draft.nextAction.trim()||draft.decisionNote?.trim()))
+ useEffect(()=>{
+   if(!hasEvaluationDrafts)return
+   const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue=''}
+   window.addEventListener('beforeunload',warn)
+   return ()=>window.removeEventListener('beforeunload',warn)
+ },[hasEvaluationDrafts])
  const [createMode,setCreateMode]=useState(false)
  const experimentLoadGeneration=useRef(0)
  const entryBusy=useRef(false)
@@ -66,7 +77,12 @@ const openExperiment=async(experimentId:string)=>{if(entryBusy.current)return;en
    }catch{setSaving('SAVE FAILED')}
    finally{sheetBusy.current=false;setOpeningSheet(false)}
  }
- const closeEntry=()=>{if(!entryBusy.current){experimentLoadGeneration.current++;onClose()}}
+ const closeEntry=()=>{
+   if(entryBusy.current)return
+   if(hasEvaluationDrafts&&!window.confirm(language==='ko'?'저장하지 않은 시향 기록이 있습니다. 닫고 버릴까요?':'Discard unsaved evaluations and close?'))return
+   entryBusy.current=true
+   void (experiment?flush():Promise.resolve()).then(()=>{experimentLoadGeneration.current++;onClose()}).catch(()=>setSaving('SAVE FAILED')).finally(()=>{entryBusy.current=false})
+ }
  const renderList=()=>(
    <>
      <div className="experiment-list-toolbar">
@@ -138,7 +154,7 @@ const openExperiment=async(experimentId:string)=>{if(entryBusy.current)return;en
   if(!experiment)return null
   if(viewport==='unsupported')return <ExperimentViewportGate mode={viewport} onClose={leaveDetail}/>
    const railModel=buildExperimentRail(experiment)
-   return <WideWorkspaceShell className="experiment-detail" headerActions={<><button className="experiment-name-edit-action" type="button" onClick={()=>{setEditName(experiment.name);setEditOpen(true)}}>EDIT NAME</button><button className="experiment-delete-action" type="button" disabled={comparing||openingSheet} onClick={()=>{setDeleteError('');setDeleteOpen(true)}}>DELETE EXPERIMENT</button></>} eyebrow={t.detail} formulaId={formula.formulaId} formulaName={formula.name} context={experiment.name + " · BASE: " + baseLabel(experiment,versions,language)} closeLabel={t.backList} onClose={()=>void leaveDetail()}>{saving==='SAVE FAILED'&&<p role="alert">Unable to save Experiment. Please try closing again to retry.</p>}{comparing&&<div className="experiment-compare-context" role="status"><span>{t.compare} · {draftIds.length} / 4</span><span>{t.compareHint}</span></div>}<nav className="experiment-navigation"><ExperimentGenealogyRail model={railModel} mode={compareSession.mode} compareDraftIds={draftIds} compareBusy={openingSheet} onToggleCompare={id=>{if(!openingSheet)setCompareSession(current=>toggleComparisonDraft(experiment,current,id))}} editingState={state} activeFamilyId={deriveActiveRailFamily(experiment,state)?.variantId??null} language={language} onSelectBase={()=>setState('base')} onSelectVariant={setState}/><div className="experiment-navigation-actions">{comparing?<><button ref={compareActionRef} type="button" disabled={openingSheet} onClick={()=>setCompareSession(current=>cancelCompareMode(experiment,current))}>{t.cancel}</button><button type="button" disabled={openingSheet||!canOpenExperimentSheet(experiment,draftIds)} onClick={()=>void openSheet()}>{railCompareMessages[language].openSheet}</button></>:<><button type="button" onClick={()=>{const next=addVariantFromBase(experiment);queue(next);setState(next.variants[next.variants.length-1].variantId)}}>{t.addVariant}</button><button ref={compareActionRef} type="button" disabled={!experiment.variants.length} onClick={()=>setCompareSession(current=>enterCompareMode(experiment,current))}>{t.sheet}</button></>}</div></nav>{state==='base'?<BaseNotebook experiment={experiment} sourceLabel={baseLabel(experiment,versions,language)}/>:selectedVariant?<VariantEditor experiment={experiment} variant={selectedVariant} language={language} structuralDisabled={comparing||openingSheet} onChange={queue} onDelete={()=>{if(confirm('Delete this Variant?')){try{const fallback=resolveSelectionAfterVariantDelete(experiment,state);const next=removeVariant(experiment,state);queue(next);const resolved=reconcileExperimentSelection(next,fallback);setState(resolved==='base'?'base':resolved.variantId)}catch{setSaving('SAVE FAILED')}}}} saving={saving}/>:<BaseNotebook experiment={experiment} sourceLabel={baseLabel(experiment,versions,language)}/>}</WideWorkspaceShell>
+   return <WideWorkspaceShell className="experiment-detail" headerActions={<><button className="experiment-name-edit-action" type="button" onClick={()=>{setEditName(experiment.name);setEditOpen(true)}}>EDIT NAME</button><button className="experiment-delete-action" type="button" disabled={comparing||openingSheet} onClick={()=>{setDeleteError('');setDeleteOpen(true)}}>DELETE EXPERIMENT</button></>} eyebrow={t.detail} formulaId={formula.formulaId} formulaName={formula.name} context={experiment.name + " · BASE: " + baseLabel(experiment,versions,language)} closeLabel={t.backList} onClose={()=>void leaveDetail()}>{saving==='SAVE FAILED'&&<p role="alert">Unable to save Experiment. Please try closing again to retry.</p>}{comparing&&<div className="experiment-compare-context" role="status"><span>{t.compare} · {draftIds.length} / {EXPERIMENT_COMPARE_LIMIT}</span><span>{t.compareHint}</span></div>}<nav className="experiment-navigation"><ExperimentGenealogyRail model={railModel} mode={compareSession.mode} compareDraftIds={draftIds} compareBusy={openingSheet} onToggleCompare={id=>{if(!openingSheet)setCompareSession(current=>toggleComparisonDraft(experiment,current,id))}} editingState={state} activeFamilyId={deriveActiveRailFamily(experiment,state)?.variantId??null} language={language} onSelectBase={()=>setState('base')} onSelectVariant={setState}/><div className="experiment-navigation-actions">{comparing?<><button ref={compareActionRef} type="button" disabled={openingSheet} onClick={()=>setCompareSession(current=>cancelCompareMode(experiment,current))}>{t.cancel}</button><button type="button" disabled={openingSheet||!canOpenExperimentSheet(experiment,draftIds)} onClick={()=>void openSheet()}>{railCompareMessages[language].openSheet}</button></>:<><button type="button" onClick={()=>{const next=addVariantFromBase(experiment);queue(next);setState(next.variants[next.variants.length-1].variantId)}}>{t.addVariant}</button><button ref={compareActionRef} type="button" disabled={!experiment.variants.length} onClick={()=>setCompareSession(current=>enterCompareMode(experiment,current))}>{t.sheet}</button></>}</div></nav>{state==='base'?<BaseNotebook experiment={experiment} sourceLabel={baseLabel(experiment,versions,language)}/>:selectedVariant?<VariantEditor experiment={experiment} variant={selectedVariant} language={language} structuralDisabled={comparing||openingSheet} onChange={queue} onDelete={()=>{if(confirm('Delete this Variant?')){try{const fallback=resolveSelectionAfterVariantDelete(experiment,state);const next=removeVariant(experiment,state);queue(next);const resolved=reconcileExperimentSelection(next,fallback);setState(resolved==='base'?'base':resolved.variantId)}catch{setSaving('SAVE FAILED')}}}} saving={saving} evaluationDrafts={evaluationDrafts} onEvaluationDraftsChange={setEvaluationDrafts}/>:<BaseNotebook experiment={experiment} sourceLabel={baseLabel(experiment,versions,language)}/>}</WideWorkspaceShell>
  }
  const renderSheet=()=>{
    if(!experiment)return null
@@ -174,7 +190,7 @@ const openExperiment=async(experimentId:string)=>{if(entryBusy.current)return;en
      if(sheet)setSheet(false);else if(comparing&&experiment)setCompareSession(current=>cancelCompareMode(experiment,current));else if(experiment)void leaveDetail();else closeEntry()
    }
    if(event.key==='Tab'&&!editOpen&&!deleteOpen&&experiment){
-     const items=Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled])')).filter(item=>item.getClientRects().length)
+     const items=Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),summary')).filter(item=>item.getClientRects().length)
      const first=items[0],last=items[items.length-1]
      if(!first){event.preventDefault();return}
      if(event.shiftKey&&(document.activeElement===first||document.activeElement===event.currentTarget)){event.preventDefault();last.focus()}
@@ -191,13 +207,16 @@ function NotebookSummary({rows,note,onNote}:{rows:FormulaSnapshotRow[];note:stri
 function BaseNotebook({experiment,sourceLabel}:{experiment:Experiment;sourceLabel:string}){
  return <section className="experiment-notebook"><div className="experiment-variant-heading"><span>BASE · {sourceLabel}</span><span className="experiment-read-only-badge">READ ONLY</span></div><table className="experiment-material-table"><NotebookHead/><tbody>{experiment.baseSnapshot.rows.map(row=><tr key={row.rowId}><td className="experiment-parts">{row.parts}</td><td className="experiment-material"><span>{row.material}</span></td><td className="experiment-dilution">{row.dilution?.enabled?<><button className="experiment-dilution-badge--active" type="button" aria-label="DIL" disabled>DIL</button><span className="experiment-dilution-value">@{row.dilution.percent}% in {row.dilution.solvent}</span></>:'—'}</td><td className="experiment-row-memo">{row.memo||'—'}</td><td className="experiment-delete-cell">—</td></tr>)}</tbody></table><NotebookSummary rows={experiment.baseSnapshot.rows} note={experiment.baseSnapshot.notes}/></section>
 }
-function VariantEditor({experiment,variant,onChange,onDelete,saving,language,structuralDisabled}:{experiment:Experiment;variant:import('../models/experiment').ExperimentVariant;onChange:(e:Experiment)=>void;onDelete:()=>void;saving:string;language:'en'|'ko';structuralDisabled:boolean}){
+function VariantEditor({experiment,variant,onChange,onDelete,saving,language,structuralDisabled,evaluationDrafts,onEvaluationDraftsChange}:{experiment:Experiment;variant:import('../models/experiment').ExperimentVariant;onChange:(e:Experiment)=>void;onDelete:()=>void;saving:string;language:'en'|'ko';structuralDisabled:boolean;evaluationDrafts:EvaluationDrafts;onEvaluationDraftsChange:(drafts:EvaluationDrafts)=>void}){
  const uiLanguage=language
  const deleteBlocked=getVariantChildren(experiment,variant.variantId).length>0
  const addMaterialLabel=uiLanguage==='ko'?'+ 원료 추가':'+ ADD MATERIAL'
  const branchBusy=useRef(false)
+ const [branchIntentOpen,setBranchIntentOpen]=useState(false)
+ const [branchIntent,setBranchIntent]=useState<BranchIntentDraft>({changeIntent:'',hypothesis:''})
  const canBranch=canCreateBranchFrom(experiment,variant.variantId)
- const createBranch=()=>{if(structuralDisabled||branchBusy.current||!canBranch)return;branchBusy.current=true;try{onChange(addVariantFromVariant(experiment,variant.variantId))}catch{branchBusy.current=false}}
+ const createBranch=()=>{if(structuralDisabled||branchBusy.current||!canBranch)return;setBranchIntent({changeIntent:'',hypothesis:''});setBranchIntentOpen(true)}
+ const submitBranch=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(structuralDisabled||branchBusy.current||!canBranch)return;branchBusy.current=true;try{onChange(addVariantFromVariant(experiment,variant.variantId,{branchPurpose:'development',...branchIntent}));setBranchIntentOpen(false)}catch{branchBusy.current=false}}
  useEffect(()=>{branchBusy.current=false},[experiment.variants.length])
  const baseRowIds=new Set(experiment.baseSnapshot.rows.map(row=>row.rowId))
  const baseRowsById=new Map(experiment.baseSnapshot.rows.map(row=>[row.rowId,row]))
@@ -205,7 +224,8 @@ function VariantEditor({experiment,variant,onChange,onDelete,saving,language,str
  const update=(rowId:string,changes:Partial<FormulaSnapshotRow>)=>onChange(updateVariantRow(experiment,variant.variantId,rowId,changes))
  return <section className="experiment-notebook">
   <div className="experiment-variant-heading"><div className="experiment-variant-title-group"><span>VARIANT {variant.label}</span><span className="experiment-save-status" data-state={saving.startsWith('SAVING')?'saving':saving==='SAVE FAILED'?'failed':'saved'} role="status" aria-live="polite">{saving}</span></div><div className="experiment-variant-heading__actions"><>{canBranch&&!structuralDisabled&&<button className="experiment-create-branch" type="button" aria-label={branchMessages[uiLanguage].createBranchFrom(variant.label)} onClick={createBranch}>{branchMessages[uiLanguage].addBranch}</button>}<div className="experiment-delete-group"><button className="experiment-delete-variant" type="button" disabled={deleteBlocked||structuralDisabled} aria-describedby={deleteBlocked?'experiment-delete-blocked':undefined} onClick={onDelete}>{variant.parentVariantId? (uiLanguage==='ko'?'Branch 삭제':'DELETE BRANCH') : (uiLanguage==='ko'?'시안 삭제':'DELETE VARIANT')}</button>{deleteBlocked&&<p id="experiment-delete-blocked" className="experiment-delete-blocked">{branchMessages[language].deleteBlocked}</p>}</div></></div></div>
-  <table className="experiment-material-table"><NotebookHead/><tbody>{variant.snapshot.rows.map(row=><tr className={isChangedFromBase(row)?'experiment-row--marked':''} key={row.rowId}>
+  {branchIntentOpen&&<form className="branch-intent-form" onSubmit={submitBranch}><BranchIntentFields value={branchIntent} onChange={setBranchIntent} language={language} purpose="development" disabled={structuralDisabled}/><div className="evaluation-actions"><button type="submit" disabled={structuralDisabled||!branchIntent.changeIntent.trim()||!branchIntent.hypothesis.trim()}>{language==='ko'?'Branch 만들기':'Create Branch'}</button><button type="button" disabled={structuralDisabled} onClick={()=>setBranchIntentOpen(false)}>{language==='ko'?'취소':'Cancel'}</button></div></form>}
+  <BranchRecord variant={variant} parentLabel={getVariantParent(experiment,variant.variantId)?.label} language={language}/><table className="experiment-material-table"><NotebookHead/><tbody>{variant.snapshot.rows.map(row=><tr className={isChangedFromBase(row)?'experiment-row--marked':''} key={row.rowId}>
    <td className="experiment-parts"><input aria-label="Parts" type="number" value={row.parts} onChange={e=>update(row.rowId,{parts:e.target.value===''?'':Number(e.target.value)})}/></td>
    <td className="experiment-material"><input aria-label="Material name" disabled={baseRowIds.has(row.rowId)} value={row.material} onChange={e=>update(row.rowId,{material:e.target.value})}/></td>
    <td><div className="experiment-dilution"><button type="button" aria-label="Dilution" disabled={baseRowIds.has(row.rowId)} aria-pressed={row.dilution?.enabled??false} onClick={()=>update(row.rowId,{dilution:{enabled:!row.dilution?.enabled,percent:row.dilution?.percent??1,solvent:row.dilution?.solvent??'ALC'}})}>DIL</button>{row.dilution?.enabled&&baseRowIds.has(row.rowId)&&<span className="experiment-dilution-value">@{row.dilution.percent}% in {row.dilution.solvent}</span>}{row.dilution?.enabled&&!baseRowIds.has(row.rowId)&&<div className="experiment-dilution-fields"><span>@</span><input aria-label="Dilution percent" type="number" value={row.dilution.percent} onChange={e=>update(row.rowId,{dilution:{...row.dilution!,percent:Number(e.target.value)}})}/><span>% in</span><input aria-label="Dilution solvent" value={row.dilution.solvent} onChange={e=>update(row.rowId,{dilution:{...row.dilution!,solvent:e.target.value}})}/></div>}</div></td>
@@ -214,6 +234,7 @@ function VariantEditor({experiment,variant,onChange,onDelete,saving,language,str
   </tr>)}</tbody></table>
   <div className="experiment-editor-actions"><button type="button" onClick={()=>onChange(addVariantRow(experiment,variant.variantId,{material:'',cas:'',parts:''}))}>{addMaterialLabel}</button></div>
   <NotebookSummary rows={variant.snapshot.rows} note={variant.note} onNote={value=>onChange(updateVariantNote(experiment,variant.variantId,value))}/>
+  <VariantEvaluations key={variant.variantId} experiment={experiment} variant={variant} language={language} disabled={structuralDisabled} onChange={onChange} drafts={evaluationDrafts} onDraftsChange={onEvaluationDraftsChange}/>
  </section>
 }
 

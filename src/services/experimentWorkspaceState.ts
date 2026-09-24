@@ -1,7 +1,9 @@
 import type { Experiment } from '../models/experiment'
 import { getVariantChildren, getVariantParent } from './experimentGenealogy'
 import { buildExperimentRail } from './experimentRail'
-import { getDefaultComparisonVariantIds } from './experimentComparison'
+import { EXPERIMENT_COMPARE_LIMIT, getDefaultComparisonVariantIds } from './experimentComparison'
+
+export { EXPERIMENT_COMPARE_LIMIT } from './experimentComparison'
 
 export function buildComparisonFamilies(experiment: Experiment) {
   return buildExperimentRail(experiment).families
@@ -22,15 +24,13 @@ export type ExperimentCompareSession =
   | { mode: 'navigation'; committedIds: readonly string[]; draftIds: null }
   | { mode: 'compare'; committedIds: readonly string[]; draftIds: readonly string[] }
 
-export const EXPERIMENT_COMPARE_LIMIT = 4
-
 /** Keep valid membership and caller order; never add replacements or impose Sheet ordering. */
 export function reconcileComparisonIds(experiment: Experiment, ids: readonly string[]): string[] {
   const valid = new Set(experiment.variants.map(variant => variant.variantId))
   return [...new Set(ids)].filter(id => id !== 'base' && valid.has(id))
 }
 
-/** New Experiment/Formula/List/Error Boundary session: first four array entries, as today. */
+/** New Experiment/Formula/List/Error Boundary session: first five array entries, as today. */
 export function resetExperimentCompareSession(experiment: Experiment): ExperimentCompareSession {
   return { mode: 'navigation', committedIds: getDefaultComparisonVariantIds(experiment), draftIds: null }
 }

@@ -16,8 +16,8 @@ describe('Experiment comparison', () => {
     const e = experiment([row('h', 'Hedione', 100), row('i', 'Indole', 10)], [{ id: 'a', label: 'A', rows: [row('h', 'Hedione', 90), row('v', 'Vanillin', 5)] }, { id: 'b', label: 'B', rows: [row('h', 'Hedione', 80), row('e', 'Ethyl Maltol', 3)] }])
     const m = buildExperimentComparisonMatrix(experimentComparisonStates(e)); expect(m.rows.map((r) => r.material)).toEqual(['Hedione', 'Indole', 'Vanillin', 'Ethyl Maltol']); expect(m.rows[1].cells[1]).toBeUndefined(); expect(m.rows[1].cells[0]?.parts).toBe(10)
   })
-  it('uses exact rowId and preserves renamed/dilution metadata per cell', () => {
-    const e = experiment([row('r1', 'Linalool', 100, { dilution: { enabled: true, percent: 1, solvent: 'ALC' } })], [{ id: 'a', label: 'A', rows: [row('r1', 'Linalyl Acetate', 100, { dilution: { enabled: true, percent: 10, solvent: 'DPG' } })] }]); const m = buildExperimentComparisonMatrix(experimentComparisonStates(e)); expect(m.rows).toHaveLength(1); expect(m.rows[0].cells[1]?.material).toBe('Linalyl Acetate'); expect(m.rows[0].cells[1]?.dilution?.solvent).toBe('DPG')
+  it('keeps changed material or dilution as separate labeled rows', () => {
+    const e = experiment([row('r1', 'Linalool', 100, { dilution: { enabled: true, percent: 1, solvent: 'ALC' } })], [{ id: 'a', label: 'A', rows: [row('r1', 'Linalyl Acetate', 100, { dilution: { enabled: true, percent: 10, solvent: 'DPG' } })] }]); const m = buildExperimentComparisonMatrix(experimentComparisonStates(e)); expect(m.rows).toHaveLength(2); expect(m.rows[0].material).toBe('Linalool'); expect(m.rows[0].cells[1]).toBeUndefined(); expect(m.rows[1].material).toBe('Linalyl Acetate'); expect(m.rows[1].dilution?.solvent).toBe('DPG'); expect(m.rows[1].cells[0]).toBeUndefined()
   })
   it('does not merge conflicting CAS values', () => {
     const e = experiment([row('', 'Material X', 1, { cas: '111-11-1' })], [{ id: 'a', label: 'A', rows: [row('', 'Material X', 2, { cas: '222-22-2' })] }]); expect(buildExperimentComparisonMatrix(experimentComparisonStates(e)).rows).toHaveLength(2)
@@ -31,7 +31,7 @@ describe('Experiment comparison', () => {
   it('preserves zero, empty, missing, and independent totals', () => {
     const e = experiment([row('z', 'Zero', 0), row('empty', 'Empty', ''), row('gone', 'Gone', 10)], [{ id: 'a', label: 'A', rows: [row('z', 'Zero', 0), row('empty', 'Empty', '')] }]); const m = buildExperimentComparisonMatrix(experimentComparisonStates(e)); expect(m.rows[0].cells[0]?.parts).toBe(0); expect(m.rows[1].cells[0]?.parts).toBe(''); expect(m.rows[2].cells[1]).toBeUndefined(); expect(m.totals).toEqual([10, 0])
   })
-  it('defaults to and orders at most four variants without mutation', () => {
-    const e = experiment([], ['A', 'B', 'C', 'D', 'E'].map((label) => ({ id: label.toLowerCase(), label, rows: [] }))); const before = structuredClone(e); expect(getDefaultComparisonVariantIds(e)).toEqual(['a', 'b', 'c', 'd']); expect(getOrderedComparisonVariantIds(e, ['e', 'b', 'd'])).toEqual(['b', 'd', 'e']); expect(e).toEqual(before); expect(experimentComparisonStates(e, ['e', 'b', 'd']).map((s) => s.label)).toEqual(['BASE', 'B', 'D', 'E'])
+  it('defaults to and orders at most five variants without mutation', () => {
+    const e = experiment([], ['A', 'B', 'C', 'D', 'E', 'F'].map((label) => ({ id: label.toLowerCase(), label, rows: [] }))); const before = structuredClone(e); expect(getDefaultComparisonVariantIds(e)).toEqual(['a', 'b', 'c', 'd', 'e']); expect(getOrderedComparisonVariantIds(e, ['f', 'b', 'd', 'e', 'c', 'a'])).toEqual(['a', 'b', 'c', 'd', 'e']); expect(e).toEqual(before); expect(experimentComparisonStates(e, ['f', 'b', 'd', 'e', 'c', 'a']).map((s) => s.label)).toEqual(['BASE', 'A', 'B', 'C', 'D', 'E'])
   })
 })

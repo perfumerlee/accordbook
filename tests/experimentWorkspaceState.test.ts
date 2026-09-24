@@ -22,10 +22,10 @@ describe('experiment workspace selection', () => {
     expect(deriveExperimentNavigation(value,'A2').children.map(v=>v.variantId)).toEqual(['A1','A2','A3'])
     expect(experimentComparisonStates(value,['U','A2','J1','B1']).map(s=>s.id)).toEqual(['base','U','A2','B1','J1'])
   })
-  it('exposes all four top-level comparison candidates without Branches', () => {
-    const value=experiment(['a','b','c','d'])
-    expect(buildComparisonFamilies(value).map(f=>[f.parent.variantId,f.children.length])).toEqual([['a',0],['b',0],['c',0],['d',0]])
-    expect(experimentComparisonStates(value,['b','d']).map(s=>s.id)).toEqual(['base','b','d'])
+  it('exposes five top-level comparison candidates without Branches', () => {
+    const value=experiment(['a','b','c','d','e'])
+    expect(buildComparisonFamilies(value).map(f=>[f.parent.variantId,f.children.length])).toEqual([['a',0],['b',0],['c',0],['d',0],['e',0]])
+    expect(experimentComparisonStates(value,['b','d','e']).map(s=>s.id)).toEqual(['base','b','d','e'])
   })
   it('groups mixed creation order structurally and preserves Sheet ordering and cap', () => {
     const value=experiment(['a','a1','b','c','d','c1','c2'])
@@ -36,7 +36,7 @@ describe('experiment workspace selection', () => {
     expect(buildComparisonFamilies(value).map(f=>[f.parent.variantId,f.children.map(c=>c.variantId)])).toEqual([
       ['a',['a1']],['b',[]],['c',['c1','c2']],['d',[]]
     ])
-    expect(experimentComparisonStates(value,['c2','d','a1','c1','b']).map(s=>s.id)).toEqual(['base','a1','b','d','c1'])
+    expect(experimentComparisonStates(value,['c2','d','a1','c1','b']).map(s=>s.id)).toEqual(['base','a1','b','d','c1','c2'])
     expect(JSON.stringify(value)).toBe(before)
   })
   it('counts direct children only and groups legacy labels by parent ID', () => {
