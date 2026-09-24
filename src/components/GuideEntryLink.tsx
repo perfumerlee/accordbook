@@ -117,7 +117,7 @@ function GuideLink({
     >
       <span className="guide-entry-main">
         <GuideBookIcon />
-        <span>GUIDE</span>
+        <span>{locale === 'ko' ? '가이드' : 'GUIDE'}</span>
       </span>
       {mobile && <span className="guide-entry-arrow" aria-hidden="true">→</span>}
     </a>

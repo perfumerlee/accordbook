@@ -15,18 +15,18 @@ const labels = {
     save: '기록 저장', cancel: '취소', edit: '기록 수정', remove: '기록 삭제',
     snapshot: '평가 당시 배합 보기', capture: '저장할 때의 시안 배합을 함께 보존합니다.',
     preserved: '기록을 수정해도 평가 당시 배합은 그대로 유지됩니다.',
-    limit: '이 Branch에서는 새 Branch를 만들 수 없습니다.',
-    branchPurposes: { development: '계속 진행할 Branch', check: '확인용 Branch', comparison: '비교용 Branch' },
-    linked: '이 기록에서 만든 Branch', deleteBlocked: '연결된 Branch가 있어 이 기록을 삭제할 수 없습니다.',
+    limit: '이 브랜치에서는 새 브랜치를 만들 수 없습니다.',
+    branchPurposes: { development: '계속 진행할 브랜치', check: '확인용 브랜치', comparison: '비교용 브랜치' },
+    linked: '이 기록에서 만든 브랜치', deleteBlocked: '연결된 브랜치가 있어 이 기록을 삭제할 수 없습니다.',
     confirmDelete: '이 시향 기록과 평가 당시 배합을 삭제할까요?',
     confirmCancel: '작성 중인 시향 기록을 버릴까요?', failed: '기록을 처리하지 못했습니다. 입력 내용을 확인해 주세요.',
     parts: '배합량', material: '원료', dilution: '희석', memo: '메모',
     verdicts: { continue: '계속 진행', hold: '보류', stop: '여기서 종료', uncertain: '아직 판단하지 않음' },
     directions: {
-      continue: { label: '다음에 바꿔볼 것', hint: '현재 방향이 유망합니다. 바꿔볼 내용을 정해 다음 실험으로 이어가세요.', placeholder: '예: Indole을 조금 늘려 균형을 비교한다.', branch: '이 배합에서 다음 Branch 만들기' },
-      hold: { label: '확인할 것', hint: '가능성은 있지만 결정을 보류합니다. 재시향할 조건이나 확인할 점을 남기세요.', placeholder: '예: 하루 뒤 같은 희석 조건에서 잔향을 다시 확인한다.', branch: '확인용 Branch 만들기' },
-      stop: { label: '이 방향을 종료한 이유', hint: '이 평가에서는 실험을 끝냅니다. 새 Branch는 만들지 않으며 기존 Branch와 기록은 보존됩니다.', placeholder: '예: 목표한 투명함과 멀어져 이 방향은 종료한다.', branch: '' },
-      uncertain: { label: '판단에 필요한 것', hint: '아직 판단할 정보가 부족합니다. 비교할 대상이나 더 살펴볼 점을 남기세요.', placeholder: '예: BASE와 비교해 실제로 차이를 느낄 수 있는지 확인한다.', branch: '비교용 Branch 만들기' },
+      continue: { label: '다음에 바꿔볼 것', hint: '현재 방향이 유망합니다. 바꿔볼 내용을 정해 다음 실험으로 이어가세요.', placeholder: '예: Indole을 조금 늘려 균형을 비교한다.', branch: '이 배합에서 다음 브랜치 만들기' },
+      hold: { label: '확인할 것', hint: '가능성은 있지만 결정을 보류합니다. 재시향할 조건이나 확인할 점을 남기세요.', placeholder: '예: 하루 뒤 같은 희석 조건에서 잔향을 다시 확인한다.', branch: '확인용 브랜치 만들기' },
+      stop: { label: '이 방향을 종료한 이유', hint: '이 평가에서는 실험을 끝냅니다. 새 브랜치는 만들지 않으며 기존 브랜치와 기록은 보존됩니다.', placeholder: '예: 목표한 투명함과 멀어져 이 방향은 종료한다.', branch: '' },
+      uncertain: { label: '판단에 필요한 것', hint: '아직 판단할 정보가 부족합니다. 비교할 대상이나 더 살펴볼 점을 남기세요.', placeholder: '예: BASE와 비교해 실제로 차이를 느낄 수 있는지 확인한다.', branch: '비교용 브랜치 만들기' },
     },
   },
   en: {
@@ -134,7 +134,7 @@ export default function VariantEvaluations({ experiment, variant, language, disa
         </div>
         {branchDraft?.evaluationId === item.evaluationId && purpose && <form className="branch-intent-form" onSubmit={event=>{event.preventDefault();if(!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim())return;if(act(()=>addVariantFromEvaluation(experiment,variant.variantId,item.evaluationId,{branchPurpose:branchDraft.purpose,...branchDraft.intent})))setBranchDraft(undefined)}}>
           <BranchIntentFields value={branchDraft.intent} onChange={intent=>setBranchDraft({...branchDraft,intent})} language={language} purpose={branchDraft.purpose} disabled={disabled}/>
-          <div className="evaluation-actions"><button type="submit" disabled={disabled||!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim()}>{language==='ko'?'Branch 만들기':'Create Branch'}</button><button type="button" disabled={disabled} onClick={()=>setBranchDraft(undefined)}>{t.cancel}</button></div>
+          <div className="evaluation-actions"><button type="submit" disabled={disabled||!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim()}>{language==='ko'?'브랜치 만들기':'Create Branch'}</button><button type="button" disabled={disabled} onClick={()=>setBranchDraft(undefined)}>{t.cancel}</button></div>
         </form>}
         {purpose && !canBranch && <p className="evaluation-hint">{t.limit}</p>}
       </article>

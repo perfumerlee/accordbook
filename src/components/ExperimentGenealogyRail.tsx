@@ -81,11 +81,16 @@ export default function ExperimentGenealogyRail({ model, editingState, activeFam
   }, [selectedExpansionKey])
   const countBadge=(count:number,label:string)=><span className="rail-count" aria-label={label} title={label}>{count}</span>
   const countBranchTree=(nodes:ExperimentRailBranchNode[]):number=>nodes.reduce((total,node)=>total+1+countBranchTree(node.children),0)
-  const descendantCountLabel=(count:number)=>ko?`하위 Branch 총 ${count}개`:`${count} descendant ${count === 1 ? 'Branch' : 'Branches'} total`
+  const descendantCountLabel=(count:number)=>ko?`하위 브랜치 총 ${count}개 · 모든 단계 포함`:`${count} descendant ${count === 1 ? 'Branch' : 'Branches'} total · all levels included`
+  const descendantCounts = new Map(model.deepGroups.filter(group => group.parent).map(group => [group.parent!.variantId, countBranchTree(group.roots)]))
+  const childCountBadge = (id: string) => {
+    const count = descendantCounts.get(id) ?? 0
+    return count > 0 ? countBadge(count, descendantCountLabel(count)) : null
+  }
   const selectedVariantLabel = [...model.families.flatMap(family => [family.parent, ...family.children]), ...model.deepCandidates.map(candidate => candidate.variant)].find(variant => variant.variantId === editingState)?.label ?? editingState
-  const checkbox=(id:string,label:string,name:string,count=0)=><label className="rail-check"><input type="checkbox" aria-label={railCompareMessages[language].select(name)} checked={compareDraftIds.includes(id)} disabled={compareBusy||(!compareDraftIds.includes(id)&&compareDraftIds.length>=EXPERIMENT_COMPARE_LIMIT)} onChange={()=>onToggleCompare?.(id)}/><span className="rail-check-name">{label}{count>0&&countBadge(count,ko?`하위 Branch ${count}개`:`${count} child ${count === 1 ? 'Branch' : 'Branches'}`)}</span></label>
-  const parentName = (label: string, count: number) => count ? ko ? `${label}, Branch ${count}개` : `${label}, ${count} ${count === 1 ? 'Branch' : 'Branches'}` : label
-  const childName = (label: string, parent: string) => ko ? `${label}, 부모 ${parent}` : `${label}, Branch of ${parent}`
+  const checkbox=(id:string,label:string,name:string,count=0,descendants=false)=><label className="rail-check"><input type="checkbox" aria-label={railCompareMessages[language].select(name)} checked={compareDraftIds.includes(id)} disabled={compareBusy||(!compareDraftIds.includes(id)&&compareDraftIds.length>=EXPERIMENT_COMPARE_LIMIT)} onChange={()=>onToggleCompare?.(id)}/><span className="rail-check-name">{label}{count>0&&countBadge(count,descendants?descendantCountLabel(count):ko?`하위 브랜치 ${count}개`:`${count} child ${count === 1 ? 'Branch' : 'Branches'}`)}</span></label>
+  const parentName = (label: string, count: number) => count ? ko ? `${label}, 브랜치 ${count}개` : `${label}, ${count} ${count === 1 ? 'Branch' : 'Branches'}` : label
+  const childName = (label: string, parent: string, count = 0) => (ko ? `${label}, 부모 ${parent}` : `${label}, Branch of ${parent}`) + (count > 0 ? `, ${descendantCountLabel(count)}` : '')
   // Selection is the only trigger: note edits and autosave must not recenter the rail.
   useEffect(() => {
     const container = scroller.current
@@ -127,12 +132,12 @@ export default function ExperimentGenealogyRail({ model, editingState, activeFam
           aria-current={activeFamilyId === family.parent.variantId && editingState !== family.parent.variantId ? 'location' : undefined}
           className={activeFamilyId === family.parent.variantId ? 'rail-parent rail-parent--context' : 'rail-parent'}
           aria-label={parentName(family.parent.label, family.children.length)} onClick={() => onSelectVariant(family.parent.variantId)}>
-          {family.parent.label}{family.children.length > 0 && countBadge(family.children.length,ko?`하위 Branch ${family.children.length}개`:`${family.children.length} child ${family.children.length === 1 ? 'Branch' : 'Branches'}`)}
+          {family.parent.label}{family.children.length > 0 && countBadge(family.children.length,ko?`하위 브랜치 ${family.children.length}개`:`${family.children.length} child ${family.children.length === 1 ? 'Branch' : 'Branches'}`)}
         </button>}
-        {family.children.length > 0 && <div className="rail-children">{family.children.map(child => <span className={`rail-node${selectedPathIdSet.has(child.variantId) && child.variantId !== editingState ? ' rail-node--path' : ''}`} key={child.variantId}>{comparing?checkbox(child.variantId,child.label,childName(child.label,family.parent.label)):<button type="button"
+        {family.children.length > 0 && <div className="rail-children">{family.children.map(child => <span className={`rail-node${selectedPathIdSet.has(child.variantId) && child.variantId !== editingState ? ' rail-node--path' : ''}`} key={child.variantId}>{comparing?checkbox(child.variantId,child.label,childName(child.label,family.parent.label,descendantCounts.get(child.variantId)),descendantCounts.get(child.variantId),true):<button type="button"
           ref={editingState === child.variantId ? selected : undefined} aria-pressed={editingState === child.variantId}
           aria-current={selectedPathIdSet.has(child.variantId) && child.variantId !== editingState ? 'location' : undefined}
-          aria-label={childName(child.label, family.parent.label)} onClick={() => onSelectVariant(child.variantId)}>{child.label}</button>}</span>)}</div>}
+          aria-label={childName(child.label, family.parent.label, descendantCounts.get(child.variantId))} onClick={() => onSelectVariant(child.variantId)}>{child.label}{childCountBadge(child.variantId)}</button>}</span>)}</div>}
       </div>)}
     </div>
     {overflow.left && <div className="rail-overflow rail-overflow--left"><button ref={leftScrollButton} type="button" className="rail-scroll-button" aria-label={railCompareMessages[language].scrollLeft} onClick={() => scrollRail(-1)}><span aria-hidden="true">‹</span></button></div>}
@@ -140,9 +145,9 @@ export default function ExperimentGenealogyRail({ model, editingState, activeFam
     </div>
     </div>
       {model.deepCandidates.length > 0 && <section className="rail-deep">
-        <div className="rail-deep-heading"><button type="button" className="rail-deep-trigger" aria-expanded={deepOpen} onClick={() => setDeepOpen(!deepOpen)}>{deepOpen ? '−' : '+'} {ko ? '깊은 Branch' : 'DEEP BRANCHES'} {countBadge(model.deepCandidates.length,ko?`깊은 Branch 총 ${model.deepCandidates.length}개`:`${model.deepCandidates.length} deep Branches total`)}</button>
+        <div className="rail-deep-heading"><button type="button" className="rail-deep-trigger" aria-expanded={deepOpen} onClick={() => setDeepOpen(!deepOpen)}>{deepOpen ? '−' : '+'} {ko ? '깊은 브랜치' : 'DEEP BRANCHES'} {countBadge(model.deepCandidates.length,ko?`깊은 브랜치 총 ${model.deepCandidates.length}개`:`${model.deepCandidates.length} deep Branches total`)}</button>
         {!comparing && <button type="button" className="rail-view-toggle" aria-pressed={showAll} onClick={() => {setShowAll(!showAll);setDeepOpen(true);if(!showAll)setExpandedDeepIds(new Set(allDeepIds))}}>{showAll ? (ko ? '선택 계보 보기' : 'FOCUS LINEAGE') : (ko ? '전체 계보 보기' : 'VIEW ALL LINEAGES')}</button>}</div>
-        {selectedPath.length > 2 && !comparing && <nav className="rail-current-path" aria-label={ko ? '현재 Branch 경로' : 'Current Branch path'}>
+        {selectedPath.length > 2 && !comparing && <nav className="rail-current-path" aria-label={ko ? '현재 브랜치 경로' : 'Current Branch path'}>
           {selectedPath.map((pathVariant, index) => <span key={pathVariant.variantId}>
             {index > 0 && <span className="rail-path-separator" aria-hidden="true">›</span>}
             <button type="button" aria-current={index === selectedPath.length - 1 ? 'location' : undefined}
@@ -150,8 +155,8 @@ export default function ExperimentGenealogyRail({ model, editingState, activeFam
           </span>)}
         </nav>}
         {deepOpen && <>
-        {!comparing && !showAll && <div className="rail-parent-picker" role="group" aria-label={ko ? '탐색할 부모 Branch' : 'Browse parent Branch'}>{model.deepGroups.map(group => {const count=countBranchTree(group.roots);return <button type="button" key={groupKey(group)} aria-pressed={activeGroupKey === groupKey(group)} onClick={() => {setBrowsedGroup(groupKey(group));setExpandedDeepIds(new Set(allDeepIds))}}>{group.parent?.label ?? (ko ? '기타' : 'OTHER')} {countBadge(count,descendantCountLabel(count))}</button>})}</div>}
-        {!comparing && !showAll && !activeGroupKey ? <div className="rail-empty-state"><strong>{editingState === 'base' ? (ko ? 'BASE에서는 특정 계보가 선택되지 않았습니다.' : 'No lineage is focused while BASE is selected.') : ko ? `${selectedVariantLabel}에는 아직 Deep Branch가 없습니다.` : `No Deep Branches continue from ${selectedVariantLabel} yet.`}</strong><span>{editingState === 'base' ? (ko ? '위에서 부모 Variant를 선택하거나, 레일에서 Variant를 선택하면 해당 계보에 집중할 수 있습니다.' : 'Choose a parent Variant above or select a Variant in the rail to focus its lineage.') : ko ? '실험 단계를 이어가려면 현재 Variant에서 + ADD BRANCH를 선택하세요.' : 'To continue this experiment, choose + ADD BRANCH for the current Variant.'}</span></div> : <div className="rail-deep-groups" ref={deepList}>{model.deepGroups.filter(group => comparing || showAll || groupKey(group) === activeGroupKey).map(group => {
+        {!comparing && !showAll && <div className="rail-parent-picker" role="group" aria-label={ko ? '탐색할 상위 브랜치' : 'Browse parent Branch'}>{model.deepGroups.map(group => {const count=countBranchTree(group.roots);return <button type="button" key={groupKey(group)} aria-pressed={activeGroupKey === groupKey(group)} onClick={() => {setBrowsedGroup(groupKey(group));setExpandedDeepIds(new Set(allDeepIds))}}>{group.parent?.label ?? (ko ? '기타' : 'OTHER')} {countBadge(count,descendantCountLabel(count))}</button>})}</div>}
+        {!comparing && !showAll && !activeGroupKey ? <div className="rail-empty-state"><strong>{editingState === 'base' ? (ko ? 'BASE에서는 특정 계보가 선택되지 않았습니다.' : 'No lineage is focused while BASE is selected.') : ko ? `${selectedVariantLabel}에는 아직 깊은 브랜치가 없습니다.` : `No Deep Branches continue from ${selectedVariantLabel} yet.`}</strong><span>{editingState === 'base' ? (ko ? '위에서 부모 Variant를 선택하거나, 레일에서 시안을 선택하면 해당 계보에 집중할 수 있습니다.' : 'Choose a parent Variant above or select a Variant in the rail to focus its lineage.') : ko ? '실험 단계를 이어가려면 현재 시안에서 + 브랜치 추가를 선택하세요.' : 'To continue this experiment, choose + ADD BRANCH for the current Variant.'}</span></div> : <div className="rail-deep-groups" ref={deepList}>{model.deepGroups.filter(group => comparing || showAll || groupKey(group) === activeGroupKey).map(group => {
           const groupId = group.parent?.variantId ?? 'other'
           const expanded = comparing || showAll ? expandedDeepIds.has(groupId) : true
           const count = countBranchTree(group.roots)
@@ -159,7 +164,7 @@ export default function ExperimentGenealogyRail({ model, editingState, activeFam
             {(showAll || comparing) && <button type="button" className="rail-deep-group-toggle" aria-expanded={expanded}
               aria-current={group.parent?.variantId === editingState ? 'location' : undefined}
               onClick={() => toggleDeep(groupId)}>
-              {expanded ? '−' : '+'} {group.parent ? (ko ? `상위 ${group.parent.label}` : `FROM ${group.parent.label}`) : (ko ? '기타 Branch' : 'OTHER BRANCHES')} {countBadge(count,descendantCountLabel(count))}
+              {expanded ? '−' : '+'} {group.parent ? (ko ? `상위 ${group.parent.label}` : `FROM ${group.parent.label}`) : (ko ? '기타 브랜치' : 'OTHER BRANCHES')} {countBadge(count,descendantCountLabel(count))}
             </button>}
             {expanded && <div className="rail-deep-group-content">{group.roots.map(node => renderDeepNode(node))}</div>}
           </section>

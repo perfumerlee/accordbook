@@ -16,9 +16,9 @@ const render = (verdict: EvaluationVerdict, language: 'en' | 'ko', draft = false
 
 describe('evaluation direction presentation', () => {
   it.each([
-    ['continue', 'Create next Branch from this composition', 'What to try next', '이 배합에서 다음 Branch 만들기'],
-    ['hold', 'Create a check Branch', 'What to check', '확인용 Branch 만들기'],
-    ['uncertain', 'Create a comparison Branch', 'What is needed to decide?', '비교용 Branch 만들기'],
+    ['continue', 'Create next Branch from this composition', 'What to try next', '이 배합에서 다음 브랜치 만들기'],
+    ['hold', 'Create a check Branch', 'What to check', '확인용 브랜치 만들기'],
+    ['uncertain', 'Create a comparison Branch', 'What is needed to decide?', '비교용 브랜치 만들기'],
   ] as const)('labels the %s action and its purpose in both languages', (verdict, action, field, koreanAction) => {
     expect(render(verdict, 'en')).toContain(action)
     expect(render(verdict, 'en', true)).toContain(field)

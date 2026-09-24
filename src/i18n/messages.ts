@@ -40,7 +40,7 @@ export const railCompareMessages = {
 
 export const branchMessages = {
   en: { addBranch: '+ ADD BRANCH', createBranchFrom: (label: string) => `Create Branch from ${label}`, deleteBlocked: 'This Variant has Branches.\nDelete its child Branches first.' },
-  ko: { addBranch: '+ ADD BRANCH', createBranchFrom: (label: string) => `${label}에서 Branch 생성`, deleteBlocked: '이 Variant에는 Branch가 있습니다.\n먼저 하위 Branch를 삭제해주세요.' },
+  ko: { addBranch: '+ 브랜치 추가', createBranchFrom: (label: string) => `${label}에서 브랜치 생성`, deleteBlocked: '이 브랜치에 하위 브랜치가 있습니다.\n먼저 하위 브랜치를 삭제해주세요.' },
 } as const
 
 

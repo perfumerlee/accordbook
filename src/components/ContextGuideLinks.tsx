@@ -55,7 +55,7 @@ function ContextLink({
 }) {
   const label =
     locale === 'ko'
-      ? `${context === 'time-machine' ? 'Time Machine' : context === 'experiments' ? '실험' : '가져오기와 내보내기'} 가이드 새 탭에서 열기`
+      ? `${context === 'time-machine' ? '타임머신' : context === 'experiments' ? '실험' : '가져오기와 내보내기'} 가이드 새 탭에서 열기`
       : `Open ${context === 'time-machine' ? 'Time Machine' : context === 'experiments' ? 'Experiments' : 'Import & Export'} Guide in a new tab`
 
   return (
@@ -68,7 +68,7 @@ function ContextLink({
       title={label}
     >
       <GuideBookIcon />
-      <span>GUIDE</span>
+      <span>{locale === 'ko' ? '가이드' : 'GUIDE'}</span>
       <span className="context-guide-external" aria-hidden="true">↗</span>
     </a>
   )

@@ -14,7 +14,7 @@ export default function BranchIntentFields({ value, onChange, language, purpose,
     ? ({ development: '계속 진행', check: '확인용', comparison: '비교용' }[purpose])
     : ({ development: 'Development', check: 'Check', comparison: 'Comparison' }[purpose])
   return <fieldset className="branch-intent-fields">
-    <legend>{ko ? `이번 Branch의 실험 의도 · ${purposeLabel}` : `Intent for this Branch · ${purposeLabel}`}</legend>
+    <legend>{ko ? `이번 브랜치의 실험 의도 · ${purposeLabel}` : `Intent for this Branch · ${purposeLabel}`}</legend>
     <label>
       {ko ? '무엇을 바꿀 건가요?' : 'What will you change?'}
       <textarea required disabled={disabled} value={value.changeIntent} onChange={event => onChange({ ...value, changeIntent: event.target.value })}

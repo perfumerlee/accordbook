@@ -75,6 +75,9 @@
 .experiments-error-boundary{min-height:100dvh;display:grid;place-items:center;padding:32px;box-sizing:border-box;background:var(--paper);color:var(--ink);text-align:center}.experiments-error-boundary h1{max-width:520px;font:400 26px Georgia,serif}.experiments-error-boundary button{margin-top:18px;padding:10px 16px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:var(--paper);cursor:pointer}
 .experiment-create-branch{font:inherit}
 .experiment-delete-blocked{display:block;max-width:240px;margin-top:4px;color:var(--muted);font:11px/1.35 Georgia,serif;white-space:pre-line}
+html[lang="ko"] .experiments-layer button{font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",Georgia,"Times New Roman",serif!important}
+html[lang="ko"] .experiment-detail .experiment-variant-heading{font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",Georgia,"Times New Roman",serif}
+html[lang="ko"] .experiment-detail .experiment-row-memo input{font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",Georgia,"Times New Roman",serif}
 .experiment-detail .experiment-notebook{margin-top:24px}
 .experiment-detail .experiment-variant-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px;color:var(--muted);font:11px/1.4 "Courier New",monospace;letter-spacing:.06em}
 .experiment-detail .experiment-variant-heading__actions{display:flex;align-items:center;gap:14px}
