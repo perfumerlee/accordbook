@@ -190,6 +190,19 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
     setLanguage(next)
     if (storage) void storage.settings.save({ formulaIdPrefix: prefix, language: next })
   }
+  useEffect(() => {
+    const toggleLanguage = (event: KeyboardEvent) => {
+      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
+      const target = event.target
+      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [inert]')) return
+      const blockingDialog = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).some(dialog => !dialog.closest('.tm-panel, .experiments-layer'))
+      if (blockingDialog) return
+      event.preventDefault()
+      chooseLanguage(language === 'ko' ? 'en' : 'ko')
+    }
+    window.addEventListener('keydown', toggleLanguage, true)
+    return () => window.removeEventListener('keydown', toggleLanguage, true)
+  }, [language, storage, prefix])
   const languageHintEligible = shouldShowKoreanLanguageHint({
     browserLanguage: browserLanguage(), currentLanguage: language, hasExplicitLanguageChoice: explicitLanguageChoice,
   })
@@ -236,7 +249,53 @@ export default function AccordbookNotebook({ introComplete = true }: { introComp
   useEffect(() => { if (archiveOpen) setNotebookOpen(false); else if (previousArchiveOpen.current) setNotebookOpen(true); previousArchiveOpen.current = archiveOpen }, [archiveOpen])
   useEffect(() => { if ((archiveOpen && archive.length === 0) || (!archiveOpen && formulas.length === 0)) setFormulaSearchQuery('') }, [archiveOpen, archive.length, formulas.length])
   useEffect(() => { const menu = formulaMenuRef.current; if (!menu) return; const pinned = active ? pinnedFormulaIds.includes(active.id) : false; const labels: Record<string, string> = language === 'ko' ? { 'time-machine': '타임머신', duplicate: '새 페이지로 복제', pin: pinned ? '고정 해제' : '고정', archive: '보관함으로 이동' } : { 'time-machine': 'Time Machine', duplicate: 'Duplicate as new page', pin: pinned ? 'Unpin' : 'Pin', archive: 'Move to Archive' }; for (const item of Array.from(menu.querySelectorAll<HTMLButtonElement>('[data-action]'))) { const label = item.querySelector<HTMLElement>('[data-label]'); if (label) label.textContent = labels[item.dataset.action ?? ''] ?? label.textContent } }, [language, active, pinnedFormulaIds])
-  useEffect(() => { const fitTitle = () => { const input = document.querySelector<HTMLInputElement>('.formula-name'); if (!input || !window.matchMedia('(max-width: 767px)').matches || !input.value) return; input.style.removeProperty('font-size'); const computed = getComputedStyle(input); const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); if (!context) return; context.font = computed.font; const letterSpacing = parseFloat(computed.letterSpacing || '0'); const measured = context.measureText(input.value).width + (Number.isFinite(letterSpacing) ? input.value.length * letterSpacing : 0); const available = Math.max(1, input.clientWidth - (parseFloat(computed.paddingLeft) || 0) - (parseFloat(computed.paddingRight) || 0) - 2); if (!Number.isFinite(measured) || measured <= available) return; const currentSize = parseFloat(computed.fontSize) || 32; const fittedSize = Math.max(14, currentSize * available / measured); input.style.setProperty('font-size', `${fittedSize}px`, 'important') }; fitTitle(); window.addEventListener('resize', fitTitle); return () => window.removeEventListener('resize', fitTitle) }, [active?.name])
+  useEffect(() => {
+    const input = document.querySelector<HTMLInputElement>('.formula-name')
+    if (!input) return
+    const fitTitle = () => {
+      // Start from the configured typography; shrink only when the actual field is too narrow.
+      input.style.removeProperty('font-size')
+      if (!input.value || !input.clientWidth) return
+      const computed = getComputedStyle(input)
+      const context = document.createElement('canvas').getContext('2d')
+      if (!context) return
+      const measure = () => {
+        const current = getComputedStyle(input)
+        context.font = current.font
+        const letterSpacing = parseFloat(current.letterSpacing || '0')
+        const metrics = context.measureText(input.value)
+        return Math.max(metrics.width, metrics.actualBoundingBoxRight) + Math.max(0, metrics.actualBoundingBoxLeft) + (Number.isFinite(letterSpacing) ? input.value.length * letterSpacing : 0)
+      }
+      const available = Math.max(1, input.clientWidth - (parseFloat(computed.paddingLeft) || 0) - (parseFloat(computed.paddingRight) || 0) - 4)
+      const measured = measure()
+      if (!Number.isFinite(measured) || measured <= available) return
+      let low = 0
+      let high = parseFloat(computed.fontSize) || 32
+      // Re-measure to account for fixed letter spacing and italic glyph overhang.
+      for (let step = 0; step < 14; step++) {
+        const size = (low + high) / 2
+        input.style.setProperty('font-size', `${size}px`, 'important')
+        if (measure() <= available) low = size
+        else high = size
+      }
+      input.style.setProperty('font-size', `${low}px`, 'important')
+    }
+    fitTitle()
+    let width = input.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (input.clientWidth === width) return
+      width = input.clientWidth
+      fitTitle()
+    })
+    observer.observe(input)
+    window.addEventListener('resize', fitTitle)
+    document.fonts.addEventListener('loadingdone', fitTitle)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', fitTitle)
+      document.fonts.removeEventListener('loadingdone', fitTitle)
+    }
+  }, [active?.id, active?.name, language])
   useLayoutEffect(() => { if (!hydrationComplete) return; setNotebookOpen(true); setArchiveOpen(false) }, [hydrationComplete])
   const pending = useRef<Formula | undefined>(undefined); const provenancePending = useRef<Formula | undefined>(undefined); const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined); const provenanceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined); const saveStartedAt = useRef<number>(0); const statusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => { void (async () => { try { const s = await createStorage(); setStorage(s); setStatus(s.mode === 'indexeddb' ? 'saved-locally' : 'session-only'); const [settings, initialList, archived] = await Promise.all([s.settings.get(), s.formulas.list(), s.archive.list()]); setPrefix(settings?.formulaIdPrefix ?? 'ACC'); const savedLocale = localStorage.getItem('accordbook.locale'); setLanguage(savedLocale === 'ko' || savedLocale === 'en' ? savedLocale : settings?.language ?? 'en'); let list = initialList; setArchive(archived); setArchiveOpen(false); if (!list.length) { const f = await createFormula(s, settings?.formulaIdPrefix ?? 'ACC'); await s.formulas.save(f); list = [f] } else { const normalized = list.map(ensureRowIds); const needsRepair = normalized.some((formula, index) => formula.rows.some((row, rowIndex) => row.rowId !== list[index].rows[rowIndex].rowId)); if (needsRepair) await Promise.all(normalized.map((f) => s.formulas.save(f))); list = normalized } setPinnedFormulaIds(loadPinnedFormulaIds(list.map((formula) => formula.id))); const saved = localStorage.getItem(ACTIVE_KEY); const selected = list.find((f) => f.id === saved) ?? list[0]; setFormulas(list); setActive(selected); localStorage.setItem(ACTIVE_KEY, selected.id); setHydrationComplete(true); finishInitialization() } catch (error) { console.error('Accordbook initialization failed', error); setInitializationError('Unable to load the notebook. Please reload the page.') ; setHydrationComplete(true); finishInitialization() } })() }, [])

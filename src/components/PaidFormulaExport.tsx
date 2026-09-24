@@ -23,10 +23,10 @@ export default function PaidFormulaExport({ formula, language, storage }: { form
   const [snapshot, setSnapshot] = useState<Formula>()
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
-      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
+      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyF' && event.key.toLowerCase() !== 'f')) return
       const target = event.target
       if (target instanceof HTMLElement) {
-        if (target.closest('textarea, select, [contenteditable="true"], [inert]')) return
+        if (target.closest('input, textarea, select, [contenteditable="true"], [inert]')) return
         const dialogTarget = target.closest<HTMLElement>('[role="dialog"]')
         if (dialogTarget && !dialogTarget.classList.contains('tm-panel')) return
       }

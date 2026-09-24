@@ -22,7 +22,7 @@ $secretRng.Dispose()
 5. 함수 목록에서 `setupPaidFormulaRegistry`를 선택하여 실행하고 Google 권한을 승인합니다.
 6. **배포 → 새 배포 → 웹 앱**: 실행 사용자는 **나**, 접근 사용자는 **모든 사용자**로 지정합니다. 조직 정책상 허용되지 않으면 별도 인증 백엔드가 필요합니다. 시트 자체를 공개하거나 링크 공개로 바꾸지 않습니다.
 7. `/exec` URL은 Accordbook 판매자 패널에 기본값으로 내장되어 표시되지 않습니다.
-8. Accordbook에서 입력창 밖을 클릭하고 **Ctrl+Alt+P**를 누릅니다. Mac은 Command+Alt+P입니다.
+8. Accordbook에서 입력창 밖을 클릭하고 **Ctrl+Alt+F**를 누릅니다. Mac은 Command+Option+F입니다. **Ctrl+Alt+L** (Mac은 Command+Option+L)로 한국어와 영어를 전환할 수 있습니다.
 9. 판매자 등록 키는 `PaidFormulaConfig`의 `SELLER_TOKEN` 값과 동일하게 입력합니다. 구매자 이름과 전체 휴대폰 번호를 입력하면 `01012345678`은 `010-1234-5678`로 표시됩니다. 현재 010 번호만 지원합니다.
 10. **PIN 생성**을 눌렀을 때만 발급 PIN이 화면에 나타납니다. PIN을 복사한 뒤 구매자에게 전달합니다.
 11. **시트 등록 후 파일 저장**을 누릅니다. 응답 성공과 Package ID 일치를 확인해야 다운로드됩니다.
