@@ -21,6 +21,6 @@
   },
   "provenance": {
     "schemaVersion": 1,
-    "claimedSource": { "originType": "reference", "title": "Formula Drop · DROP-2026-001", "note": "Free Formula Drop package; source fixture: public/formula-drops/2026-001/source.json" }
+    "claimedSource": { "originType": "reference", "title": "Formula Drop · DROP-2026-001", "note": "A public Formula Drop reference." }
   }
 }

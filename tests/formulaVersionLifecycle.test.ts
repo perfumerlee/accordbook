@@ -23,6 +23,14 @@ describe('Formula Version lifecycle', () => {
     expect(saved?.snapshot.rows[0].parts).toBe(100); expect(saved?.snapshot.rows[0].dilution?.percent).toBe(10); expect(saved?.snapshot.notes).toBe('current')
   })
 
+  it('captures the Formula origin at version creation time', async () => {
+    const storage = await createStorage(); const formula = makeFormula(); const withOrigin = { ...formula, provenance: await createProvenance(formula, 'created', { originType: 'inspired_by', title: 'Rose Accord' }) }
+    const version = await createFormulaVersion(storage, withOrigin)
+    expect(version.snapshot.claimedSource).toEqual({ originType: 'inspired_by', title: 'Rose Accord' })
+    withOrigin.provenance!.claimedSource.title = 'Changed Current Origin'
+    expect(version.snapshot.claimedSource?.title).toBe('Rose Accord')
+  })
+
   it('normalizes legacy rows with stable rowIds in snapshots', async () => {
     const storage = await createStorage(); const version = await createFormulaVersion(storage, makeFormula())
     expect(version.snapshot.rows.every((row) => row.rowId.length > 0)).toBe(true)

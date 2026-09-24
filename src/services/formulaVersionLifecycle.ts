@@ -8,7 +8,7 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 
 export function createVersionSnapshot(formula: Formula): FormulaVersionSnapshot {
   const normalized = ensureRowIds(formula)
-  return clone({ name: normalized.name, date: normalized.date, notes: normalized.notes, formulaId: normalized.formulaId, rows: snapshotOf(normalized).map(({ rowId, material, cas, parts, dilution }) => ({ rowId, material, cas, parts, dilution })) })
+  return clone({ name: normalized.name, date: normalized.date, notes: normalized.notes, formulaId: normalized.formulaId, rows: snapshotOf(normalized).map(({ rowId, material, cas, parts, dilution }) => ({ rowId, material, cas, parts, dilution })), ...(normalized.provenance?.claimedSource ? { claimedSource: normalized.provenance.claimedSource } : {}) })
 }
 
 export function areVersionSnapshotsEqual(left: FormulaVersionSnapshot, right: FormulaVersionSnapshot): boolean {

@@ -39,5 +39,5 @@ export interface ReconstructionCheckpoint { revisionId: string; sequence: number
 export interface FingerprintMetadata { algorithm: 'SHA-256'; canonicalizationVersion: 1; value: string }
 export interface ProvenanceCheckpoint { kind: 'genesis' | 'migration'; recordedAt: string; formulaSnapshot: string; fingerprint: FingerprintMetadata }
 
-export interface FormulaVersionSnapshot { name: string; date: string; notes: string; formulaId: string; rows: FormulaSnapshotRow[] }
+export interface FormulaVersionSnapshot { name: string; date: string; notes: string; formulaId: string; rows: FormulaSnapshotRow[]; claimedSource?: ClaimedSource }
 export interface FormulaVersion { versionId: string; parentFormulaId: string; versionNumber: number | null; kind: 'manual' | 'restore-point'; createdAt: string; note: string; snapshot: FormulaVersionSnapshot; sourceCurrentUpdatedAt: string; sourceFingerprint?: string; sourceRevisionId?: string }
