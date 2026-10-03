@@ -301,12 +301,27 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 @media(max-width:767px){.note-header .workspace-actions .experiments-page-action{display:none!important}}
 /* Workspace transfer feedback stays within the existing sidebar and experiment layout. */
 .workspace-feedback, .workspace-import-hint { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; max-width: 100%; }
-.workspace-feedback { padding: 10px; margin: 8px 0; background: #f3f0e8; color: #34342d; }
-.workspace-feedback[role="alert"] { color: #8d352a; }
+.workspace-feedback-slot { display:grid; grid-template-rows:1fr; margin:10px 0; opacity:1; transition:grid-template-rows 240ms ease,margin 240ms ease,opacity 180ms ease; animation:workspace-feedback-in 180ms ease-out; }
+.workspace-feedback-slot.is-leaving { grid-template-rows:0fr; margin-top:0; margin-bottom:0; opacity:0; pointer-events:none; }
+.workspace-feedback-clip { min-height:0; overflow:hidden; }
+.workspace-feedback { display:flex; align-items:center; gap:9px; width:fit-content; max-width:100%; box-sizing:border-box; padding:9px 10px; margin:0; border:1px solid var(--line-soft); border-left:2px solid var(--accent); border-radius:3px; background:color-mix(in srgb,var(--accent) 6%,var(--paper)); color:var(--ink); font:11px/1.5 Inter,Pretendard,sans-serif; }
+.workspace-feedback-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,transparent); font-weight:600; }
+.workspace-feedback-icon svg { width:16px; height:16px; }
+.workspace-feedback-message { min-width:0; overflow-wrap:anywhere; }
+.workspace-feedback:has([role="alert"]) { border-left-color:var(--danger); }
+.workspace-feedback:has([role="alert"]) .workspace-feedback-icon { color:var(--danger); background:color-mix(in srgb,var(--danger) 10%,transparent); }
+.workspace-feedback-dismiss { flex:0 0 28px; align-self:stretch; min-height:28px; margin:-4px -5px -4px 1px; padding:0; border:0; border-radius:2px; background:transparent; color:var(--muted); font:18px/1 Georgia,serif; cursor:pointer; }
+.workspace-feedback-dismiss:hover { background:var(--paper-2); color:var(--ink); }
+.workspace-feedback-dismiss:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.workspace-feedback-spinner { width:10px; height:10px; border:1.5px solid currentColor; border-right-color:transparent; border-radius:50%; animation:workspace-feedback-spin 800ms linear infinite; }
+@keyframes workspace-feedback-in { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
+@keyframes workspace-feedback-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .workspace-feedback-slot,.workspace-feedback-spinner { animation:none; transition:none; } }
 .workspace-import-hint { padding: 4px 10px; margin: 0; }
 .export-menu .btn { white-space: normal; overflow-wrap: anywhere; min-height: 40px; }
 .app > .sidebar .formula-list { flex: 1 1 auto; }
-.app > .sidebar .workspace-feedback { flex-shrink: 0; }
+.app > .sidebar .workspace-feedback-slot { flex-shrink:0; }
+.app > .sidebar .workspace-feedback { width:100%; }
 @media (min-width: 1200px) {
   .data-actions .export-menu { top: auto; bottom: calc(100% + 6px); max-height: calc(100vh - 32px); overflow-y: auto; }
   .data-actions .export-menu::before { display: none; }
