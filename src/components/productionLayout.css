@@ -299,3 +299,16 @@ html[lang="ko"] .tm-panel .tm-current small::after{content:"편집 가능한 현
 }
 .note-header .workspace-actions .experiments-page-action{display:inline-flex}
 @media(max-width:767px){.note-header .workspace-actions .experiments-page-action{display:none!important}}
+/* Workspace transfer feedback stays within the existing sidebar and experiment layout. */
+.workspace-feedback, .workspace-import-hint { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; max-width: 100%; }
+.workspace-feedback { padding: 10px; margin: 8px 0; background: #f3f0e8; color: #34342d; }
+.workspace-feedback[role="alert"] { color: #8d352a; }
+.workspace-import-hint { padding: 4px 10px; margin: 0; }
+.export-menu .btn { white-space: normal; overflow-wrap: anywhere; min-height: 40px; }
+.app > .sidebar .formula-list { flex: 1 1 auto; }
+.app > .sidebar .workspace-feedback { flex-shrink: 0; }
+@media (min-width: 1200px) {
+  .data-actions .export-menu { top: auto; bottom: calc(100% + 6px); max-height: calc(100vh - 32px); overflow-y: auto; }
+  .data-actions .export-menu::before { display: none; }
+}
+@media (max-width: 1199px) { .export-menu .workspace-print-action { display: none; } }

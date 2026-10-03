@@ -151,3 +151,4 @@ rootCA.pem
 *-REPORT.md
 *-PLAN.md
 *-DIAGNOSIS.md
+.qa/workspace/

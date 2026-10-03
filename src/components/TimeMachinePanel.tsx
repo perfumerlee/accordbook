@@ -1,9 +1,11 @@
+import type { WorkspaceExportCoordinator } from '../services/workspaceExportCoordinator'
+import { useWorkspaceExportParticipant } from './useWorkspaceExportParticipant'
 import { VersionReleaseStatus, ReleasedIndicator } from './VersionReleaseStatus'
 import { getReleasedVersion } from '../services/formulaRelease'
 import { VersionCompositionView } from './VersionCompositionView'
 import { canShowVersionComposition } from '../services/versionComposition'
 import { ScaleBatchView } from './ScaleBatchView'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Formula, FormulaVersion, FormulaVersionSnapshot } from '../models/formula'
 import type { AccordbookStorage } from '../storage/storageService'
 import { createFormulaVersion, listFormulaVersions } from '../services/formulaVersionLifecycle'
@@ -38,7 +40,7 @@ export function formatVersionNote(version: FormulaVersion, language: 'en' | 'ko'
   return version.note
 }
 
-export default function TimeMachinePanel({ formula, storage, language, onClose, onBeforeSaveVersion, onRestore, onCreateAsNew, onMarkReleasedVersion, onRemoveReleasedVersion, onViewAsSheet, isOpen, opener, openSequence = 0 }: { formula: Formula; storage: AccordbookStorage; language: 'en' | 'ko'; onClose: () => void; onBeforeSaveVersion?: () => Promise<void>; onRestore?: (formula: Formula) => Promise<void>; onCreateAsNew?: (version: FormulaVersion) => Promise<void>; onMarkReleasedVersion?: (formulaId: string, versionId: string) => Promise<void>; onRemoveReleasedVersion?: (formulaId: string) => Promise<void>; onViewAsSheet?: (versions: FormulaVersion[], includeCurrent: boolean) => void; isOpen: boolean; opener?: HTMLElement | null; openSequence?: number }) {
+export default function TimeMachinePanel({ workspaceCoordinator, formula, storage, language, onClose, onBeforeSaveVersion, onRestore, onCreateAsNew, onMarkReleasedVersion, onRemoveReleasedVersion, onViewAsSheet, isOpen, opener, openSequence = 0 }: { workspaceCoordinator?: WorkspaceExportCoordinator; formula: Formula; storage: AccordbookStorage; language: 'en' | 'ko'; onClose: () => void; onBeforeSaveVersion?: () => Promise<void>; onRestore?: (formula: Formula) => Promise<void>; onCreateAsNew?: (version: FormulaVersion) => Promise<void>; onMarkReleasedVersion?: (formulaId: string, versionId: string) => Promise<void>; onRemoveReleasedVersion?: (formulaId: string) => Promise<void>; onViewAsSheet?: (versions: FormulaVersion[], includeCurrent: boolean) => void; isOpen: boolean; opener?: HTMLElement | null; openSequence?: number }) {
   const t = messages[language]
   const panelRef = useRef<HTMLElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -90,6 +92,10 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     batchReturnPending.current = true
   }
   const formulaIdRef = useRef(formula.id); const [versions, setVersions] = useState<FormulaVersion[]>([]); const [compareTarget, setCompareTarget] = useState<FormulaVersion>(); const [activeTab, setActiveTab] = useState<TimeMachineTab>("version"); const [selected, setSelected] = useState<FormulaVersion>(); const [noteOpen, setNoteOpen] = useState(false); const [note, setNote] = useState(''); const [saving, setSaving] = useState(false); const [capitalizationWarnings, setCapitalizationWarnings] = useState<string[]>([]); const [restoring, setRestoring] = useState(false); const [restoreConfirm, setRestoreConfirm] = useState(false); const [closing, setClosing] = useState(false); const [contextChanging, setContextChanging] = useState(false); const ko = language === 'ko'
+  useWorkspaceExportParticipant(workspaceCoordinator, { formulaId: formula.id, role: 'version',
+    blockedReason: () => saving || restoring || creatingAsNew ? 'unfinished-structural-edit' : noteOpen ? 'unfinished-version-draft' : undefined,
+    flush: async () => undefined,
+  })
   const [sheetSelected, setSheetSelected] = useState<string[]>([]); const [sheetCurrent, setSheetCurrent] = useState(true)
   const sheetSelectionCount = sheetSelected.length + (sheetCurrent ? 1 : 0)
   useEffect(() => { setSheetSelected([]); setSheetCurrent(true) }, [formula.id])
@@ -217,7 +223,8 @@ export default function TimeMachinePanel({ formula, storage, language, onClose, 
     if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { event.preventDefault(); last.focus() }
     else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) { event.preventDefault(); first.focus() }
   }
-  const date = (value: string) => new Date(value).toLocaleString(ko ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  const dateFormatter = useMemo(() => new Intl.DateTimeFormat(ko ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }), [ko])
+  const date = (value: string) => { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? parsed.toString() : dateFormatter.format(parsed) }
   const restore = async () => { if (!selected || restoring) return; setRestoring(true); try { await onBeforeSaveVersion?.(); const restored = await restoreFormulaVersion(storage, formula, selected); await onRestore?.(restored); setRestoreConfirm(false); setSelected(undefined); setActiveTab("version"); await reload() } finally { setRestoring(false) } }
   const selectTab = (tab: TimeMachineTab) => {
     if (tab === 'compare') setCompareTarget(compareTarget ?? selected)

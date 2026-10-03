@@ -6,6 +6,8 @@ import { formatDilutionSuffix } from '../services/dilutionDisplay'
 import { evaluationBranchPurpose } from '../services/evaluationDirection'
 import BranchIntentFields, { type BranchIntentDraft } from './BranchIntentFields'
 import './variantEvaluations.css'
+import type { WorkspaceExportCoordinator } from '../services/workspaceExportCoordinator'
+import { useWorkspaceExportParticipant } from './useWorkspaceExportParticipant'
 
 const labels = {
   ko: {
@@ -55,7 +57,8 @@ const labels = {
 type Draft = EvaluationInput & { evaluationId?: string }
 export type EvaluationDrafts = Record<string, Draft | undefined>
 
-export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange }: {
+export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange, workspaceCoordinator }: {
+  workspaceCoordinator?: WorkspaceExportCoordinator
   experiment: Experiment
   variant: ExperimentVariant
   language: 'en' | 'ko'
@@ -71,6 +74,10 @@ export default function VariantEvaluations({ experiment, variant, language, disa
   const [error, setError] = useState('')
   const [branchDraft, setBranchDraft] = useState<{ evaluationId: string; purpose: NonNullable<ReturnType<typeof evaluationBranchPurpose>>; intent: BranchIntentDraft }>()
   const busy = useRef(false)
+  useWorkspaceExportParticipant(workspaceCoordinator, { formulaId: experiment.parentFormulaId, role: 'draft',
+    blockedReason: () => branchDraft ? 'unsaved-branch-intent' : draft ? 'unsaved-experiment-draft' : undefined,
+    flush: async () => undefined,
+  })
   const evaluations = [...(variant.evaluations ?? [])].reverse()
   const canBranch = canCreateBranchFrom(experiment, variant.variantId)
   const directionHintId = useId()

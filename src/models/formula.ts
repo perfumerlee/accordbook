@@ -15,6 +15,8 @@ export interface FormulaMaterial {
 }
 
 export interface Formula {
+  /** Local Workspace ingestion metadata, not an Origin claim or a runtime relationship. */
+  workspaceImport?: { sourceFormulaId: string; importedAt: string }
   releasedVersionId?: string
   id: string
   formulaId: string

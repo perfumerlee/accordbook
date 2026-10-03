@@ -7,6 +7,7 @@ import type { Formula } from '../models/formula'
 import type { AccordbookBackupData } from '../models/backup'
 import { VersionRepository } from './versionRepository'
 import { ExperimentRepository } from './experimentRepository'
+import { WorkspaceRepository } from './workspaceRepository'
 
 export type AutosaveStatus = 'saving' | 'saved-locally' | 'session-only'
 
@@ -18,6 +19,7 @@ export interface AccordbookStorage {
   meta: MetaRepository
   versions: VersionRepository
   experiments: ExperimentRepository
+  workspaces: WorkspaceRepository
   saveFormula(formula: Formula): Promise<AutosaveStatus>
   exportData(): Promise<AccordbookBackupData>
   importData(data: AccordbookBackupData): Promise<void>
@@ -34,6 +36,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
     meta: new MetaRepository(database),
     versions: new VersionRepository(database),
     experiments: new ExperimentRepository(database),
+    workspaces: new WorkspaceRepository(database),
     async saveFormula(formula) {
       try {
         await formulas.save(formula)

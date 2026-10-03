@@ -2,10 +2,26 @@ import { describe, expect, it } from 'vitest'
 import { createBackup } from '../src/services/exportJson'
 import { BackupImportError, parseBackup, importBackup } from '../src/services/importJson'
 import { createStorage } from '../src/storage/storageService'
+import { workspaceFixture } from './workspaceFixtures'
+import { toWorkspaceFile } from '../src/services/workspaceExport'
+import { importWorkspace } from '../src/services/workspaceImporter'
 
 const data = { settings: { formulaIdPrefix: 'ACC', language: 'en' as const }, formulas: [], archive: [], versions: [], meta: { 'ACC-2608': 17 } }
 
 describe('backup and import', () => {
+  it('preserves imported Workspace row annotations, complete history and import metadata through Backup restore', async () => {
+    const storage = await createStorage(), source = await workspaceFixture()
+    source.versions[1].snapshot.rows[0].marked = true
+    const result = await importWorkspace(storage, toWorkspaceFile(source))
+    if (!result.ok) throw new Error(result.code)
+    const before = JSON.parse(JSON.stringify(await storage.exportData()))
+    const backup = await createBackup(storage)
+    await importBackup(storage, parseBackup(JSON.stringify(backup)))
+    const after = JSON.parse(JSON.stringify(await storage.exportData()))
+    expect(after).toEqual(before)
+    expect(after.versions.map((v: any) => v.snapshot.rows[0].marked).sort()).toEqual([false, true])
+    expect(after.versions.every((v: any) => v.snapshot.rows[0].memo === 'snapshot memo')).toBe(true)
+  })
   it('creates a v3 backup with Time Machine history', async () => { const storage = await createStorage(); await storage.importData(data); const backup = await createBackup(storage); expect(backup.app).toBe('Accordbook'); expect(backup.formatVersion).toBe(3); expect(backup.data.versions).toEqual([]); expect(backup.data.experiments).toEqual([]); expect(backup.exportedAt).toBeTruthy(); expect(backup.data.meta['ACC-2608']).toBe(17); expect(JSON.stringify(backup)).toBeTruthy() })
   it('imports v1 backups with an empty history', () => { const parsed = parseBackup(JSON.stringify({ app: 'Accordbook', formatVersion: 1, data: { settings: {}, formulas: [{ id: 'f', formulaId: 'ACC-2608-001', date: '2026-08-28', rows: [] }], archive: [], meta: {} } })); expect(parsed.formatVersion).toBe(3); expect(parsed.data.versions).toEqual([]); expect(parsed.data.experiments).toEqual([]); expect(parsed.data.formulas[0].name).toBe(''); expect(parsed.data.formulas[0].notes).toBe('') })
   it('round-trips manual and restore-point versions without changing identity', async () => { const storage = await createStorage(); const version = { versionId: 'v1', parentFormulaId: 'f', versionNumber: 1, kind: 'manual' as const, createdAt: '2026-09-03T00:00:00.000Z', note: 'first', sourceCurrentUpdatedAt: '2026-09-03T00:00:00.000Z', snapshot: { name: 'Test', date: '2026-09-03', notes: 'notes', formulaId: 'ACC-001', rows: [{ rowId: 'r1', parts: 50, material: '', cas: undefined }] } }; const formula = { id: 'f', formulaId: 'ACC-001', date: '2026-09-03', name: 'Test', notes: '', rows: [], createdAt: '2026-09-03T00:00:00.000Z', updatedAt: '2026-09-03T00:00:00.000Z' }; await storage.importData({ ...data, formulas: [formula], versions: [version] }); const backup = await createBackup(storage); const parsed = parseBackup(JSON.stringify(backup)); await importBackup(storage, parsed); expect((await storage.versions.get('v1'))?.snapshot.rows[0].parts).toBe(50); expect((await storage.versions.get('v1'))?.versionId).toBe('v1') })

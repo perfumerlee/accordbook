@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://accordbook.org/sitemap.xml
+
+#DaumWebMasterTool:c50a87c58a30cc0c60ae4d2e5ef2e7673e73bb91064576f3bd8e98e6217d956b:Wz/rfTo9osfCpgVJS36Djg==
