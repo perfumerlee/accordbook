@@ -27,6 +27,12 @@ describe('AI connection and request privacy', () => {
     expect(resolveAiConnection('true', APPROVED_PRODUCTION_AI_ENDPOINT + '?x=1', false, 'https://accordbook.org').enabled).toBe(false)
     expect(resolveAiConnection('true', 'https://accordbook-ai-api-ssg7tv75ya-du.a.run.app.evil.example/v1/ai/formula-review', false, 'https://accordbook.org').enabled).toBe(false)
   })
+  it('does not reject the approved production endpoint during request revalidation', async () => {
+    const fetcher = vi.fn().mockResolvedValue(response()); vi.stubGlobal('fetch', fetcher)
+    vi.stubGlobal('window', { location: { origin: 'https://accordbook.org' } })
+    await expect(reviewFormula({ ...input(), connection: { enabled: true, endpoint: APPROVED_PRODUCTION_AI_ENDPOINT } })).resolves.toEqual(result)
+    expect(fetcher).toHaveBeenCalledOnce()
+  })
   it.each([
     [undefined, undefined, true], ['false', connection.endpoint, true], ['true', '', true], ['true', connection.endpoint, false],
     ['true', 'https://external.example/v1/ai/formula-review', true], ['true', connection.endpoint + '?token=secret', true],

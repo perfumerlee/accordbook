@@ -61,7 +61,13 @@ export async function reviewFormula(input: {
   disclosureVersion: number; signal: AbortSignal; idempotencyKey?: string; timeoutMs?: number;
 }): Promise<AiReview> {
   // Revalidate the endpoint even if a caller constructs its own connection object.
-  const endpoint = resolveAiConnection(input.connection.enabled ? 'true' : '', input.connection.endpoint, true)
+  const approvedProductionEndpoint = input.connection.endpoint === APPROVED_PRODUCTION_AI_ENDPOINT
+  const endpoint = resolveAiConnection(
+    input.connection.enabled ? 'true' : '',
+    input.connection.endpoint,
+    approvedProductionEndpoint ? false : import.meta.env.DEV,
+    approvedProductionEndpoint ? APPROVED_PRODUCTION_ORIGIN : (typeof window !== 'undefined' ? window.location.origin : undefined),
+  )
   if (!endpoint.enabled) throw new AiClientError('NO_ENDPOINT')
   if (!validAiToken(input.token)) throw new AiClientError('NO_TOKEN')
   if (input.disclosureVersion !== 1) throw new AiClientError('INVALID_DISCLOSURE')
