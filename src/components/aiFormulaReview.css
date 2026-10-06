@@ -1,13 +1,43 @@
-.ai-review { margin: 0 0 20px; border: 1px solid #b9ad99; color: inherit; background: #faf7ef; min-width: 0; font: inherit; overflow-wrap: anywhere; }
+.ai-review { margin: 0 0 20px; color: inherit; min-width: 0; font: inherit; overflow-wrap: anywhere; }
+.ai-review:not(:has(.ai-review-body)) { margin: 0; }
+.ai-review-action-slot { display: inline-flex; flex: 0 0 auto; margin-right: 12px; }
+.app .main .editor-actions .ai-review-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; letter-spacing: .04em; }
+.app .main .editor-actions .ai-review-trigger { background: #f4ede0; border-color: #8f806d; color: #4f4539; }
+.app .main .editor-actions .ai-review-trigger:hover { background: #ebe1d1; border-color: #8f806d; color: #4f4539; }
+.app .main .editor-actions:has(.ai-review-trigger.is-open) { padding-bottom: 0; align-items: flex-end; }
+.app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-left { align-items: flex-end; }
+.app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-right,
+.app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-left > .btn { margin-bottom: 12px; }
+.app .main .editor-actions .ai-review-trigger.is-open { border-color: #8f806d; border-bottom-color: #faf7ef; border-radius: 8px 8px 0 0; background: #f4ede0; color: #4f4539; position: relative; z-index: 1; margin-bottom: -1px; }
+.ai-review-action-slot:has(.is-open) { position: relative; z-index: 2; }
+.ai-review-action-slot:has(.is-open)::after { content: ''; position: absolute; left: 1px; right: 1px; bottom: -2px; height: 4px; background: #faf7ef; pointer-events: none; }
+.app .main .editor-actions .ai-review-trigger.is-open:hover { transform: none; }
+.ai-review-trigger svg { flex: 0 0 auto; }
+.ai-review-trigger:focus-visible { outline: 2px solid #5c5344; outline-offset: 3px; }
+@media (min-width: 768px) and (max-width: 900px) {
+  .app .main .editor-actions:has(.ai-review-action-slot) { gap: 8px; flex-wrap: nowrap; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .btn { padding-inline: 5px; font-size: 10px; white-space: nowrap; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { gap: 6px; }
+}
+@media (max-width: 767px) {
+  .ai-review-action-slot { margin-right: 0; }
+  .app .main .editor-actions:has(.ai-review-action-slot) { gap: 6px; flex-wrap: nowrap; }
+  .app .main .editor-actions .ai-review-trigger { padding-inline: 6px; font-size: 11px; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { gap: 6px; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right .btn { padding-inline: 6px; }
+}
 .ai-review *, .ai-review *::before, .ai-review *::after { box-sizing: border-box; }
 .ai-review button { font: inherit; color: inherit; background: transparent; border: 1px solid #a99e8b; padding: 9px 14px; min-height: 44px; cursor: pointer; white-space: normal; }
 .ai-review button:disabled { opacity: .5; cursor: default; }
 .ai-review button:focus-visible, .ai-review input:focus-visible { outline: 2px solid #5c5344; outline-offset: 3px; }
-.ai-review .ai-review-trigger { border: 0; width: 100%; text-align: left; letter-spacing: .12em; font-size: 12px; font-weight: 700; }
-.ai-review-body { padding: 0 18px 18px; max-width: 100%; }
+.ai-review-body { padding: 0 18px 18px; max-width: 100%; border: 1px solid #b9ad99; border-radius: 0 8px 8px 8px; background: #faf7ef; }
 .ai-review-body p { line-height: 1.6; margin: 12px 0; white-space: pre-wrap; }
 .ai-review-heading, .ai-review-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.ai-review-heading { justify-content: space-between; }
+.ai-review-heading { justify-content: space-between; padding-top: 14px; }
+.ai-review-heading > strong { font-size: 15px; }
+.ai-review-close { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; white-space: nowrap; }
+.ai-review-close span { font-size: 18px; line-height: 1; }
+.ai-review-body > .ai-review-heading + .ai-review-mock { border-top: 1px solid #d1c7b7; padding-top: 12px; }
 .ai-review-mock, .ai-review-usage { font-size: 12px; }
 .ai-review fieldset { border: 1px solid #d1c7b7; margin: 18px 0; padding: 12px; min-width: 0; }
 .ai-review legend { padding: 0 5px; max-width: 100%; font-size: 12px; }
@@ -16,6 +46,8 @@
 .ai-review input[type="password"] { min-width: 0; width: 300px; max-width: 100%; min-height: 44px; border: 1px solid #a99e8b; background: #fffdf7; color: inherit; padding: 8px; }
 .ai-review-connection { margin-bottom: 18px; }
 .ai-review-connection > label { display: block; margin-bottom: 8px; }
+.ai-review-body > button,
+.ai-review-connection > button { display: block; margin-left: auto; max-width: 100%; }
 .ai-review-result { border-top: 1px solid #b9ad99; margin-top: 18px; }
 .ai-review-result h3 { font-size: 12px; letter-spacing: .08em; margin: 20px 0 10px; }
 .ai-review-result ul { padding-left: 22px; }

@@ -1,4 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { Formula } from '../models/formula'
 import { buildAIContext } from '../services/aiContextBuilder'
 import { AiClientError, reviewFormula, supportedAiContext, validAiToken, type AiConnection, type AiReview } from '../services/aiClient'
@@ -7,8 +8,8 @@ import { aiSnapshotMarker, AiRequestGate } from '../services/aiReviewRequest'
 import { aiErrorMessage, aiMessages } from '../i18n/aiMessages'
 import './aiFormulaReview.css'
 
-export default function AiFormulaReview({ formula, language, connection }: {
-  formula?: Readonly<Formula>; language: 'en' | 'ko'; connection: AiConnection
+export default function AiFormulaReview({ formula, language, connection, triggerTarget }: {
+  formula?: Readonly<Formula>; language: 'en' | 'ko'; connection: AiConnection; triggerTarget?: HTMLElement | null
 }) {
   const m = aiMessages[language]
   const id = useId()
@@ -101,9 +102,12 @@ export default function AiFormulaReview({ formula, language, connection }: {
   return <section className="ai-review" aria-label="AI REVIEW" onKeyDown={event => {
     if (event.key === 'Escape' && open && !event.nativeEvent.isComposing) { event.stopPropagation(); close() }
   }}>
-    <button ref={trigger} type="button" className="ai-review-trigger" aria-expanded={open} aria-controls={id} onClick={() => open ? close() : setOpen(true)}>AI REVIEW</button>
+    {triggerTarget && createPortal(<button ref={trigger} type="button" className={`btn ai-review-trigger${open ? ' is-open' : ''}`} aria-label={open ? 'Close AI review' : 'Open AI review'} aria-expanded={open} aria-controls={id} onClick={() => open ? close() : setOpen(true)}>
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" /></svg>
+      <span>AI REVIEW</span>
+    </button>, triggerTarget)}
     {open && <div id={id} className="ai-review-body">
-      <div className="ai-review-heading"><strong>{m.current}</strong><button type="button" onClick={close}>{m.close}</button></div>
+      <div className="ai-review-heading"><strong>{m.current}</strong><button className="ai-review-close" type="button" onClick={close}><span aria-hidden="true">×</span>{m.close}</button></div>
       <p className="ai-review-mock">{m.mock}</p>
       <p>{m.disclosure}</p>
       {!accepted ? <button type="button" onClick={() => { acceptAiDisclosure(); setAccepted(true) }}>{m.accept}</button> : <p>{m.accepted}</p>}
