@@ -61,7 +61,7 @@ export async function generatePages(root = process.cwd()) {
   const guide = await generateGuideRoutes(root, shell)
   if (guide.documents.length) await validateGuideDocumentAssets(root, guide.documents)
   await copyGuideAssets(root, guide.documents)
-  const guideUrls = ['/guide/en/', '/guide/ko/', ...guideSitemapEntries(guide.documents)]
+  const guideUrls = ['https://accordbook.org/guide/en/', 'https://accordbook.org/guide/ko/', ...guideSitemapEntries(guide.documents)]
   const baseSitemap = sitemap(archives).replace('</urlset>', guideUrls.map(url => `<url><loc>${url}</loc></url>`).join('') + '</urlset>')
   await writeFile(join(root,'dist/sitemap.xml'),baseSitemap)
   return archives.length
