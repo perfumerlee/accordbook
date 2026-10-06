@@ -47,6 +47,8 @@ jobs:
       - name: Build
         env:
           VITE_FORMULA_DROP_PUBLIC_API_URL: ${{ vars.VITE_FORMULA_DROP_PUBLIC_API_URL }}
+          VITE_AI_ENABLED: 'true'
+          VITE_AI_ENDPOINT: https://accordbook-ai-api-ssg7tv75ya-du.a.run.app/v1/ai/formula-review
         run: npm run build
 
       - name: Setup Pages

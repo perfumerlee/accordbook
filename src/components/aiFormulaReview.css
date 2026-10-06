@@ -1,0 +1,25 @@
+.ai-review { margin: 0 0 20px; border: 1px solid #b9ad99; color: inherit; background: #faf7ef; min-width: 0; font: inherit; overflow-wrap: anywhere; }
+.ai-review *, .ai-review *::before, .ai-review *::after { box-sizing: border-box; }
+.ai-review button { font: inherit; color: inherit; background: transparent; border: 1px solid #a99e8b; padding: 9px 14px; min-height: 44px; cursor: pointer; white-space: normal; }
+.ai-review button:disabled { opacity: .5; cursor: default; }
+.ai-review button:focus-visible, .ai-review input:focus-visible { outline: 2px solid #5c5344; outline-offset: 3px; }
+.ai-review .ai-review-trigger { border: 0; width: 100%; text-align: left; letter-spacing: .12em; font-size: 12px; font-weight: 700; }
+.ai-review-body { padding: 0 18px 18px; max-width: 100%; }
+.ai-review-body p { line-height: 1.6; margin: 12px 0; white-space: pre-wrap; }
+.ai-review-heading, .ai-review-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ai-review-heading { justify-content: space-between; }
+.ai-review-mock, .ai-review-usage { font-size: 12px; }
+.ai-review fieldset { border: 1px solid #d1c7b7; margin: 18px 0; padding: 12px; min-width: 0; }
+.ai-review legend { padding: 0 5px; max-width: 100%; font-size: 12px; }
+.ai-review fieldset label { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.ai-review input[type="checkbox"] { flex: 0 0 auto; width: 18px; height: 18px; accent-color: #574d40; }
+.ai-review input[type="password"] { min-width: 0; width: 300px; max-width: 100%; min-height: 44px; border: 1px solid #a99e8b; background: #fffdf7; color: inherit; padding: 8px; }
+.ai-review-connection { margin-bottom: 18px; }
+.ai-review-connection > label { display: block; margin-bottom: 8px; }
+.ai-review-result { border-top: 1px solid #b9ad99; margin-top: 18px; }
+.ai-review-result h3 { font-size: 12px; letter-spacing: .08em; margin: 20px 0 10px; }
+.ai-review-result ul { padding-left: 22px; }
+.ai-review-result li { margin: 8px 0; line-height: 1.6; white-space: pre-wrap; }
+.ai-review-stale, .ai-review [role="alert"] { border-left: 3px solid #98633e; padding-left: 12px; }
+@media (max-width: 767px) { .ai-review-body { padding: 0 12px 14px; } .ai-review-controls { align-items: stretch; flex-direction: column; } .ai-review input[type="password"] { width: 100%; } }
+@media print { .ai-review { display: none !important; } }
