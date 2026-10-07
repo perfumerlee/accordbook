@@ -15,7 +15,8 @@ const experiment: Experiment = {
 describe('Experiment Compare panel entry', () => {
   it('renders a closed localized entry point and does not open consent or submit on mount', () => {
     const html = renderToStaticMarkup(<ExperimentComparePanel experiment={experiment} variantIds={['local-variant-id']} language="en" />)
-    expect(html).toContain('AI COMPARE')
+    expect(html).toContain('AI Compare')
+    expect(html).toContain('class="ai-action-icon"')
     expect(html).toContain('aria-expanded="false"')
     expect(html).not.toContain('Beta access token')
     expect(html).not.toContain('I understand and consent')
@@ -25,7 +26,9 @@ describe('Experiment Compare panel entry', () => {
 
   it('provides the Korean entry label without exposing local identifiers', () => {
     const html = renderToStaticMarkup(<ExperimentComparePanel experiment={experiment} variantIds={['local-variant-id']} language="ko" />)
-    expect(html).toContain('AI 비교')
+    expect(html).toContain('AI Compare')
+    expect(html.match(/class="ai-action-icon"/g)).toHaveLength(1)
+    expect(html).not.toContain('✦')
     expect(html).not.toContain('local-experiment-id')
     expect(html).not.toContain('local-variant-id')
   })
@@ -34,7 +37,7 @@ describe('Experiment Compare panel entry', () => {
     const html = renderToStaticMarkup(<ExperimentComparisonSheet experiment={experiment} formula={{ formulaId: 'ACC-1', name: 'Formula' }} language="en" variantIds={['local-variant-id']} onClose={() => {}} />)
     expect(html).toContain('BASE')
     expect(html).toContain('A')
-    expect(html).toContain('AI COMPARE')
+    expect(html).toContain('AI Compare')
     expect(html).toContain('aria-expanded="false"')
   })
 })

@@ -4,6 +4,9 @@ import { ExperimentNextRoundAiError, executeExperimentNextRound, parseExperiment
 import { makeExperimentNextRoundReviewRecord, persistExperimentNextRoundReview } from '../src/services/experimentNextRoundReviewPersistence'
 import { createMemoryStorage } from '../src/storage/database'
 import { AiReviewRepository } from '../src/storage/aiReviewRepository'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { createElement } from 'react'
+import ExperimentNextRoundPanel from '../src/components/ExperimentNextRoundPanel'
 
 afterEach(() => vi.restoreAllMocks())
 const experiment = (): Experiment => ({
@@ -15,6 +18,19 @@ const prepared = (includeDecisionNote = false) => prepareExperimentNextRound({ e
 const result = { findings: 'Advisory finding', uncertainties: ['Not measured'], nextChecks: ['Check drydown'], adjustmentDirections: ['Consider a small controlled change'], advisoryOnly: true as const }
 
 describe('Experiment Next Round preparation and execution', () => {
+  it('uses the fixed English action name in both locales and renders one standardized AI icon', () => {
+    const value = experiment()
+    const variant = value.variants[0]
+    const evaluation = variant.evaluations[0]
+    for (const language of ['ko', 'en'] as const) {
+      const html = renderToStaticMarkup(createElement(ExperimentNextRoundPanel, { experiment: value, variant, evaluation, language }))
+      expect(html).toContain('AI Next Round')
+      expect(html.match(/class="ai-action-icon"/g)).toHaveLength(1)
+      expect(html).not.toContain('✦')
+      expect(html).not.toContain('다음 라운드 AI')
+      expect(html).not.toContain('AI 다음 라운드')
+    }
+  })
   it('uses the exact saved Evaluation snapshot and deterministic BASE delta, excluding internal IDs and live Variant edits', () => {
     const value = prepared()
     expect(value.request.evaluated.rows[0].material).toBe('Evaluated Hedione')

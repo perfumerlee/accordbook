@@ -11,7 +11,7 @@ export default function ExperimentCompareReviewHistory({ reviews, language, getE
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [generation, setGeneration] = useState(0)
-  const t = { title: ko ? '실험 AI 리뷰 기록' : 'Experiment AI Review History', back: ko ? '실험 목록으로' : 'Back to Experiments', noItems: ko ? '저장된 실험 리뷰가 없습니다.' : 'No saved Experiment Reviews.', orphan: ko ? '원본 실험을 찾을 수 없습니다' : 'Source Experiment is no longer available', open: ko ? '리뷰 열기' : 'Open Review', remove: ko ? '리뷰 삭제' : 'Delete Review', confirm: ko ? '이 실험 리뷰를 삭제할까요? 삭제 후에는 복구할 수 없습니다.' : 'Delete this Experiment Review? This cannot be undone.', failed: ko ? '기록을 불러오거나 삭제하지 못했습니다.' : 'Could not load or verify the Review History change.' }
+  const t = { title: 'Experiment AI Review History', back: ko ? '실험 목록으로' : 'Back to Experiments', noItems: ko ? '저장된 실험 리뷰가 없습니다.' : 'No saved Experiment Reviews.', orphan: ko ? '원본 실험을 찾을 수 없습니다' : 'Source Experiment is no longer available', open: ko ? '리뷰 열기' : 'Open Review', remove: ko ? '리뷰 삭제' : 'Delete Review', confirm: ko ? '이 실험 리뷰를 삭제할까요? 삭제 후에는 복구할 수 없습니다.' : 'Delete this Experiment Review? This cannot be undone.', failed: ko ? '기록을 불러오거나 삭제하지 못했습니다.' : 'Could not load or verify the Review History change.' }
   useEffect(() => {
     let active = true; setLoading(true); setError('')
     void (async () => { try { const records = await reviews.listAllExperimentReviews(); const next = await Promise.all(records.map(async record => ({ record, orphan: !(await getExperiment(record.experimentId)) }))); if (active) setItems(next) }

@@ -1,5 +1,6 @@
 .experiment-next-round{margin-top:12px;min-width:0}
-.experiment-next-round__trigger{min-height:36px;padding:7px 11px;border:1px solid var(--border);border-radius:4px;background:var(--paper-2);color:var(--ink);font:11px/1.35 var(--ws-mono);cursor:pointer}
+.experiment-next-round__trigger{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:7px 11px;border:1px solid var(--border);border-radius:4px;background:var(--paper-2);color:var(--ink);font:11px/1.35 var(--ws-mono);cursor:pointer}
+.experiment-next-round__trigger .ai-action-icon{flex:0 0 14px}
 .experiment-next-round__trigger:hover{background:var(--paper-3,var(--paper-2))}
 .experiment-next-round__trigger:focus-visible,.experiment-next-round__panel :is(button,input):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .experiment-next-round__panel{margin-top:8px;padding:16px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0;overflow-wrap:anywhere}

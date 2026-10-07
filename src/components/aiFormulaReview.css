@@ -1,7 +1,7 @@
 .ai-review { margin: 0 0 20px; color: inherit; min-width: 0; font: inherit; overflow-wrap: anywhere; }
 .ai-review:not(:has(.ai-review-body)) { margin: 0; }
 .ai-review-action-slot { display: inline-flex; flex: 0 0 auto; margin-right: 12px; }
-.app .main .editor-actions .ai-review-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; letter-spacing: .04em; }
+.app .main .editor-actions .ai-review-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; letter-spacing: .04em; }
 .app .main .editor-actions .ai-review-trigger { background: #f4ede0; border-color: #8f806d; color: #4f4539; }
 .app .main .editor-actions .ai-review-trigger:hover { background: #ebe1d1; border-color: #8f806d; color: #4f4539; }
 .app .main .editor-actions:has(.ai-review-trigger.is-open) { padding-bottom: 0; align-items: flex-end; }
@@ -12,7 +12,7 @@
 .ai-review-action-slot:has(.is-open) { position: relative; z-index: 2; }
 .ai-review-action-slot:has(.is-open)::after { content: ''; position: absolute; left: 1px; right: 1px; bottom: -2px; height: 4px; background: #faf7ef; pointer-events: none; }
 .app .main .editor-actions .ai-review-trigger.is-open:hover { transform: none; }
-.ai-review-trigger svg { flex: 0 0 auto; }
+.ai-action-icon { display: block; flex: 0 0 14px; width: 14px; height: 14px; }
 .ai-review-trigger:focus-visible { outline: 2px solid #5c5344; outline-offset: 3px; }
 @media (min-width: 768px) and (max-width: 900px) {
   .app .main .editor-actions:has(.ai-review-action-slot) { gap: 8px; flex-wrap: nowrap; }

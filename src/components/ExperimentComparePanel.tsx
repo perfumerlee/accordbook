@@ -9,6 +9,7 @@ import { calculateTotalParts } from '../services/formulaCalculator'
 import type { AiReviewRepository } from '../storage/aiReviewRepository'
 import type { StorageMode } from '../storage/database'
 import './experimentComparePanel.css'
+import AiActionIcon from './AiActionIcon'
 
 type Props = {
   experiment: Experiment
@@ -27,15 +28,15 @@ type Phase = 'idle' | 'preparing' | 'running' | 'complete' | 'failed' | 'cancell
 
 const copy = {
   en: {
-    trigger: 'AI COMPARE', title: 'AI experiment comparison', eyebrow: 'EXPERIMENT COMPARE', close: 'Close AI comparison',
+    trigger: 'AI Compare', title: 'AI Compare', eyebrow: 'EXPERIMENT COMPARE', close: 'Close AI comparison',
     intro: 'Optional analysis sends only BASE and the selected Variants to the AI service. Results are advisory and do not change this Experiment.',
     scope: 'Sent: material names, parts, valid CAS references, active dilution, and computed deltas. Not sent: Formula name, Experiment name, Variant notes, evaluations, branch intent, or unrelated Variants.',
     context: 'Review the exact comparison scope', base: 'BASE', selected: 'Selected Variants',
     consent: 'I understand and consent to send this Experiment comparison for this one request.',
-    token: 'Beta access token', connect: 'Use token', connected: 'Token is held in memory only.', clear: 'Clear token', run: 'Run AI comparison', running: 'Comparing…',
+    token: 'Beta access token', connect: 'Use token', connected: 'Token is held in memory only.', clear: 'Clear token', run: 'Run AI Compare', running: 'Comparing…',
     unknownLimit: 'The effective server request-size limit has not been verified. AI sending is disabled until an operator supplies the verified limit.',
-    unavailable: 'AI comparison is not configured for this environment.', ineligible: 'Complete BASE and every selected Variant to exactly 1,000 parts before requesting a comparison.',
-    consentRequired: 'Confirm the Experiment Compare disclosure for this request.', tokenInvalid: 'Enter a valid beta token.',
+    unavailable: 'AI Compare is not configured for this environment.', ineligible: 'Complete BASE and every selected Variant to exactly 1,000 parts before requesting a comparison.',
+    consentRequired: 'Confirm the AI Compare disclosure for this request.', tokenInvalid: 'Enter a valid beta token.',
     failed: 'The comparison could not be completed. If the outcome is uncertain, do not retry automatically.', cancel: 'Cancel request',
     result: 'AI advisory', summary: 'COMPARE SUMMARY', objective: 'OBJECTIVE DELTA', hypotheses: 'VARIANT HYPOTHESES', hypothesis: 'AI HYPOTHESIS', uncertainty: 'UNCERTAINTIES', checks: 'SMELLING CHECKS',
     overallUncertainty: 'Overall uncertainties', overallChecks: 'Overall smelling checks', parts: 'parts', bytes: 'Request size',
@@ -44,15 +45,15 @@ const copy = {
     saveReview: 'Save Review', saveBusy: 'Saving…', saved: 'Saved to this device', sessionOnly: 'Saved for this session only; durable storage is unavailable.', saveFailed: 'Could not save this Review. The current result is still available.', history: 'Review History', currentHistory: 'This Experiment', allHistory: 'All Experiment Reviews', noHistory: 'No saved Experiment Reviews.', openReview: 'Open Review', backToResult: 'Back to current result', deleteReview: 'Delete Review', confirmDelete: 'Delete this saved Experiment Review? This cannot be undone.', deleteFailed: 'Could not verify deletion. The saved Review remains selected.', deleted: 'Review deleted.', orphan: 'Source Experiment is no longer available', historyLoadFailed: 'Could not load Review History.', savedAt: 'Saved', variantsLabel: 'Variants', historyDetail: 'Saved Experiment Review',
   },
   ko: {
-    trigger: 'AI 비교', title: 'AI 실험 비교', eyebrow: '실험 비교', close: 'AI 비교 닫기',
+    trigger: 'AI Compare', title: 'AI Compare', eyebrow: '실험 비교', close: 'AI 비교 닫기',
     intro: '선택 기능입니다. BASE와 선택한 시안만 AI 서비스로 전송합니다. 결과는 참고용이며 이 실험을 변경하지 않습니다.',
     scope: '전송 항목: 원료명, parts, 유효한 CAS 참조, 활성 희석 정보, 계산된 차이. 미전송 항목: Formula 이름, 실험 이름, 시안 노트, 평가 기록, 브랜치 의도, 선택하지 않은 시안.',
     context: '전송 범위를 확인하세요', base: 'BASE', selected: '선택 시안',
     consent: '이번 요청에 한해 이 실험 비교를 AI 서비스로 보내는 데 동의합니다.',
-    token: '베타 액세스 토큰', connect: '토큰 사용', connected: '토큰은 메모리에만 보관됩니다.', clear: '토큰 지우기', run: 'AI 비교 실행', running: '비교 중…',
+    token: '베타 액세스 토큰', connect: '토큰 사용', connected: '토큰은 메모리에만 보관됩니다.', clear: '토큰 지우기', run: 'AI Compare 실행', running: '비교 중…',
     unknownLimit: '서버의 실제 요청 크기 한도를 확인하지 못했습니다. 운영자가 확인된 한도를 제공할 때까지 AI 전송은 비활성화됩니다.',
-    unavailable: '현재 환경에 AI 비교가 설정되어 있지 않습니다.', ineligible: '요청 전에 BASE와 선택한 모든 시안의 합계를 정확히 1,000 parts로 맞춰 주세요.',
-    consentRequired: '이번 요청의 Experiment Compare 전송 안내를 확인해 주세요.', tokenInvalid: '유효한 베타 토큰을 입력해 주세요.',
+    unavailable: '현재 환경에 AI Compare가 설정되어 있지 않습니다.', ineligible: '요청 전에 BASE와 선택한 모든 시안의 합계를 정확히 1,000 parts로 맞춰 주세요.',
+    consentRequired: '이번 요청의 AI Compare 전송 안내를 확인해 주세요.', tokenInvalid: '유효한 베타 토큰을 입력해 주세요.',
     failed: '비교를 완료하지 못했습니다. 처리 결과가 불확실하면 자동으로 재시도하지 마세요.', cancel: '요청 취소',
     result: 'AI 참고 결과', summary: '비교 요약', objective: '객관적 차이', hypotheses: '시안별 가설', hypothesis: 'AI 가설', uncertainty: '불확실성', checks: '시향 확인 제안',
     overallUncertainty: '전체 불확실성', overallChecks: '전체 시향 확인 제안', parts: 'parts', bytes: '요청 크기',
@@ -220,12 +221,12 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
 
   return <section className="experiment-ai-compare" aria-label={t.title}>
     <button className="experiment-ai-compare__trigger" type="button" aria-expanded={open} onClick={() => { if (open) close(); else { setPhase('preparing'); setOpen(true); setError('') } }}>
-      <span aria-hidden="true">✦</span> {t.trigger}
+      <AiActionIcon /> {t.trigger}
     </button>
     {open && <div className="experiment-ai-compare__panel">
       <header><div><p className="experiment-ai-compare__eyebrow">{t.eyebrow}</p><h2>{t.title}</h2></div><button type="button" aria-label={t.close} onClick={close}>×</button></header>
       <p>{t.intro}</p><p className="experiment-ai-compare__scope">{t.scope}</p>
-      <section aria-label={t.context}><h3>{t.context}</h3><div className="experiment-ai-compare__states"><span><strong>{t.base}</strong><small>{calculateTotalParts(experiment.baseSnapshot.rows.map(row => ({ ...row, id: row.rowId })))} / 1,000 {t.parts}</small></span>{orderedVariantIds.map((id, index) => { const variant = experiment.variants.find(item => item.variantId === id); const total = variant ? calculateTotalParts(variant.snapshot.rows.map(row => ({ ...row, id: row.rowId }))) : 0; return <span key={id}><strong>{labels[index]} · {variant?.label ?? '—'}</strong><small>{total} / 1,000 {t.parts}</small></span> })}</div></section>
+      <section className="experiment-ai-compare__selection" aria-label={t.context}><h3>{t.context}</h3><div className="experiment-ai-compare__states"><span><strong>{t.base}</strong><small>{calculateTotalParts(experiment.baseSnapshot.rows.map(row => ({ ...row, id: row.rowId })))} / 1,000 {t.parts}</small></span>{orderedVariantIds.map((id, index) => { const variant = experiment.variants.find(item => item.variantId === id); const total = variant ? calculateTotalParts(variant.snapshot.rows.map(row => ({ ...row, id: row.rowId }))) : 0; return <span key={id}><strong>{labels[index]} · {variant?.label ?? '—'}</strong><small>{total} / 1,000 {t.parts}</small></span> })}</div></section>
       {preparation.failed ? <p role="status" className="experiment-ai-compare__warning">{preparation.failure instanceof ExperimentCompareAiError && preparation.failure.code === 'INELIGIBLE_COMPOSITION' ? t.ineligible : t.invalid}</p> : <p className="experiment-ai-compare__meta">{t.bytes}: {prepared?.byteLength ?? '—'} / {isLimitValid ? requestLimitBytes : '—'} bytes</p>}
       {!isLimitValid && <p role="status" className="experiment-ai-compare__warning">{t.unknownLimit}</p>}
       {!aiConnection.enabled && <p role="status" className="experiment-ai-compare__warning">{t.unavailable}</p>}

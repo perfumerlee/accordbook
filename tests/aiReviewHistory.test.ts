@@ -12,6 +12,16 @@ const makeReview = (reviewId: string, sourceFormulaId: string, createdAt: string
 })
 
 describe('AI Review History UI contract', () => {
+  it('keeps the Formula AI Review action name in English and uses the shared single AI icon', () => {
+    const component = readFileSync('src/components/AiFormulaReview.tsx', 'utf8')
+    const icon = readFileSync('src/components/AiActionIcon.tsx', 'utf8')
+    expect(component).toContain('<span>AI Review</span>')
+    expect(component).toContain('import AiActionIcon from \'./AiActionIcon\'')
+    expect(component).not.toContain('AI 리뷰')
+    expect(icon).toContain('className="ai-action-icon"')
+    expect(icon.match(/<path\b/g)).toHaveLength(1)
+  })
+
   it('uses Formula-scoped and global repository queries, preserving newest-first repository order', async () => {
     vi.stubGlobal('indexedDB', new IDBFactory())
     const reviews = (await createStorage()).reviews
