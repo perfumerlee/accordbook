@@ -1,17 +1,24 @@
 import type { Formula, FormulaVersion } from '../models/formula'
 import type { Experiment } from '../models/experiment'
+import type { FormulaAiReviewRecord } from '../models/aiReviewRecord'
 import type { AccordbookSettings } from '../models/settings'
 import { appendIndexedWorkspace, readIndexedWorkspace, prepareWorkspaceAppend, WorkspaceAppendConflict, type WorkspaceAppend, type WorkspaceRecords } from './workspaceRepository'
 
-export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments'
+export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments' | 'reviews'
 export type StorageMode = 'indexeddb' | 'memory'
 
-type StoreValue = Formula | FormulaVersion | Experiment | AccordbookSettings | number
+type StoreValue = Formula | FormulaVersion | Experiment | FormulaAiReviewRecord | AccordbookSettings | number
 type StoreMap = Map<string, StoreValue>
+const sourceFormulaId = (value: StoreValue): string | undefined => {
+  if (typeof value !== 'object' || value === null) return undefined
+  if ('parentFormulaId' in value) return value.parentFormulaId
+  if ('sourceFormulaId' in value) return value.sourceFormulaId
+  return undefined
+}
 
 const DB_NAME = 'accordbook'
-const DB_VERSION = 4
-const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments']
+const DB_VERSION = 5
+const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments', 'reviews']
 
 export interface StorageDatabase {
   readonly mode: StorageMode
@@ -20,13 +27,14 @@ export interface StorageDatabase {
   get<T extends StoreValue>(store: StoreName, key: string): Promise<T | undefined>
   getAll<T extends StoreValue>(store: StoreName): Promise<T[]>
   /** Returns owned copies, including in memory mode. */
-  getByParent<T extends FormulaVersion | Experiment>(store: 'versions' | 'experiments', parentFormulaId: string): Promise<T[]>
+  getByParent<T extends FormulaVersion | Experiment | FormulaAiReviewRecord>(store: 'versions' | 'experiments' | 'reviews', parentFormulaId: string): Promise<T[]>
   getParentReferences(store: 'versions' | 'experiments'): Promise<{ key: string; parentFormulaId: string }[]>
   entries(store: StoreName): Promise<Array<[string, StoreValue]>>
   put(store: StoreName, key: string, value: StoreValue): Promise<void>
+  add(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
   clear(): Promise<void>
-  replaceAll(data: { formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
+  replaceAll(data: { formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; reviews?: FormulaAiReviewRecord[]; settings?: AccordbookSettings; meta: Record<string, number> }): Promise<void>
 }
 
 function createMemoryDatabase(): StorageDatabase {
@@ -62,13 +70,14 @@ function createMemoryDatabase(): StorageDatabase {
     },
     async get<T extends StoreValue>(store: StoreName, key: string) { return stores.get(store)!.get(key) as T | undefined },
     async getAll<T extends StoreValue>(store: StoreName) { return [...stores.get(store)!.values()] as T[] },
-    async getByParent<T extends FormulaVersion | Experiment>(store: 'versions' | 'experiments', parentFormulaId: string) { return structuredClone([...stores.get(store)!.values()].filter(v => (v as T).parentFormulaId === parentFormulaId)) as T[] },
+    async getByParent<T extends FormulaVersion | Experiment | FormulaAiReviewRecord>(store: 'versions' | 'experiments' | 'reviews', parentFormulaId: string) { return structuredClone([...stores.get(store)!.values()].filter(v => sourceFormulaId(v) === parentFormulaId)) as T[] },
     async getParentReferences(store) { return [...stores.get(store)!.entries()].map(([key, value]) => ({ key, parentFormulaId: (value as FormulaVersion | Experiment).parentFormulaId })) },
     async entries(store: StoreName) { return [...stores.get(store)!.entries()] },
     async put(store: StoreName, key: string, value: StoreValue) { stores.get(store)!.set(key, value) },
+    async add(store: StoreName, key: string, value: StoreValue) { const target = stores.get(store)!; if (target.has(key)) throw new Error('Record identity already exists'); target.set(key, structuredClone(value)) },
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
     async clear() { stores.forEach((store) => store.clear()) },
-    async replaceAll(data) { await this.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); for (const item of data.versions ?? []) await this.put('versions', item.versionId, item); for (const item of data.experiments ?? []) await this.put('experiments', item.experimentId, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
+    async replaceAll(data) { for (const name of STORE_NAMES) if (name !== 'reviews' || data.reviews !== undefined) stores.get(name)!.clear(); for (const item of data.formulas) await this.put('formulas', item.id, item); for (const item of data.archive) await this.put('archive', item.id, item); for (const item of data.versions ?? []) await this.put('versions', item.versionId, item); for (const item of data.experiments ?? []) await this.put('experiments', item.experimentId, item); for (const item of data.reviews ?? []) await this.put('reviews', item.reviewId, item); if (data.settings) await this.put('settings', 'current', data.settings); for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value) },
   }
 }
 
@@ -91,13 +100,14 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
     async appendWorkspaceAtomic(input) { await appendIndexedWorkspace(database, input) },
     async get<T extends StoreValue>(store: StoreName, key: string) { return run(store, (objectStore) => objectStore.get(key)) as Promise<T | undefined> },
     async getAll<T extends StoreValue>(store: StoreName) { return run(store, (objectStore) => objectStore.getAll()) as Promise<T[]> },
-    async getByParent<T extends FormulaVersion | Experiment>(store: 'versions' | 'experiments', parentFormulaId: string) {
+    async getByParent<T extends FormulaVersion | Experiment | FormulaAiReviewRecord>(store: 'versions' | 'experiments' | 'reviews', parentFormulaId: string) {
       return new Promise<T[]>((resolve, reject) => {
         const tx = database.transaction(store, 'readonly'), objectStore = tx.objectStore(store)
-        const indexed = objectStore.indexNames.contains('parentFormulaId')
-        const request = indexed ? objectStore.index('parentFormulaId').getAll(parentFormulaId) : objectStore.getAll()
+        const indexName = store === 'reviews' ? 'sourceFormulaId' : 'parentFormulaId'
+        const indexed = objectStore.indexNames.contains(indexName)
+        const request = indexed ? objectStore.index(indexName).getAll(parentFormulaId) : objectStore.getAll()
         let result: T[] = []
-        request.onsuccess = () => { result = indexed ? request.result : request.result.filter((v: T) => v.parentFormulaId === parentFormulaId) }
+        request.onsuccess = () => { result = indexed ? request.result : request.result.filter((v: T) => sourceFormulaId(v) === parentFormulaId) }
         tx.oncomplete = () => resolve(result)
         tx.onabort = () => reject(tx.error ?? new Error('Scoped query aborted'))
       })
@@ -141,17 +151,19 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
     },
     async entries(store: StoreName) { return run(store, (objectStore) => objectStore.getAllKeys()).then((keys) => Promise.all(keys.map(async (key) => [String(key), await run(store, (objectStore) => objectStore.get(key))] as [string, StoreValue]))) },
     async put(store: StoreName, key: string, value: StoreValue) { await run(store, (objectStore) => objectStore.put(value, key)) },
+    async add(store: StoreName, key: string, value: StoreValue) { await run(store, (objectStore) => objectStore.add(value, key)) },
     async delete(store: StoreName, key: string) { await run(store, (objectStore) => objectStore.delete(key)) },
     async clear() { for (const store of STORE_NAMES) await run(store, (objectStore) => objectStore.clear()) },
     async replaceAll(data) {
       await new Promise<void>((resolve, reject) => {
         const transaction = database.transaction(STORE_NAMES, 'readwrite')
         transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB replacement failed'))
-        for (const name of STORE_NAMES) transaction.objectStore(name).clear()
+        for (const name of STORE_NAMES) if (name !== 'reviews' || data.reviews !== undefined) transaction.objectStore(name).clear()
         for (const item of data.formulas) transaction.objectStore('formulas').put(item, item.id)
         for (const item of data.archive) transaction.objectStore('archive').put(item, item.id)
         for (const item of data.versions ?? []) transaction.objectStore('versions').put(item, item.versionId)
         for (const item of data.experiments ?? []) transaction.objectStore('experiments').put(item, item.experimentId)
+        for (const item of data.reviews ?? []) transaction.objectStore('reviews').put(item, item.reviewId)
         if (data.settings) transaction.objectStore('settings').put(data.settings, 'current')
         for (const [key, value] of Object.entries(data.meta)) transaction.objectStore('meta').put(value, key)
       })
@@ -170,6 +182,8 @@ export async function openDatabase(): Promise<StorageDatabase> {
           const store = openRequest.transaction!.objectStore(name)
           if (!store.indexNames.contains('parentFormulaId')) store.createIndex('parentFormulaId', 'parentFormulaId', { unique: false })
         }
+        const reviews = openRequest.transaction!.objectStore('reviews')
+        if (!reviews.indexNames.contains('sourceFormulaId')) reviews.createIndex('sourceFormulaId', 'sourceFormulaId', { unique: false })
       }
       openRequest.onsuccess = () => { openRequest.result.onversionchange = () => openRequest.result.close(); resolve(openRequest.result) }
       openRequest.onerror = () => reject(openRequest.error)

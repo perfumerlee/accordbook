@@ -52,6 +52,23 @@
 .ai-review-result h3 { font-size: 12px; letter-spacing: .08em; margin: 20px 0 10px; }
 .ai-review-result ul { padding-left: 22px; }
 .ai-review-result li { margin: 8px 0; line-height: 1.6; white-space: pre-wrap; }
+.ai-review-save { margin-top: 14px; }
+.ai-review-save > button { display: block; margin-left: auto; max-width: 100%; }
+.ai-review-save > [role="status"] { font-size: 12px; }
+.ai-review-history-control { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #d1c7b7; }
+.ai-review-history-control > span, .ai-review-saved-meta { font-size: 12px; color: #655b4d; }
+.ai-review-history { margin-top: 12px; padding: 12px; border: 1px solid #d1c7b7; border-radius: 6px; background: #f7f2e8; min-width: 0; }
+.ai-review-history-heading, .ai-review-history-heading > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ai-review-history-heading > div button { min-height: 38px; padding: 6px 10px; }
+.ai-review-history-heading > div button[aria-pressed="true"] { background: #ebe1d1; border-color: #8f806d; }
+.ai-review-history-list { display: grid; gap: 8px; list-style: none; margin: 12px 0 0; padding: 0; }
+.ai-review-history-entry { display: grid; width: 100%; gap: 4px; text-align: left; background: #fffdf7 !important; border-color: #d1c7b7 !important; border-radius: 4px; }
+.ai-review-history-entry > span { font-size: 12px; color: #655b4d; }
+.ai-review-history-entry .ai-review-history-preview { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
+.ai-review-history-nav { display: flex; justify-content: flex-start; margin-top: 8px; }
+.ai-review-delete { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.ai-review-delete button { color: #6e3d2b; border-color: #9a7563; }
+.ai-review-delete [role="alert"] { width: 100%; }
 .ai-review-stale, .ai-review [role="alert"] { border-left: 3px solid #98633e; padding-left: 12px; }
-@media (max-width: 767px) { .ai-review-body { padding: 0 12px 14px; } .ai-review-controls { align-items: stretch; flex-direction: column; } .ai-review input[type="password"] { width: 100%; } }
+@media (max-width: 767px) { .ai-review-body { padding: 0 12px 14px; } .ai-review-controls { align-items: stretch; flex-direction: column; } .ai-review input[type="password"] { width: 100%; } .ai-review-history { padding: 9px; } .ai-review-history-heading { align-items: flex-start; } .ai-review-history-heading > div { justify-content: flex-start; } .ai-review-history-heading > div button { padding-inline: 7px; font-size: 12px; } .ai-review-history-control { align-items: flex-start; flex-direction: column; } }
 @media print { .ai-review { display: none !important; } }

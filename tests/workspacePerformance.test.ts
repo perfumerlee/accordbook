@@ -36,7 +36,7 @@ describe('Workspace performance boundaries',()=>{
     const db=await openDatabase();expect(db.mode).toBe('indexeddb')
     if(!upgrade)await db.appendWorkspaceAtomic(source)
     await new Promise<void>((resolve,reject)=>{
-      const r=indexedDB.open('accordbook',4);r.onerror=()=>reject(r.error);r.onsuccess=()=>{
+      const r=indexedDB.open('accordbook',5);r.onerror=()=>reject(r.error);r.onsuccess=()=>{
         const tx=r.result.transaction(['versions','experiments'],'readonly')
         for(const name of ['versions','experiments'])expect(tx.objectStore(name).index('parentFormulaId').keyPath).toBe('parentFormulaId')
         tx.oncomplete=()=>{r.result.close();resolve()}
