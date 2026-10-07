@@ -1,5 +1,10 @@
 import type { AIContextV1 } from './aiContext'
 import type { AiReview } from '../services/aiClient'
+import type { ExperimentAiCompareReviewRecord } from './experimentAiReviewRecord'
+import type { ExperimentNextRoundReviewRecord } from './experimentNextRoundAi'
+
+export type ExperimentAiReviewRecord = ExperimentAiCompareReviewRecord | ExperimentNextRoundReviewRecord
+export type AiReviewRecord = FormulaAiReviewRecord | ExperimentAiReviewRecord
 
 /** A locally persisted copy of one validated Formula Review exchange. */
 export interface FormulaAiReviewRecord {

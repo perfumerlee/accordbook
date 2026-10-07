@@ -49,6 +49,8 @@ jobs:
           VITE_FORMULA_DROP_PUBLIC_API_URL: ${{ vars.VITE_FORMULA_DROP_PUBLIC_API_URL }}
           VITE_AI_ENABLED: 'true'
           VITE_AI_ENDPOINT: https://accordbook-ai-api-ssg7tv75ya-du.a.run.app/v1/ai/formula-review
+          # Keep aligned with the read-verified Cloud Run AI_INPUT_BYTES setting.
+          VITE_EXPERIMENT_AI_INPUT_BYTES: '16384'
         run: npm run build
 
       - name: Setup Pages

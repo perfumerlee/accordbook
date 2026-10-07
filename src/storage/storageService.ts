@@ -24,7 +24,7 @@ export interface AccordbookStorage {
   workspaces: WorkspaceRepository
   saveFormula(formula: Formula): Promise<AutosaveStatus>
   exportData(): Promise<AccordbookBackupData>
-  importData(data: AccordbookBackupData): Promise<void>
+  importData(data: AccordbookBackupData, options?: { preserveExperimentReviews?: boolean }): Promise<void>
 }
 
 export async function createStorage(): Promise<AccordbookStorage> {
@@ -48,7 +48,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
         return 'session-only'
       }
     },
-    async exportData() { return { settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), experiments: await (new ExperimentRepository(database)).list(), reviews: await (new AiReviewRepository(database)).listAll(), meta: await (new MetaRepository(database)).getAll() } },
-    async importData(data) { await database.replaceAll(data) },
+    async exportData() { const reviews = new AiReviewRepository(database); return { settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), experiments: await (new ExperimentRepository(database)).list(), reviews: [...await reviews.listAll(), ...await reviews.listAllExperimentReviews()], meta: await (new MetaRepository(database)).getAll() } },
+    async importData(data, options) { await database.replaceAll(data, options) },
   }
 }

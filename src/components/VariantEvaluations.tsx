@@ -8,6 +8,9 @@ import BranchIntentFields, { type BranchIntentDraft } from './BranchIntentFields
 import './variantEvaluations.css'
 import type { WorkspaceExportCoordinator } from '../services/workspaceExportCoordinator'
 import { useWorkspaceExportParticipant } from './useWorkspaceExportParticipant'
+import ExperimentNextRoundPanel from './ExperimentNextRoundPanel'
+import type { AiReviewRepository } from '../storage/aiReviewRepository'
+import type { StorageMode } from '../storage/database'
 
 const labels = {
   ko: {
@@ -57,8 +60,12 @@ const labels = {
 type Draft = EvaluationInput & { evaluationId?: string }
 export type EvaluationDrafts = Record<string, Draft | undefined>
 
-export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange, workspaceCoordinator }: {
+export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange, workspaceCoordinator, requestLimitBytes, requestLimitVerified, reviews, storageMode }: {
   workspaceCoordinator?: WorkspaceExportCoordinator
+  requestLimitBytes?: number
+  requestLimitVerified?: boolean
+  reviews?: AiReviewRepository
+  storageMode?: StorageMode
   experiment: Experiment
   variant: ExperimentVariant
   language: 'en' | 'ko'
@@ -139,6 +146,7 @@ export default function VariantEvaluations({ experiment, variant, language, disa
           <button type="button" disabled={disabled || !!draft} onClick={() => edit(item)}>{t.edit}</button>
           <button type="button" disabled={disabled || !!draft || branches.length > 0} title={branches.length ? t.deleteBlocked : undefined} onClick={() => { if (window.confirm(t.confirmDelete)) act(() => removeVariantEvaluation(experiment, variant.variantId, item.evaluationId)) }}>{t.remove}</button>
         </div>
+        <ExperimentNextRoundPanel experiment={experiment} variant={variant} evaluation={item} language={language} disabled={disabled || !!draft} requestLimitBytes={requestLimitBytes} requestLimitVerified={requestLimitVerified} reviews={reviews} storageMode={storageMode}/>
         {branchDraft?.evaluationId === item.evaluationId && purpose && <form className="branch-intent-form" onSubmit={event=>{event.preventDefault();if(!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim())return;if(act(()=>addVariantFromEvaluation(experiment,variant.variantId,item.evaluationId,{branchPurpose:branchDraft.purpose,...branchDraft.intent})))setBranchDraft(undefined)}}>
           <BranchIntentFields value={branchDraft.intent} onChange={intent=>setBranchDraft({...branchDraft,intent})} language={language} purpose={branchDraft.purpose} disabled={disabled}/>
           <div className="evaluation-actions"><button type="submit" disabled={disabled||!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim()}>{language==='ko'?'브랜치 만들기':'Create Branch'}</button><button type="button" disabled={disabled} onClick={()=>setBranchDraft(undefined)}>{t.cancel}</button></div>

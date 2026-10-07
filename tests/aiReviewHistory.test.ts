@@ -53,8 +53,8 @@ describe('AI Review History UI contract', () => {
   it('discloses Review snapshot and response contents before starting a full backup download', () => {
     const notebook = readFileSync('src/components/AccordbookNotebook.tsx', 'utf8')
     const exportHandler = notebook.slice(notebook.indexOf('const exportJson ='), notebook.indexOf('const [workspaceFeedback'))
-    expect(exportHandler).toContain('저장된 AI Review의 전송 스냅샷과 생성된 응답')
-    expect(exportHandler).toContain('saved AI Review submission snapshots and generated responses')
+    expect(exportHandler).toContain('저장된 AI Review와 실험 비교의 전송 스냅샷, 결정적 차이 및 생성된 응답')
+    expect(exportHandler).toContain('saved AI Review and Experiment comparison snapshots, deterministic deltas, and generated responses')
     expect(exportHandler.indexOf('window.confirm')).toBeLessThan(exportHandler.indexOf('downloadBackup(backup)'))
   })
 })

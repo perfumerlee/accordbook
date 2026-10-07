@@ -44,12 +44,12 @@ describe('Workspace / existing file contracts isolation', () => {
     expect(() => parseFreeFormulaDropPackage('DROP-2026-001', workspace, 'drop.accordbook', source.formula.name)).toThrow()
     expect(() => parseWorkspaceFile(text)).toThrow()
   })
-  it('keeps Backup v3 replacement contract separate from append', async () => {
+  it('keeps full Backup v5 replacement contract separate from append', async () => {
     const storage = await createStorage()
     const source = await workspaceFixture()
     await storage.workspaces.appendWorkspaceAtomic(source)
     const backup = await createBackup(storage)
-    expect(backup.app).toBe('Accordbook'); expect(backup.formatVersion).toBe(4)
+    expect(backup.app).toBe('Accordbook'); expect(backup.formatVersion).toBe(5)
     expect(backup.data.formulas).toEqual([source.formula])
     expect(backup.data.experiments).toEqual(source.experiments)
     expect(parseBackup(JSON.stringify(backup)).data.experiments).toEqual(source.experiments)

@@ -26,7 +26,7 @@ const review = (overrides: Partial<FormulaAiReviewRecord> = {}): FormulaAiReview
 })
 
 describe('Formula AI Review storage', () => {
-  it('upgrades an existing v4 database without rewriting existing stores and adds the source index', async () => {
+  it('upgrades an existing v4 database without rewriting existing stores and adds both review indexes', async () => {
     const factory = new IDBFactory(); vi.stubGlobal('indexedDB', factory)
     const legacy = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = factory.open('accordbook', 4)
@@ -44,11 +44,35 @@ describe('Formula AI Review storage', () => {
     const database = await openDatabase()
     expect(database.mode).toBe('indexeddb')
     expect((await database.get('formulas', formula.id))?.formulaId).toBe(formula.formulaId)
-    const inspect = factory.open('accordbook', 5)
+    const inspect = factory.open('accordbook', 6)
     const upgraded = await new Promise<IDBDatabase>((resolve, reject) => { inspect.onsuccess = () => resolve(inspect.result); inspect.onerror = () => reject(inspect.error) })
     expect(upgraded.objectStoreNames.contains('reviews')).toBe(true)
     expect(upgraded.transaction('reviews').objectStore('reviews').indexNames.contains('sourceFormulaId')).toBe(true)
+    expect(upgraded.transaction('reviews').objectStore('reviews').indexNames.contains('experimentId')).toBe(true)
     upgraded.close()
+  })
+
+  it('upgrades v5 by adding the Experiment index while preserving existing Formula Review rows', async () => {
+    const factory = new IDBFactory(); vi.stubGlobal('indexedDB', factory)
+    await new Promise<void>((resolve, reject) => {
+      const request = factory.open('accordbook', 5)
+      request.onupgradeneeded = () => {
+        const db = request.result
+        for (const name of ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments', 'reviews']) db.createObjectStore(name)
+        request.transaction!.objectStore('versions').createIndex('parentFormulaId', 'parentFormulaId')
+        request.transaction!.objectStore('experiments').createIndex('parentFormulaId', 'parentFormulaId')
+        request.transaction!.objectStore('reviews').createIndex('sourceFormulaId', 'sourceFormulaId')
+        request.transaction!.objectStore('reviews').put(review(), review().reviewId)
+      }
+      request.onsuccess = () => { request.result.close(); resolve() }
+      request.onerror = () => reject(request.error)
+    })
+    const storage = await createStorage()
+    expect(await storage.reviews.get(review().reviewId)).toEqual(review())
+    const db = await new Promise<IDBDatabase>((resolve, reject) => { const request = factory.open('accordbook', 6); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error) })
+    expect(db.transaction('reviews').objectStore('reviews').indexNames.contains('sourceFormulaId')).toBe(true)
+    expect(db.transaction('reviews').objectStore('reviews').indexNames.contains('experimentId')).toBe(true)
+    db.close()
   })
 
   it('saves durably and supports get, formula list, all list, and delete with isolated immutable snapshots', async () => {
@@ -89,17 +113,17 @@ describe('Formula AI Review storage', () => {
     expect((await repository.listAll())[0].sourceFormulaId).toBe(formula.id)
   })
 
-  it('preserves legacy-import reviews and round-trips reviews in full backup v4, including orphan links', async () => {
+  it('preserves legacy-import reviews and round-trips reviews in full backup v5, including orphan links', async () => {
     const storage = await createStorage()
     const record = review({ sourceFormulaId: 'deleted-formula' })
     await storage.reviews.save(record)
     const legacy = parseBackup(JSON.stringify({ app: 'Accordbook', formatVersion: 3, data: { settings: {}, formulas: [], archive: [], versions: [], experiments: [], meta: {} } }))
-    expect(legacy.formatVersion).toBe(4)
+    expect(legacy.formatVersion).toBe(3)
     expect(legacy.data.reviews).toBeUndefined()
     await importBackup(storage, legacy)
     expect((await storage.reviews.get(record.reviewId))?.sourceFormulaId).toBe('deleted-formula')
     const full = await createBackup(storage)
-    expect(full.formatVersion).toBe(4)
+    expect(full.formatVersion).toBe(5)
     const restored = parseBackup(JSON.stringify(full))
     expect(restored.data.reviews).toEqual([record])
     await importBackup(storage, restored)

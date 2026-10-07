@@ -42,6 +42,7 @@ import { ensureRowIds } from '../services/reconstruction'
 import MultiVersionSheet from './MultiVersionSheet'
 import ExperimentsWorkspace from './ExperimentsWorkspace'
 import ExperimentErrorBoundary from './ExperimentErrorBoundary'
+import { experimentAiRequestLimit } from '../services/experimentAiConfig'
 import { currentComparisonState, versionComparisonState, type MultiVersionState } from '../services/multiVersionSheet'
 import { formatDilutionSuffix } from '../services/dilutionDisplay'
 import OriginPanel from './OriginPanel'
@@ -462,7 +463,7 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
   const restoreVersion = async (restored: Formula) => workspaceCoordinator.runMutation(async () => { if (!storage) return; await storage.saveFormula(restored); setActive(restored); setFormulas((all) => all.map((item) => item.id === restored.id ? restored : item)); localStorage.setItem(ACTIVE_KEY, restored.id) })
   const removeArchive = async (f: Formula) => workspaceCoordinator.runMutation(async () => { if (!storage) return; await deleteArchivedFormula(storage, f.id); const nextPins = pinnedFormulaIds.filter((id) => id !== f.id); setPinnedFormulaIds(nextPins); savePinnedFormulaIds(nextPins); setArchive(await storage.archive.list()); setDeleteState((all) => { const next = { ...all }; delete next[f.id]; return next }) })
   const beginDelete = (f: Formula) => { if (deleteState[f.id]) return; setDeleteState((s) => ({ ...s, [f.id]: 'confirming' })); setTimeout(() => setDeleteState((s) => ({ ...s, [f.id]: 'ready' })), 3500) }
-  const exportJson = async () => { if (!storage) return; if (!window.confirm(language === 'ko' ? '전체 백업에는 저장된 AI Review의 전송 스냅샷과 생성된 응답이 포함될 수 있습니다. 다운로드한 파일은 민감한 정보로 취급해 안전하게 보관하세요. 계속할까요?' : 'A full backup may include saved AI Review submission snapshots and generated responses. Treat the downloaded file as sensitive and store it securely. Continue?')) return; try { await flush(); const backup = await createBackup(storage); downloadBackup(backup); setBackupReminder(markBackupSuccess()); trackBackupExported() } catch { setBackupReminder(readBackupReminderState()) } }
+  const exportJson = async () => { if (!storage) return; if (!window.confirm(language === 'ko' ? '전체 백업에는 저장된 AI Review와 실험 비교의 전송 스냅샷, 결정적 차이 및 생성된 응답이 포함될 수 있습니다. 다운로드한 파일은 민감한 정보로 취급해 안전하게 보관하세요. 계속할까요?' : 'A full backup may include saved AI Review and Experiment comparison snapshots, deterministic deltas, and generated responses. Treat the downloaded file as sensitive and store it securely. Continue?')) return; try { await flush(); const backup = await createBackup(storage); downloadBackup(backup); setBackupReminder(markBackupSuccess()); trackBackupExported() } catch { setBackupReminder(readBackupReminderState()) } }
   const [workspaceFeedback, setWorkspaceFeedback] = useState<{ key: WorkspaceMessageKey; error?: boolean }>()
   const [workspaceFeedbackLeaving, setWorkspaceFeedbackLeaving] = useState(false)
   useEffect(() => {
@@ -612,6 +613,7 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
     {multiVersionStates && mobileViewport && <MultiVersionSheet formula={active} states={multiVersionStates} language={language} onClose={() => { setMultiVersionStates(undefined); setTimeMachineOpen(false) }} />}
     {experimentsOpen && <ExperimentErrorBoundary language={language} onReturn={() => setExperimentsOpen(false)}><ExperimentsWorkspace
       onExportWorkspace={() => void exportFormula()} workspaceBusy={workspaceBusy}
+      compareRequestLimitBytes={experimentAiRequestLimit.bytes} compareRequestLimitVerified={experimentAiRequestLimit.verified}
       workspaceFeedback={workspaceFeedback ? workspaceMessages[language][workspaceFeedback.key] : undefined} workspaceFeedbackError={workspaceFeedback?.error} workspaceFeedbackLeaving={workspaceFeedbackLeaving} onDismissWorkspaceFeedback={() => setWorkspaceFeedbackLeaving(true)}
       workspaceCoordinator={workspaceCoordinator}
       key={active.id}

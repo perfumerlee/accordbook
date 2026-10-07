@@ -3,8 +3,10 @@ import type { AccordbookBackup, AccordbookBackupData } from '../models/backup'
 import type { AccordbookStorage } from '../storage/storageService'
 import { validateExperiment } from './experimentLifecycle'
 import type { Experiment } from '../models/experiment'
-import type { FormulaAiReviewRecord } from '../models/aiReviewRecord'
+import type { AiReviewRecord } from '../models/aiReviewRecord'
 import { validateFormulaAiReviewRecord } from '../models/aiReviewRecord'
+import { validateExperimentAiCompareReviewRecord } from '../models/experimentAiReviewRecord'
+import { validateExperimentNextRoundReviewRecord } from '../models/experimentNextRoundAi'
 
 export class BackupImportError extends Error {}
 const originTypes: ProvenanceOriginType[] = ['not_specified', 'original', 'inspired_by', 'adapted_from', 'imported', 'duplicated', 'reference', 'unknown']
@@ -17,7 +19,7 @@ export function parseBackup(input: string): AccordbookBackup {
   try { raw = JSON.parse(input) } catch { throw new BackupImportError('Invalid JSON backup file.') }
   if (!raw || typeof raw !== 'object') throw new BackupImportError('Invalid Accordbook backup file.')
   const value = raw as { app?: unknown; formatVersion?: unknown; exportedAt?: unknown; data?: unknown }
-  if (value.app !== 'Accordbook' || ![1, 2, 3, 4].includes(value.formatVersion as number) || !value.data || typeof value.data !== 'object') throw new BackupImportError('Unsupported or invalid backup version.')
+  if (value.app !== 'Accordbook' || ![1, 2, 3, 4, 5].includes(value.formatVersion as number) || !value.data || typeof value.data !== 'object') throw new BackupImportError('Unsupported or invalid backup version.')
   const data = value.data as Partial<AccordbookBackupData>
   if (!Array.isArray(data.formulas) || !Array.isArray(data.archive) || !data.settings || typeof data.settings !== 'object' || !data.meta || typeof data.meta !== 'object') throw new BackupImportError('Invalid Accordbook backup structure.')
   const formulas = data.formulas.map((item, index) => normalizeFormula(item, index))
@@ -31,7 +33,7 @@ export function parseBackup(input: string): AccordbookBackup {
     if (version.kind === 'manual' && (version.versionNumber === null || !Number.isInteger(version.versionNumber) || version.versionNumber < 1)) throw new BackupImportError('Invalid manual version number.')
     if (version.kind === 'restore-point' && version.versionNumber !== null) throw new BackupImportError('Invalid restore-point version number.')
   }
-  const experiments = (value.formatVersion === 3 || value.formatVersion === 4)
+  const experiments = (value.formatVersion === 3 || value.formatVersion === 4 || value.formatVersion === 5)
     ? (Array.isArray(data.experiments) ? data.experiments as Experiment[] : (() => { throw new BackupImportError('Invalid Experiment backup structure.') })())
     : []
   if (new Set(experiments.map(item => item.experimentId)).size !== experiments.length) throw new BackupImportError('Duplicate Experiment id.')
@@ -39,13 +41,21 @@ export function parseBackup(input: string): AccordbookBackup {
     if (!formulaIds.includes(experiment.parentFormulaId)) throw new BackupImportError('Orphan Experiment.')
     try { validateExperiment(experiment) } catch { throw new BackupImportError('Invalid Experiment data.') }
   }
-  let reviews: FormulaAiReviewRecord[] | undefined
-  if (value.formatVersion === 4) {
+  let reviews: AiReviewRecord[] | undefined
+  if (value.formatVersion === 4 || value.formatVersion === 5) {
     if (!Array.isArray(data.reviews)) throw new BackupImportError('Invalid AI Review backup structure.')
-    reviews = data.reviews as FormulaAiReviewRecord[]
+    reviews = data.reviews as AiReviewRecord[]
     if (new Set(reviews.map(item => item?.reviewId)).size !== reviews.length) throw new BackupImportError('Duplicate AI Review id.')
     for (const review of reviews) {
-      try { validateFormulaAiReviewRecord(review) } catch { throw new BackupImportError('Invalid AI Review data.') }
+      try {
+        if (value.formatVersion === 4) {
+          if (review?.reviewType !== 'formula') throw new Error('Unexpected v4 review type')
+          validateFormulaAiReviewRecord(review)
+        } else if (review?.reviewType === 'formula') validateFormulaAiReviewRecord(review)
+        else if (review?.reviewType === 'experiment' && review?.operation === 'compare') validateExperimentAiCompareReviewRecord(review)
+        else if (review?.reviewType === 'experiment' && review?.operation === 'next_round') validateExperimentNextRoundReviewRecord(review)
+        else throw new Error('Unknown review type')
+      } catch { throw new BackupImportError('Invalid AI Review data.') }
       // Source formulas may have been deleted before backup; preserve those reviews as orphans.
     }
   }
@@ -55,7 +65,7 @@ export function parseBackup(input: string): AccordbookBackup {
   const manualKeys = versions.filter(version => version.kind === 'manual').map(version => `${version.parentFormulaId}:${version.versionNumber}`)
   if (new Set(manualKeys).size !== manualKeys.length) throw new BackupImportError('Duplicate manual version number.')
   return {
-    app: 'Accordbook', formatVersion: 4,
+    app: 'Accordbook', formatVersion: value.formatVersion as 1 | 2 | 3 | 4 | 5,
     exportedAt: typeof value.exportedAt === 'string' ? value.exportedAt : new Date().toISOString(),
     data: {
       settings: { formulaIdPrefix: typeof data.settings.formulaIdPrefix === 'string' ? data.settings.formulaIdPrefix : 'ACC', language: data.settings.language === 'ko' ? 'ko' : 'en' },
@@ -65,4 +75,11 @@ export function parseBackup(input: string): AccordbookBackup {
     },
   }
 }
-export async function importBackup(storage: AccordbookStorage, backup: AccordbookBackup): Promise<void> { await storage.importData(backup.data) }
+export async function importBackup(storage: AccordbookStorage, backup: AccordbookBackup): Promise<void> {
+  if (backup.formatVersion === 4) {
+    // Preserve Experiment reviews atomically with the local backup replacement transaction.
+    await storage.importData(backup.data, { preserveExperimentReviews: true })
+    return
+  }
+  await storage.importData(backup.data)
+}
