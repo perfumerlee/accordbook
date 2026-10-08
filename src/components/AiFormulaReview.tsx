@@ -187,14 +187,14 @@ export default function AiFormulaReview({ formula, language, connection, trigger
   const built = formula ? buildAIContext(formula, { includeName, includeNotes }) : undefined
   const supported = built?.ok && supportedAiContext(built.context)
   if (!connection.enabled) return null
-  return <section className="ai-review" aria-label="AI Review" onKeyDown={event => {
+  return <section className="ai-review ai-notebook" aria-label="AI Review" onKeyDown={event => {
     if (event.key === 'Escape' && open && !event.nativeEvent.isComposing) { event.stopPropagation(); close() }
   }}>
     {triggerTarget && createPortal(<button ref={trigger} type="button" className={`btn ai-review-trigger${open ? ' is-open' : ''}`} aria-label={open ? 'Close AI review' : 'Open AI review'} aria-expanded={open} aria-controls={id} onClick={() => open ? close() : setOpen(true)}>
       <AiActionIcon />
       <span>AI Review</span>
     </button>, triggerTarget)}
-    {open && <div id={id} className="ai-review-body">
+    {open && <div id={id} className="ai-review-body ai-panel">
       <header className="ai-review-heading"><div><p className="ai-review-eyebrow">AI REVIEW</p><h3>{savedDetail ? m.savedReview : historyOpen ? m.current : result ? m.currentResult : m.current}</h3></div><button className="ai-review-close" type="button" aria-label={m.close} title={m.close} onClick={close}><span aria-hidden="true">×</span></button></header>
       {reviews && <div className="ai-review-view-switch" role="group" aria-label={m.history}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => { setHistoryOpen(false); setSavedDetail(undefined) }}>{m.reviewSetup}</button>
@@ -202,7 +202,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       </div>}
       <div className="ai-review-form">
       <p className="ai-review-mock">{m.mock}</p>
-      <p>{m.disclosure}</p>
+      <p className="ai-review-disclosure">{m.disclosure}</p>
       {!accepted ? <button type="button" onClick={() => { acceptAiDisclosure(); setAccepted(true) }}>{m.accept}</button> : <p>{m.accepted}</p>}
       <fieldset><legend>{m.fields}</legend>
         <label><input type="checkbox" checked={includeName} onChange={e => setIncludeName(e.target.checked)} />{m.name}</label>

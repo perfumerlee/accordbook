@@ -1,0 +1,153 @@
+/* Shared presentation for every AI surface. Component styles own layout and
+   visibility; this file owns typography, controls, surfaces and spacing. */
+.ai-notebook {
+  --ai-ink: #332e27;
+  --ai-muted: #726757;
+  --ai-rule: #d8cbb6;
+  --ai-edge: #b5a58e;
+  --ai-paper: #f7f0df;
+  --ai-sheet: #fcf8ef;
+  --ai-hover: #eee5d4;
+  --ai-body: Georgia, 'Noto Serif KR', 'Nanum Myeongjo', serif;
+  --ai-ui: Inter, Pretendard, system-ui, sans-serif;
+  --ai-mono: 'Courier New', monospace;
+  --accent: #78674f;
+  --line: var(--ai-rule);
+  --line-soft: var(--ai-rule);
+  --border: var(--ai-edge);
+  --paper: var(--ai-paper);
+  --paper-2: var(--ai-sheet);
+  --ws-serif: var(--ai-body);
+  --ws-mono: var(--ai-mono);
+  color: var(--ai-ink);
+  font: 14px/1.75 var(--ai-body);
+  min-width: 0;
+}
+/* Form controls remain readable in both locales, even inside Evaluation's
+   legacy Korean serif override. Titles and reading text retain notebook serif. */
+html .ai-notebook.ai-notebook :is(button, input, select),
+html[lang='ko'] .experiments-layer .ai-notebook.ai-notebook :is(button, input, select) {
+  font-family: var(--ai-ui) !important;
+}
+.ai-notebook.ai-notebook button {
+  box-sizing: border-box;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--ai-edge);
+  border-radius: 5px;
+  background: var(--ai-sheet);
+  color: var(--ai-ink);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.ai-notebook.ai-notebook button:hover:not(:disabled) { background: var(--ai-hover); border-color: #88775f; }
+.ai-notebook.ai-notebook button:disabled { opacity: 1; color: #968b7c; background: #f3eddf; border-color: var(--ai-rule); cursor: not-allowed; }
+.ai-notebook.ai-notebook :is(button, input, summary):focus-visible { outline: 2px solid #78674f; outline-offset: 3px; }
+.ai-notebook.ai-notebook .ai-panel, .ai-notebook.ai-notebook.ai-panel {
+  display: grid;
+  padding: clamp(16px, 2vw, 24px);
+  background: var(--ai-paper);
+  border: 1px solid var(--ai-edge);
+  border-radius: 0 7px 7px 7px;
+  color: var(--ai-ink);
+  box-shadow: none;
+  gap: 18px;
+}
+.ai-notebook.ai-notebook .ai-panel > :is(header, .ai-review-heading) { align-items: center; margin: 0; padding: 0 0 16px; border-bottom: 1px solid var(--ai-rule); }
+.ai-notebook.ai-notebook .ai-panel > p { margin: 0; }
+.ai-notebook.ai-notebook :is(.ai-review-heading h3, .experiment-ai-compare__panel > header h2, .experiment-next-round__panel > header h3, .experiment-review-history__detail h3) {
+  margin: 0; font: 400 20px/1.45 var(--ai-body); letter-spacing: -.015em;
+}
+.ai-notebook.ai-notebook :is(.ai-review-eyebrow, .experiment-ai-compare__eyebrow, .experiment-next-round__eyebrow) {
+  margin: 0 0 6px !important; color: var(--ai-muted); font: 11px/1.45 var(--ai-mono) !important; letter-spacing: .08em;
+}
+.ai-notebook.ai-notebook :is(.ai-review-close, .experiment-ai-compare__panel > header > button, .experiment-next-round__close) {
+  flex: 0 0 40px; width: 40px; height: 40px; min-height: 40px; padding: 0 !important;
+  display: inline-grid; place-items: center; border-color: transparent; background: transparent; font-size: 24px !important; line-height: 1;
+}
+.ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) {
+  margin: 0; padding: 0; gap: 6px; border-bottom: 1px solid var(--ai-rule); flex-wrap: wrap;
+}
+.ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) button {
+  position: relative; bottom: -1px; min-height: 40px; padding: 9px 14px;
+  border: 1px solid transparent; border-bottom-color: var(--ai-rule); border-radius: 5px 5px 0 0;
+  background: transparent; color: var(--ai-muted); white-space: nowrap;
+}
+.ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) button[aria-pressed='true'] {
+  border-color: var(--ai-rule); border-bottom-color: var(--ai-sheet); background: var(--ai-sheet); color: var(--ai-ink); font-weight: 500;
+}
+.ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) button span {
+  min-width: 21px; height: 21px; font: 11px/1 var(--ai-ui); color: var(--ai-muted); background: var(--ai-hover);
+}
+.ai-notebook.ai-notebook :is(.ai-review-form, .experiment-next-round__form) { gap: 16px; }
+.ai-notebook.ai-notebook .ai-review-form > button:not(.ai-review-execute),
+.ai-notebook.ai-notebook .ai-review-connection > button { justify-self: start; width: fit-content; }
+.ai-notebook.ai-notebook :is(p, li) { font-family: var(--ai-body); font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.ai-notebook.ai-notebook :is(.ai-review-result, .ai-review-saved-detail, .experiment-ai-compare__result, .experiment-ai-compare__history-detail, .experiment-next-round__result, .experiment-next-round__history-detail, .experiment-review-history__detail) {
+  padding: clamp(16px, 2vw, 24px); border: 1px solid var(--ai-rule); border-radius: 5px;
+  background: var(--ai-sheet); color: var(--ai-ink); min-width: 0;
+}
+.ai-notebook.ai-notebook :is(.ai-review-result, .ai-review-saved-detail, .experiment-ai-compare__result, .experiment-ai-compare__history-detail, .experiment-next-round__result, .experiment-next-round__history-detail, .experiment-review-history__detail) :is(p, ul) { max-width: 78ch; }
+.ai-notebook.ai-notebook :is(.ai-review-result h3, .ai-review-saved-detail h3, .experiment-ai-compare__result h4, .experiment-ai-compare__history-detail h4, .experiment-next-round__result h4, .experiment-next-round__history-detail h5, .experiment-review-history__detail h4) {
+  margin: 22px 0 8px; font: 600 13px/1.5 var(--ai-ui); letter-spacing: .015em; text-transform: none; color: var(--ai-ink);
+}
+.ai-notebook.ai-notebook :is(.ai-review-result, .ai-review-saved-detail, .experiment-ai-compare__result, .experiment-ai-compare__history-detail, .experiment-next-round__result, .experiment-next-round__history-detail, .experiment-review-history__detail) li { margin: 8px 0; }
+.ai-notebook.ai-notebook :is(.ai-review-history, .experiment-ai-compare__history, .experiment-next-round__history) { margin: 0; padding: 0; border: 0; background: transparent; border-radius: 0; }
+.ai-notebook.ai-notebook :is(.ai-review-history-heading, .experiment-ai-compare__history > header, .experiment-next-round__history-heading) { margin: 0 0 16px; gap: 12px; }
+.ai-notebook.ai-notebook :is(.ai-review-history-heading h4, .experiment-ai-compare__history > header h3, .experiment-next-round__history-heading h4, .experiment-review-history > header h2) { font: 400 17px/1.5 var(--ai-body); margin: 0; }
+.ai-notebook.ai-notebook :is(.ai-review-history-heading, .experiment-next-round__history-heading) > div:has(> h4) { display: block; }
+.ai-notebook.ai-notebook :is(.ai-review-history-entry, .experiment-ai-compare__history-list > li, .experiment-next-round__history-list > li, .experiment-review-history > ul > li) {
+  padding: 16px; border: 1px solid var(--ai-rule) !important; border-radius: 5px; background: var(--ai-sheet) !important;
+}
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li, .experiment-next-round__history-list > li, .experiment-review-history > ul > li) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) { display: flex; width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { min-width: 96px; flex: 0 0 auto; }
+.ai-notebook.ai-notebook :is(.ai-review-history-entry > strong, .experiment-ai-compare__history-list strong, .experiment-next-round__history-copy strong, .experiment-review-history__copy > strong) { font: 600 15px/1.5 var(--ai-body); }
+.ai-notebook.ai-notebook :is(small, .ai-review-saved-meta, .ai-review-history-entry > span:not(.ai-review-history-preview), .experiment-ai-compare__meta, .experiment-next-round__meta, .experiment-review-history__target, .experiment-ai-compare__history-versions) { color: var(--ai-muted); font: 12px/1.6 var(--ai-ui) !important; letter-spacing: 0; }
+.ai-notebook.ai-notebook :is(.ai-review-history-entry .ai-review-history-preview, .experiment-ai-compare__history-list p, .experiment-next-round__history-copy p, .experiment-review-history__copy p) { color: var(--ai-ink); font: 14px/1.75 var(--ai-body); margin-top: 8px; }
+.ai-notebook.ai-notebook :is(.ai-review-history-preview, .experiment-ai-compare__history-list p, .experiment-next-round__history-copy p, .experiment-review-history__copy p) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.ai-notebook.ai-notebook .experiment-review-history__detail h5 { font: 14px/1.8 var(--ai-body); }
+.ai-notebook.ai-notebook :is(.ai-review-history-heading, .experiment-ai-compare__history-scope) button[aria-pressed='true'] { background: var(--ai-hover); border-color: var(--ai-edge); color: var(--ai-ink); }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__selection, .experiment-next-round__disclosure, fieldset, .experiment-ai-compare__consent, .experiment-next-round__consent) { background: var(--ai-sheet); border: 1px solid var(--ai-rule); padding: 16px; border-radius: 4px; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__scope, .ai-review-disclosure) { padding: 12px 16px; border: 0; border-left: 2px solid var(--ai-edge); background: var(--ai-sheet); color: var(--ai-muted); font: 13px/1.75 var(--ai-body) !important; }
+.ai-notebook.ai-notebook :is(.experiment-next-round__disclosure-block h4, .experiment-ai-compare__selection h3, legend, .ai-review-connection > label, .experiment-ai-compare__token > label, .experiment-next-round__token > label) { color: var(--ai-muted); font: 12px/1.5 var(--ai-ui); text-transform: none; letter-spacing: 0; }
+.ai-notebook.ai-notebook :is(.ai-review-controls, .experiment-ai-compare__token > div, .experiment-next-round__token > div) { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 600px; }
+.ai-notebook.ai-notebook input[type='password'] { flex: 1 1 180px; width: auto; min-width: 0; max-width: 100%; height: 40px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--ai-edge); border-radius: 5px; background: var(--ai-sheet); font-size: 14px; }
+.ai-notebook.ai-notebook :is(.ai-review-controls, .experiment-ai-compare__token, .experiment-next-round__token) button { flex: 0 0 auto; width: auto; }
+.ai-notebook.ai-notebook input[type='checkbox'] { width: 18px; height: 18px; accent-color: #76634a; }
+.ai-notebook.ai-notebook :is(.ai-review-execute, .experiment-ai-compare__actions > button:first-child, .experiment-next-round__run):not(:disabled) { background: #383229; border-color: #383229; color: #fffaf0; }
+.ai-notebook.ai-notebook :is(.ai-review-execute, .experiment-ai-compare__actions > button:first-child, .experiment-next-round__run):hover:not(:disabled) { background: #514535; }
+.ai-notebook.ai-notebook :is(.ai-review-save, .ai-review-delete, .experiment-ai-compare__actions, .experiment-next-round__actions, .experiment-next-round__save, .experiment-next-round__history-footer) { padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--ai-rule); justify-content: flex-end; gap: 10px; }
+.ai-notebook.ai-notebook :is(.ai-review-mock, .ai-review-usage, .experiment-next-round__advisory) { color: var(--ai-muted); font: 12px/1.65 var(--ai-ui); }
+.ai-notebook.ai-notebook :is([role='alert'], .experiment-ai-compare__warning, .experiment-next-round__warning) { color: #805335; font: 13px/1.7 var(--ai-ui); }
+.ai-notebook .ai-action-icon { width: 14px; height: 14px; flex: 0 0 14px; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__trigger, .experiment-next-round__trigger) { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__trigger, .experiment-next-round__trigger)[aria-expanded='true'] { border-bottom-color: var(--ai-paper); border-radius: 5px 5px 0 0; background: var(--ai-paper); }
+/* The Formula trigger lives in a portal outside its panel. */
+.app .main .editor-actions:has(.ai-review-action-slot) .ai-review-trigger { min-height: 40px; padding: 9px 14px; font: 13px/1.45 Inter,Pretendard,system-ui,sans-serif; letter-spacing: 0; border-color: #b5a58e; background: #fcf8ef; }
+html .experiments-layer .ai-history-trigger { min-height: 40px; padding: 9px 14px; font: 13px/1.45 Inter,Pretendard,system-ui,sans-serif !important; border-color: #b5a58e; background: #fcf8ef; border-radius: 5px; }
+html .experiments-layer .ai-history-trigger:hover { background: #eee5d4; }
+.app .main .editor-actions .ai-review-trigger.is-open { background: #f7f0df; border-bottom-color: #f7f0df; }
+.ai-review-action-slot:has(.is-open)::after { background: #f7f0df; }
+@media (max-width: 767px) {
+  .ai-notebook.ai-notebook button { min-height: 44px; }
+  .ai-notebook.ai-notebook .ai-panel { padding: 16px 12px; }
+  .ai-notebook.ai-notebook :is(.ai-review-heading h3, .experiment-ai-compare__panel > header h2, .experiment-next-round__panel > header h3) { font-size: 18px; }
+  .ai-notebook.ai-notebook :is(.ai-review-close, .experiment-ai-compare__panel > header > button, .experiment-next-round__close) { flex-basis: 44px; width: 44px; height: 44px; }
+  .ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) { gap: 2px; }
+  .ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) button { min-height: 44px; padding-inline: 10px; }
+  .ai-notebook.ai-notebook :is(.ai-review-history, .experiment-ai-compare__history, .experiment-next-round__history) { margin: 0; padding: 0; }
+  .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { flex: 1 1 0; min-width: 0; }
+  .ai-notebook.ai-notebook input[type='password'] { min-height: 44px; flex-basis: 150px; }
+  .app .main .editor-actions:has(.ai-review-action-slot), .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-left { flex-wrap: wrap; gap: 8px; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { flex-wrap: wrap; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-trigger, html .experiments-layer .ai-history-trigger { min-height: 44px; padding-inline: 12px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { .ai-notebook.ai-notebook button { transition: none; } }

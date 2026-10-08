@@ -72,9 +72,9 @@ export default function ExperimentNextRoundPanel(props: Props) {
     catch { setHistoryError(language === 'ko' ? '리뷰를 삭제하거나 확인하지 못했습니다.' : 'Could not verify the Review deletion.') }
   }
   const list = (items: readonly string[]) => items.length ? <ul>{items.map((item, index) => <li key={`${index}:${item}`}>{item}</li>)}</ul> : <p>{t.empty}</p>
-  return <section className="experiment-next-round" aria-label={t.title}>
+  return <section className="experiment-next-round ai-notebook" aria-label={t.title}>
     <button className="experiment-next-round__trigger" type="button" aria-expanded={open} onClick={() => { if (open) { clear(); setOpen(false) } else { setOpen(true); setHistoryOpen(false); setError(''); setPhase('idle') } }}><AiActionIcon /> {t.trigger}</button>
-    {open && <div className="experiment-next-round__panel">
+    {open && <div className="experiment-next-round__panel ai-panel">
       <header><div><p className="experiment-next-round__eyebrow">{t.title}</p><h3>{variant.label} · {new Date(evaluation.createdAt).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US')}</h3></div><button className="experiment-next-round__close" type="button" aria-label={t.close} onClick={() => { clear(); setOpen(false) }}>×</button></header>
       {reviews && <div className="experiment-next-round__view-switch" role="group" aria-label={t.title}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => setHistoryOpen(false)}>{t.setupTab}</button>

@@ -13,6 +13,7 @@ import GuideEditor from './components/guide/GuideEditor'
 import GuidePublishProtocolCheck from './components/guide/GuidePublishProtocolCheck'
 import { GuideLegacyRecovery } from './components/guide/GuideLegacyRecovery'
 import GuideEntryLink from './components/GuideEntryLink'
+import './components/aiNotebookDesign.css'
 
 const reservedRoute = new URLSearchParams(window.location.search).get('__accordbook_route')
 if (reservedRoute && reservedRoute.startsWith('/drop')) {

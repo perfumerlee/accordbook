@@ -46,7 +46,7 @@ const copy = {
     overallUncertainty: 'Overall uncertainties', overallChecks: 'Overall smelling checks', parts: 'parts', bytes: 'Request size',
     invalid: 'The selected comparison cannot be prepared. Check the selected Variants and their composition.', tooLarge: 'The request exceeds the verified size limit. Reduce the selected comparison.', missingVariant: 'A selected Variant is no longer available. Close and reopen the Comparison Sheet.',
     preparing: 'Preparing the selected comparison…', cancelled: 'Request cancelled locally. The server may have already processed it; do not retry automatically.',
-    saveReview: 'Save Review', saveBusy: 'Saving…', saved: 'Saved to this device', sessionOnly: 'Saved for this session only; durable storage is unavailable.', saveFailed: 'Could not save this Review. The current result is still available.', history: 'Review History', setupTab: 'Review setup', currentHistory: 'This Experiment', allHistory: 'All Experiment Reviews', historyTitle: 'Saved Experiment Reviews', noHistory: 'No saved Experiment Reviews.', openReview: 'Open Review', backToResult: 'Back to current result', deleteReview: 'Delete Review', confirmDelete: 'Delete this saved Experiment Review? This cannot be undone.', deleteFailed: 'Could not verify deletion. The saved Review remains selected.', deleted: 'Review deleted.', orphan: 'Source Experiment is no longer available', historyLoadFailed: 'Could not load Review History.', savedAt: 'Saved', variantsLabel: 'Variants', comparedVersions: 'Compared versions', historyDetail: 'Saved Experiment Review',
+    saveReview: 'Save Review', saveBusy: 'Saving…', saved: 'Saved to this device', sessionOnly: 'Saved for this session only; durable storage is unavailable.', saveFailed: 'Could not save this Review. The current result is still available.', history: 'Review History', setupTab: 'Review setup', currentHistory: 'This Experiment', allHistory: 'All Experiment Reviews', historyTitle: 'Saved Experiment Reviews', noHistory: 'No saved Experiment Reviews.', openReview: 'Open Review', backToResult: 'Back to Reviews', deleteReview: 'Delete Review', confirmDelete: 'Delete this saved Experiment Review? This cannot be undone.', deleteFailed: 'Could not verify deletion. The saved Review remains selected.', deleted: 'Review deleted.', orphan: 'Source Experiment is no longer available', historyLoadFailed: 'Could not load Review History.', savedAt: 'Saved', variantsLabel: 'Variants', comparedVersions: 'Compared versions', historyDetail: 'Saved Experiment Review',
   },
   ko: {
     trigger: 'AI Compare', title: 'AI Compare', eyebrow: '실험 비교', close: 'AI 비교 닫기',
@@ -63,7 +63,7 @@ const copy = {
     overallUncertainty: '전체 불확실성', overallChecks: '전체 시향 확인 제안', parts: 'parts', bytes: '요청 크기',
     invalid: '선택한 비교를 준비할 수 없습니다. 선택 시안과 배합량을 확인해 주세요.', tooLarge: '요청이 확인된 크기 한도를 초과합니다. 비교 범위를 줄여 주세요.', missingVariant: '선택한 시안을 찾을 수 없습니다. 비교 시트를 닫고 다시 열어 주세요.',
     preparing: '선택한 비교를 준비하고 있습니다…', cancelled: '요청을 브라우저에서 취소했습니다. 서버가 이미 처리했을 수 있으므로 자동 재시도하지 마세요.',
-    saveReview: '리뷰 저장', saveBusy: '저장 중…', saved: '이 기기에 저장했습니다', sessionOnly: '현재 세션에만 저장했습니다. 기기 저장소를 사용할 수 없습니다.', saveFailed: '리뷰를 저장하지 못했습니다. 현재 결과는 그대로 유지됩니다.', history: '리뷰 기록', setupTab: '리뷰 설정', currentHistory: '현재 실험', allHistory: '전체 실험 리뷰', historyTitle: '저장된 실험 리뷰', noHistory: '저장된 실험 리뷰가 없습니다.', openReview: '리뷰 열기', backToResult: '현재 결과로 돌아가기', deleteReview: '리뷰 삭제', confirmDelete: '저장된 실험 리뷰를 삭제할까요? 삭제 후에는 복구할 수 없습니다.', deleteFailed: '삭제 여부를 확인하지 못했습니다. 저장된 리뷰를 계속 선택 상태로 둡니다.', deleted: '리뷰를 삭제했습니다.', orphan: '원본 실험을 찾을 수 없습니다', historyLoadFailed: '리뷰 기록을 불러오지 못했습니다.', savedAt: '저장', variantsLabel: '시안', comparedVersions: '비교 버전', historyDetail: '저장된 실험 리뷰',
+    saveReview: '리뷰 저장', saveBusy: '저장 중…', saved: '이 기기에 저장했습니다', sessionOnly: '현재 세션에만 저장했습니다. 기기 저장소를 사용할 수 없습니다.', saveFailed: '리뷰를 저장하지 못했습니다. 현재 결과는 그대로 유지됩니다.', history: '리뷰 기록', setupTab: '리뷰 설정', currentHistory: '현재 실험', allHistory: '전체 실험 리뷰', historyTitle: '저장된 실험 리뷰', noHistory: '저장된 실험 리뷰가 없습니다.', openReview: '리뷰 열기', backToResult: '리뷰 목록으로', deleteReview: '리뷰 삭제', confirmDelete: '저장된 실험 리뷰를 삭제할까요? 삭제 후에는 복구할 수 없습니다.', deleteFailed: '삭제 여부를 확인하지 못했습니다. 저장된 리뷰를 계속 선택 상태로 둡니다.', deleted: '리뷰를 삭제했습니다.', orphan: '원본 실험을 찾을 수 없습니다', historyLoadFailed: '리뷰 기록을 불러오지 못했습니다.', savedAt: '저장', variantsLabel: '시안', comparedVersions: '비교 버전', historyDetail: '저장된 실험 리뷰',
   },
 } as const
 type CompareCopy = { ineligible: string; tokenInvalid: string; failed: string; tooLarge: string; missingVariant: string }
@@ -236,11 +236,11 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
     return `${base} ↔ ${variants.join(', ')}`
   }
 
-  return <section className="experiment-ai-compare" aria-label={t.title}>
+  return <section className="experiment-ai-compare ai-notebook" aria-label={t.title}>
     <button className="experiment-ai-compare__trigger" type="button" aria-expanded={open} onClick={() => { if (open) close(); else { setPhase('preparing'); setOpen(true); setError('') } }}>
       <AiActionIcon /> {t.trigger}
     </button>
-    {open && <div className="experiment-ai-compare__panel">
+    {open && <div className="experiment-ai-compare__panel ai-panel">
       <header><div><p className="experiment-ai-compare__eyebrow">{t.eyebrow}</p><h2>{t.title}</h2></div><button type="button" aria-label={t.close} onClick={close}>×</button></header>
       {reviews && <div className="experiment-ai-compare__view-switch" role="group" aria-label={t.title}><button type="button" aria-pressed={!historyOpen} onClick={() => { setHistoryOpen(false); setHistoryDetail(undefined) }}>{t.setupTab}</button><button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setHistoryDetail(undefined) }}>{t.history}<span aria-live="polite">{historyLoaded ? historyError ? '—' : historyItems.length : '…'}</span></button></div>}
       <p>{t.intro}</p><p className="experiment-ai-compare__scope">{t.scope}</p>

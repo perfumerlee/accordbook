@@ -98,7 +98,7 @@ const openExperiment=async(experimentId:string)=>{if(entryBusy.current)return;en
    <>
      <div className="experiment-list-toolbar">
        <span>{t.index(list.length)}</span>
-       <button className="experiment-action" type="button" onClick={()=>setReviewHistoryOpen(true)}>AI Review History</button>
+       <button className="experiment-action ai-history-trigger" type="button" onClick={()=>setReviewHistoryOpen(true)}>AI Review History</button>
        <button className="experiment-action experiment-action--primary" type="button" disabled={loadingExperiment}
          onClick={()=>{setCreateError('');setSource('current');setCreateMode(true)}}>{t.createTitle}</button>
      </div>
