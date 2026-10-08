@@ -195,7 +195,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       <span>AI Review</span>
     </button>, triggerTarget)}
     {open && <div id={id} className="ai-review-body">
-      <div className="ai-review-heading"><strong>{savedDetail ? m.savedReview : result ? m.currentResult : m.current}</strong><button className="ai-review-close" type="button" aria-label={m.close} onClick={close}><span aria-hidden="true">×</span>{m.close}</button></div>
+      <div className="ai-review-heading"><strong>{savedDetail ? m.savedReview : result ? m.currentResult : m.current}</strong><button className="ai-review-close" type="button" aria-label={m.close} title={m.close} onClick={close}><span aria-hidden="true">×</span></button></div>
       {reviews && <div className="ai-review-view-switch" role="group" aria-label={m.history}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => { setHistoryOpen(false); setSavedDetail(undefined) }}>{m.reviewSetup}</button>
         <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setSavedDetail(undefined) }}>{m.history}<span aria-live="polite">{historyLoaded ? historyError ? '—' : historyItems.length : '…'}</span></button>

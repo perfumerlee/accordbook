@@ -51,11 +51,19 @@ describe('Experiment Compare panel entry', () => {
     expect(html).toContain('aria-expanded="false"')
   })
 
-  it('connects the expanded Review History button to its content panel as a tab', () => {
+  it('provides sibling setup and Review History tabs with an early count', () => {
+    const component = readFileSync('src/components/ExperimentComparePanel.tsx', 'utf8')
     const css = readFileSync('src/components/experimentComparePanel.css', 'utf8')
-    expect(css).toContain('.experiment-ai-compare__history-toggle:has(button[aria-expanded="true"])')
-    expect(css).toContain('border-bottom-color: var(--paper-2)')
-    expect(css).toContain('border-radius: 0 8px 8px 8px')
-    expect(css).toContain('.experiment-ai-compare__history {\n  margin-top: 0;')
+    expect(component).toContain('className="experiment-ai-compare__view-switch" role="group"')
+    expect(component).toContain("historyLoaded ? historyError ? '—' : historyItems.length : '…'")
+    expect(css).toContain('.experiment-ai-compare__view-switch:has(button:last-child[aria-pressed="true"])')
+    expect(css).toContain('.experiment-ai-compare__panel:has(.experiment-ai-compare__view-switch button:last-child[aria-pressed="true"]) > :not(header):not(.experiment-ai-compare__view-switch):not(.experiment-ai-compare__history)')
+  })
+
+  it('shows the source formula and branch lineage in saved Compare targets', () => {
+    const component = readFileSync('src/components/ExperimentComparePanel.tsx', 'utf8')
+    expect(component).toContain('BASE · ${source.baseSnapshot.formulaId} · ${source.baseSnapshot.date}')
+    expect(component).toContain("path.join(' › ')")
+    expect(component).toContain("language === 'ko' ? '브랜치' : 'Branch'")
   })
 })

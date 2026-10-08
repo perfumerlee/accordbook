@@ -35,8 +35,8 @@
 .ai-review-heading, .ai-review-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ai-review-heading { justify-content: space-between; padding: 14px 0 12px; border-bottom: 1px solid #d1c7b7; }
 .ai-review-heading > strong { font-size: 15px; }
-.ai-review-close { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; white-space: nowrap; }
-.ai-review-close span { font-size: 18px; line-height: 1; }
+.ai-review-close { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; width: 40px; height: 40px; margin-left: auto; padding: 0; white-space: nowrap; }
+.ai-review-close span { font-size: 22px; line-height: 1; }
 .ai-review-body > .ai-review-view-switch + .ai-review-mock { padding-top: 12px; }
 .ai-review-view-switch { position: relative; z-index: 1; display: flex; gap: 4px; margin: 0 -18px 12px; padding: 0 18px; border-bottom: 1px solid #d1c7b7; }
 .ai-review-view-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 7px 13px; border-color: transparent; border-bottom: 0; border-radius: 5px 5px 0 0; color: #655b4d; white-space: nowrap; }

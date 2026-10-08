@@ -5,13 +5,15 @@
 .experiment-review-history button { min-height:38px; padding:7px 12px; border:1px solid var(--border); border-radius:4px; background:var(--paper-2); color:var(--ink); font:12px/1.4 Inter,Pretendard,system-ui,sans-serif; cursor:pointer; }
 .experiment-review-history button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .experiment-review-history > ul { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
-.experiment-review-history > ul > li { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:12px; border:1px solid var(--line-soft); border-radius:4px; background:var(--paper); }
+.experiment-review-history > ul > li { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:14px; padding:12px; border:1px solid var(--line-soft); border-radius:4px; background:var(--paper); }
 .experiment-review-history > ul > li > div:first-child { min-width:0; overflow-wrap:anywhere; }
+.experiment-review-history__operation { display:inline-flex; align-items:center; width:fit-content; margin:5px 0 0; padding:3px 7px; border:1px solid var(--line-soft); background:var(--paper-2); color:var(--muted); font:10px/1.4 var(--ws-mono); letter-spacing:.04em; }
+.experiment-review-history__target { display:block; width:fit-content; max-width:100%; margin-top:7px; padding:5px 8px; border-left:2px solid var(--accent); background:var(--paper-2); color:var(--ink); font:11px/1.5 var(--ws-mono); overflow-wrap:anywhere; }
 .experiment-review-history strong,.experiment-review-history small { display:block; }
 .experiment-review-history small { margin-top:4px; color:var(--muted); font:10px/1.5 var(--ws-mono); }
 .experiment-review-history > ul p { margin:7px 0 0; font:13px/1.55 Inter,Pretendard,system-ui,sans-serif; }
-.experiment-review-history > ul > li > div:last-child { display:grid; flex:0 0 88px; align-content:start; gap:6px; }
-.experiment-review-history > ul > li > div:last-child button { width:100%; white-space:nowrap; }
+.experiment-review-history__actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:flex-start; gap:6px; }
+.experiment-review-history__actions button { min-width:104px; white-space:nowrap; }
 .experiment-review-history > ul span,.experiment-review-history [role="status"] { color:var(--muted); font-size:11px; }
 .experiment-review-history__detail { padding:14px; border:1px solid var(--line); border-radius:4px; background:var(--paper); overflow-wrap:anywhere; }
 .experiment-review-history__detail h3 { margin:0; font:400 19px/1.35 var(--ws-serif); }
@@ -22,8 +24,8 @@
 .experiment-review-history__detail > div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:16px; }
 @media(max-width:767px) {
   .experiment-review-history > header h2 { font-size:19px; }
-  .experiment-review-history > ul > li { flex-direction:column; }
-  .experiment-review-history > ul > li > div:last-child { width:100%; flex:0 0 auto; grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .experiment-review-history > ul > li > div:last-child button { min-height:42px; }
+  .experiment-review-history > ul > li { grid-template-columns:minmax(0,1fr); }
+  .experiment-review-history__actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
+  .experiment-review-history__actions button { min-width:0; min-height:42px; }
   .experiment-review-history__detail { padding:10px; }
 }

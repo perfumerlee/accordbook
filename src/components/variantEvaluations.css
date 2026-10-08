@@ -56,7 +56,9 @@ html[lang="ko"] .experiments-layer .branch-intent-fields :is(legend,label,textar
 .evaluation-observation, .evaluation-next span { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
 .evaluation-next { display: grid; gap: 4px; }
 .evaluation-next strong { font-size: 12px; color: var(--muted, #756858); }
-.evaluation-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; font-size: 13px; }
+.evaluation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; }
+.evaluation-secondary-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.evaluation-create-branch { margin-left:auto; }
 .evaluation-card summary { cursor: pointer; font-size: 13px; width: fit-content; padding: 6px 0; }
 .evaluation-snapshot { overflow-x: auto; margin-top: 8px; }
 .evaluation-snapshot table { width: 100%; border-collapse: collapse; font-size: 13px; }
