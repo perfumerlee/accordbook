@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { Experiment } from '../src/models/experiment'
 import ExperimentComparePanel from '../src/components/ExperimentComparePanel'
@@ -39,5 +40,13 @@ describe('Experiment Compare panel entry', () => {
     expect(html).toContain('A')
     expect(html).toContain('AI Compare')
     expect(html).toContain('aria-expanded="false"')
+  })
+
+  it('connects the expanded Review History button to its content panel as a tab', () => {
+    const css = readFileSync('src/components/experimentComparePanel.css', 'utf8')
+    expect(css).toContain('.experiment-ai-compare__history-toggle:has(button[aria-expanded="true"])')
+    expect(css).toContain('border-bottom-color: var(--paper-2)')
+    expect(css).toContain('border-radius: 0 8px 8px 8px')
+    expect(css).toContain('.experiment-ai-compare__history {\n  margin-top: 0;')
   })
 })

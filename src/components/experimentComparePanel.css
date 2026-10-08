@@ -246,6 +246,20 @@
   margin-top: 12px;
 }
 
+.experiment-ai-compare__history-toggle:has(button[aria-expanded="true"]) {
+  position: relative;
+  z-index: 2;
+  margin-bottom: -1px;
+}
+
+.experiment-ai-compare__history-toggle button[aria-expanded="true"] {
+  border-color: var(--border);
+  border-bottom-color: var(--paper-2);
+  border-radius: 7px 7px 0 0;
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
 .experiment-ai-compare__actions {
   justify-content: flex-end;
   padding-top: 12px;
@@ -311,9 +325,10 @@
 }
 
 .experiment-ai-compare__history {
-  margin-top: 16px;
+  margin-top: 0;
   padding: 14px;
   border: 1px solid var(--line);
+  border-radius: 0 8px 8px 8px;
   background: var(--paper-2);
 }
 

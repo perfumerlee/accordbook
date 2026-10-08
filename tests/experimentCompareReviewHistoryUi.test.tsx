@@ -13,6 +13,12 @@ describe('Experiment Review History access UI', () => {
     expect(html).not.toContain('Run AI comparison')
   })
 
+  it('keeps the Next Round operation label in English in Korean history', () => {
+    const component = readFileSync('src/components/ExperimentCompareReviewHistory.tsx', 'utf8')
+    expect(component).toContain("record.operation === 'compare' ? 'COMPARE' : 'NEXT ROUND'")
+    expect(component).not.toContain("ko ? '다음 라운드'")
+  })
+
   it('stacks history controls and records on narrow viewports', () => {
     const css = readFileSync('src/components/experimentReviewHistory.css', 'utf8')
     expect(css).toContain('@media(max-width:767px)')
