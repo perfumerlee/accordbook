@@ -11,6 +11,7 @@ import './productionLayout.css'
 import './responsive-foundation.css'
 import '../styles/print.css'
 import type { ClaimedSource, Formula, FormulaMaterial } from '../models/formula'
+import type { ExperimentAiReviewRecord } from '../models/aiReviewRecord'
 import { createStorage, type AccordbookStorage, type AutosaveStatus } from '../storage/storageService'
 import { calculateFormulaTotals, calculatePercent } from '../services/formulaCalculator'
 import { calculateDilution } from '../services/dilutionCalculator'
@@ -95,6 +96,7 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
   const [timeMachineOpen, setTimeMachineOpen] = useState(false)
   const [multiVersionStates, setMultiVersionStates] = useState<MultiVersionState[]>()
   const [experimentsOpen, setExperimentsOpen] = useState(false)
+  const [reviewNavigation, setReviewNavigation] = useState<ExperimentAiReviewRecord>()
   const timeMachineOpenerRef = useRef<HTMLElement | null>(null)
   const mobileFormulaTriggerRef = useRef<HTMLButtonElement | null>(null)
   const [timeMachineOpenSequence, setTimeMachineOpenSequence] = useState(0)
@@ -357,6 +359,17 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
     return () => document.removeEventListener('keydown', close)
   }, [exportOpen, importOpen])
   const select = async (f: Formula) => workspaceCoordinator.runMutation(async () => { await flushProvenance(); flush(); clearPendingMaterialFocus(); newOriginFlowId.current = undefined; setOriginPromptId(undefined); setExperimentsOpen(false); setActive(f); setDrawerOpen(false); localStorage.setItem(ACTIVE_KEY, f.id) })
+  const navigateToReviewSource = async (record: ExperimentAiReviewRecord): Promise<boolean> => {
+    if (!storage) return false
+    const source = await storage.experiments.get(record.experimentId)
+    const sourceFormula = source && formulas.find(item => item.id === source.parentFormulaId)
+    if (!source || !sourceFormula) return false
+    await workspaceCoordinator.runMutation(async () => {
+      await flushProvenance(); flush(); clearPendingMaterialFocus(); newOriginFlowId.current = undefined; setOriginPromptId(undefined)
+      setActive(sourceFormula); setExperimentsOpen(true); setReviewNavigation(record); localStorage.setItem(ACTIVE_KEY, sourceFormula.id)
+    })
+    return true
+  }
   const flushProvenance = () => provenanceWrites.enqueue(async () => {
     const queued = provenancePending.current
     if (!queued) return undefined
@@ -621,7 +634,9 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
       formula={active}
       storage={storage}
       language={language}
-      onClose={() => { setExperimentsOpen(false) }}
+      reviewNavigation={reviewNavigation}
+      onNavigateReviewSource={navigateToReviewSource}
+      onClose={() => { setExperimentsOpen(false); setReviewNavigation(undefined) }}
       onBeforeCreateCurrent={async () => { const latest = pending.current ?? active; await flush(); return latest }}
     /></ExperimentErrorBoundary>}
   </>

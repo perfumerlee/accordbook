@@ -15,6 +15,8 @@
 .experiment-review-history__actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:flex-start; gap:6px; }
 .experiment-review-history__actions button { min-width:104px; white-space:nowrap; }
 .experiment-review-history > ul span,.experiment-review-history [role="status"] { color:var(--muted); font-size:11px; }
+.experiment-review-history .experiment-review-history__source-warning { display:flex; align-items:flex-start; gap:8px; max-width:78ch; margin:10px 0 0; padding:10px 12px; border:1px solid #c77a55; border-left:4px solid #b85e37; border-radius:4px; background:#fff0e5; color:#71381f; font:600 12px/1.55 Inter,Pretendard,system-ui,sans-serif; }
+.experiment-review-history .experiment-review-history__source-warning::before { content:"!"; display:inline-grid; flex:0 0 18px; width:18px; height:18px; place-items:center; border-radius:50%; background:#b85e37; color:#fffaf0; font:700 12px/1 system-ui,sans-serif; }
 .experiment-review-history__detail { padding:14px; border:1px solid var(--line); border-radius:4px; background:var(--paper); overflow-wrap:anywhere; }
 .experiment-review-history__detail h3 { margin:0; font:400 19px/1.35 var(--ws-serif); }
 .experiment-review-history__detail h4 { margin:18px 0 6px; font:11px/1.4 var(--ws-mono); letter-spacing:.04em; }
@@ -22,10 +24,18 @@
 .experiment-review-history__detail p,.experiment-review-history__detail li { font:13px/1.6 Inter,Pretendard,system-ui,sans-serif; }
 .experiment-review-history__detail section { padding-top:7px; border-top:1px solid var(--line-soft); }
 .experiment-review-history__detail > div { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:16px; }
+.experiment-review-history__detail .ai-history-detail-footer__left { display:flex; flex-wrap:wrap; justify-content:flex-start; gap:8px; margin:0; }
+.experiment-review-history__detail .ai-history-detail-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line-soft); }
+.experiment-review-history__detail .ai-history-source-action { border-color:#8f704e; background:#f0e4cf; color:#44372c; font-weight:600; }
+.experiment-review-history__detail .ai-history-source-action:hover:not(:disabled) { background:#e6d4b7; }
+.experiment-review-history__detail .ai-history-source-action:disabled { opacity:.55; cursor:not-allowed; }
 @media(max-width:767px) {
   .experiment-review-history > header h2 { font-size:19px; }
   .experiment-review-history > ul > li { grid-template-columns:minmax(0,1fr); }
   .experiment-review-history__actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
   .experiment-review-history__actions button { min-width:0; min-height:42px; }
   .experiment-review-history__detail { padding:10px; }
+  .experiment-review-history__detail .ai-history-detail-footer { align-items:stretch; flex-direction:column; }
+  .experiment-review-history__detail .ai-history-detail-footer__left { width:100%; }
+  .experiment-review-history__detail .ai-history-detail-footer__left button,.experiment-review-history__detail .ai-history-detail-footer > button { flex:1 1 auto; }
 }

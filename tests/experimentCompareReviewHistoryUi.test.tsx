@@ -6,7 +6,7 @@ import type { AiReviewRepository } from '../src/storage/aiReviewRepository'
 
 describe('Experiment Review History access UI', () => {
   it('provides a global history view and return path without any AI compare controls', () => {
-    const html = renderToStaticMarkup(<ExperimentCompareReviewHistory reviews={{} as AiReviewRepository} language="en" getExperiment={async () => undefined} onBack={() => {}} />)
+    const html = renderToStaticMarkup(<ExperimentCompareReviewHistory reviews={{} as AiReviewRepository} language="en" getExperiment={async () => undefined} onBack={() => {}} onNavigate={async () => true} />)
     expect(html).toContain('Experiment AI Review History')
     expect(html).toContain('Back to Experiments')
     expect(html).not.toContain('Beta access token')

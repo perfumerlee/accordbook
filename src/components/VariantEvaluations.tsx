@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { EvaluationVerdict, Experiment, ExperimentVariant, VariantEvaluation } from '../models/experiment'
 import { addVariantEvaluation, addVariantFromEvaluation, removeVariantEvaluation, updateVariantEvaluation, type EvaluationInput } from '../services/experimentLifecycle'
 import { canCreateBranchFrom } from '../services/experimentGenealogy'
@@ -60,12 +60,13 @@ const labels = {
 type Draft = EvaluationInput & { evaluationId?: string }
 export type EvaluationDrafts = Record<string, Draft | undefined>
 
-export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange, workspaceCoordinator, requestLimitBytes, requestLimitVerified, reviews, storageMode }: {
+export default function VariantEvaluations({ experiment, variant, language, disabled, onChange, drafts, onDraftsChange, workspaceCoordinator, requestLimitBytes, requestLimitVerified, reviews, storageMode, focusEvaluationId }: {
   workspaceCoordinator?: WorkspaceExportCoordinator
   requestLimitBytes?: number
   requestLimitVerified?: boolean
   reviews?: AiReviewRepository
   storageMode?: StorageMode
+  focusEvaluationId?: string
   experiment: Experiment
   variant: ExperimentVariant
   language: 'en' | 'ko'
@@ -88,6 +89,14 @@ export default function VariantEvaluations({ experiment, variant, language, disa
   const evaluations = [...(variant.evaluations ?? [])].reverse()
   const canBranch = canCreateBranchFrom(experiment, variant.variantId)
   const directionHintId = useId()
+
+  useEffect(() => {
+    if (!focusEvaluationId) return
+    const target = document.querySelector<HTMLElement>(`[data-evaluation-id="${CSS.escape(focusEvaluationId)}"]`)
+    if (!target) return
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    target.focus({ preventScroll: true })
+  }, [focusEvaluationId, evaluations.length])
 
   const act = (operation: () => Experiment) => {
     if (disabled || busy.current) return false
@@ -131,7 +140,7 @@ export default function VariantEvaluations({ experiment, variant, language, disa
       const branches = experiment.variants.filter(child => child.parentVariantId === variant.variantId && child.sourceEvaluationId === item.evaluationId)
       const direction = t.directions[item.verdict]
       const purpose = evaluationBranchPurpose(item.verdict)
-      return <article className="evaluation-card" data-verdict={item.verdict} key={item.evaluationId}>
+      return <article className="evaluation-card" data-evaluation-id={item.evaluationId} data-source-review={item.evaluationId === focusEvaluationId || undefined} tabIndex={item.evaluationId === focusEvaluationId ? -1 : undefined} data-verdict={item.verdict} key={item.evaluationId}>
         <header><strong>{t.verdicts[item.verdict]}</strong><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US')}</time></header>
         <p className="evaluation-observation">{item.observation}</p>
         {item.decisionNote && <p className="evaluation-next"><strong>{item.verdict === 'stop' ? t.directions.stop.label : t.decisionNote}</strong><span>{item.decisionNote}</span></p>}

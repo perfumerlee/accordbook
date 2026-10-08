@@ -68,6 +68,7 @@
 .experiment-detail .experiment-variant-strip button{flex:0 0 auto;white-space:nowrap}
 .experiment-detail .experiment-navigation-actions{display:flex;flex-wrap:nowrap;justify-content:flex-end;align-items:center;gap:8px;min-width:0;padding:3px 0 8px 16px;border-left:1px solid var(--line-soft)}
 .experiment-detail .experiment-navigation-actions button{flex:0 0 auto;white-space:nowrap;min-height:36px;box-sizing:border-box}
+.experiment-detail .experiment-review-navigation-error{margin:10px 0;padding:10px 12px;border:1px solid #c77a55;border-left:4px solid #b85e37;border-radius:4px;background:#fff0e5;color:#71381f;font:600 13px/1.5 Inter,Pretendard,system-ui,sans-serif}
 .experiment-detail .experiment-compare-context{display:flex;flex-wrap:wrap;gap:6px 18px;padding:6px 0 10px;color:var(--muted);font:11px/1.4 "Courier New",monospace}
 .experiment-detail :is(.experiment-navigation-actions,.experiment-editor-actions) button{border:1px solid var(--border);border-radius:4px;background:transparent;padding:9px 12px;color:var(--ink);font:11px/1.4 Inter,Pretendard,sans-serif;letter-spacing:.03em}
 .experiment-detail .experiment-navigation-actions button:first-child,.experiment-detail .experiment-editor-actions button{border-color:var(--ink);background:var(--ink);color:var(--paper-2)}

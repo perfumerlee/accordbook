@@ -53,6 +53,7 @@ html[lang="ko"] .experiments-layer .branch-intent-fields :is(legend,label,textar
 .evaluation-form textarea { box-sizing: border-box; width: 100%; min-height: 80px; resize: vertical; padding: 10px; font: inherit; color: inherit; border: 1px solid #b9a890; border-radius: 5px; background: rgba(255,255,255,.5); }
 .evaluation-form select { width: max-content; }
 .evaluation-card header time { color: var(--muted, #756858); font-size: 12px; }
+.evaluation-card[data-source-review="true"] { outline: 2px solid var(--accent, #b8794d); outline-offset: 2px; background: rgba(240, 228, 207, .72); scroll-margin-block: 24px; }
 .evaluation-observation, .evaluation-next span { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
 .evaluation-next { display: grid; gap: 4px; }
 .evaluation-next strong { font-size: 12px; color: var(--muted, #756858); }
