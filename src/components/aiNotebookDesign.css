@@ -108,7 +108,14 @@ html[lang='ko'] .experiments-layer .ai-notebook.ai-notebook :is(button, input, s
 }
 .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li, .experiment-next-round__history-list > li, .experiment-review-history > ul > li) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) { display: flex; width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
-.ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { min-width: 96px; flex: 0 0 auto; }
+.ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { min-width: 112px; flex: 0 0 auto; }
+.ai-notebook.ai-notebook .ai-history-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.ai-notebook.ai-notebook .ai-history-actions button { min-width: 112px; flex: 0 0 auto; }
+.ai-notebook.ai-notebook :is(.ai-history-detail-nav, .ai-review-detail-actions) { display: flex; justify-content: flex-start; margin: 0 0 14px; }
+.ai-notebook.ai-notebook .ai-history-detail-footer { display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--ai-rule); }
+.ai-notebook.ai-notebook .ai-review-delete-action { border-color: #b99c8b; color: #754d3b; background: transparent; }
+.ai-notebook.ai-notebook .ai-review-delete-action:hover:not(:disabled) { border-color: #986b54; background: #f3e8dc; }
+.ai-notebook.ai-notebook .ai-history-actions .ai-review-delete-action { order: 2; }
 .ai-notebook.ai-notebook :is(.ai-review-history-entry > strong, .experiment-ai-compare__history-list strong, .experiment-next-round__history-copy strong, .experiment-review-history__copy > strong) { font: 600 15px/1.5 var(--ai-body); }
 .ai-notebook.ai-notebook :is(small, .ai-review-saved-meta, .ai-review-history-entry > span:not(.ai-review-history-preview), .experiment-ai-compare__meta, .experiment-next-round__meta, .experiment-review-history__target, .experiment-ai-compare__history-versions) { color: var(--ai-muted); font: 12px/1.6 var(--ai-ui) !important; letter-spacing: 0; }
 .ai-notebook.ai-notebook :is(.ai-review-history-entry .ai-review-history-preview, .experiment-ai-compare__history-list p, .experiment-next-round__history-copy p, .experiment-review-history__copy p) { color: var(--ai-ink); font: 14px/1.75 var(--ai-body); margin-top: 8px; }
@@ -144,7 +151,7 @@ html .experiments-layer .ai-history-trigger:hover { background: #eee5d4; }
   .ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) { gap: 2px; }
   .ai-notebook.ai-notebook :is(.ai-review-view-switch, .experiment-ai-compare__view-switch, .experiment-next-round__view-switch) button { min-height: 44px; padding-inline: 10px; }
   .ai-notebook.ai-notebook :is(.ai-review-history, .experiment-ai-compare__history, .experiment-next-round__history) { margin: 0; padding: 0; }
-  .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { flex: 1 1 0; min-width: 0; }
+  .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions, .ai-history-actions) button { flex: 1 1 0; min-width: 0; }
   .ai-notebook.ai-notebook input[type='password'] { min-height: 44px; flex-basis: 150px; }
   .app .main .editor-actions:has(.ai-review-action-slot), .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-left { flex-wrap: wrap; gap: 8px; }
   .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { flex-wrap: wrap; }

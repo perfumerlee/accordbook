@@ -74,14 +74,14 @@
 .ai-review-history-heading > div button { min-height:36px; padding:6px 10px; }
 .ai-review-history-heading > div button[aria-pressed="true"] { border-color:var(--accent); background:var(--paper-3,var(--paper)); }
 .ai-review-history-list { display:grid; gap:8px; list-style:none; margin:12px 0 0; padding:0; }
-.ai-review-history-entry { display:grid; width:100%; gap:4px; text-align:left; background:var(--paper) !important; border-color:var(--line-soft) !important; }
+.ai-review-history-entry { display:grid; width:100%; gap:4px; padding:14px; border:1px solid var(--line-soft); border-radius:5px; text-align:left; background:var(--paper); }
 .ai-review-history-entry > span { color:var(--muted); font-size:12px; }
 .ai-review-history-entry .ai-review-history-preview { display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow-wrap:anywhere; }
-.ai-review-history-nav { display:flex; justify-content:flex-start; }
+.ai-review-history-entry .ai-history-actions { margin-top:8px; }
 .ai-review-saved-meta { margin:8px 0 14px !important; color:var(--muted); font-size:12px; }
 .ai-review-delete { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:12px; border-top:1px solid var(--line-soft); }
-.ai-review-delete button { border-color:#9a7563; color:#6e3d2b; }
-.ai-review-delete [role="alert"] { width:100%; }
+.ai-review-delete button { border-color:#b99c8b; color:#754d3b; }
+.ai-review-delete-error { color:#805335; }
 .ai-review-stale,.ai-review [role="alert"] { padding-left:12px; border-left:3px solid #98633e; }
 @media (max-width:767px) { .ai-review-body { padding:14px 12px; } .ai-review-controls { align-items:stretch; } .ai-review-controls input[type="password"] { flex:1 1 100%; width:100%; } .ai-review-view-switch { margin-inline:-4px; padding-inline:4px; } .ai-review-view-switch button { padding-inline:9px; font-size:12px; } .ai-review-history { margin-inline:-12px; margin-bottom:-14px; padding:12px; } .ai-review-history-heading { align-items:flex-start; } .ai-review-history-heading > div { justify-content:flex-start; } .ai-review-history-heading > div button { padding-inline:7px; font-size:12px; } }
 @media print { .ai-review { display: none !important; } }

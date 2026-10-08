@@ -168,9 +168,9 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       saving.current = false
     }
   }
-  const deleteSavedReview = async () => {
-    if (!reviews || !savedDetail) return
-    const selectedId = savedDetail.reviewId
+  const deleteSavedReview = async (record: FormulaAiReviewRecord) => {
+    if (!reviews) return
+    const selectedId = record.reviewId
     if (!window.confirm(m.confirmDeleteReview)) return
     setDeleteError(false)
     try {
@@ -179,7 +179,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       await reviews.delete(selectedId)
       if (await reviews.get(selectedId)) throw new Error('Review deletion could not be confirmed.')
       setHistoryItems(items => items.filter(item => item.reviewId !== selectedId))
-      setSavedDetail(undefined)
+      setSavedDetail(value => value?.reviewId === selectedId ? undefined : value)
     } catch {
       setDeleteError(true)
     }
@@ -198,9 +198,9 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       <header className="ai-review-heading"><div><p className="ai-review-eyebrow">AI REVIEW</p><h3>{savedDetail ? m.savedReview : historyOpen ? m.current : result ? m.currentResult : m.current}</h3></div><button className="ai-review-close" type="button" aria-label={m.close} title={m.close} onClick={close}><span aria-hidden="true">×</span></button></header>
       {reviews && <div className="ai-review-view-switch" role="group" aria-label={m.history}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => { setHistoryOpen(false); setSavedDetail(undefined) }}>{m.reviewSetup}</button>
-        <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setSavedDetail(undefined) }}>{m.history}<span aria-live="polite">{historyLoaded ? historyError ? '—' : historyItems.length : '…'}</span></button>
-      </div>}
-      <div className="ai-review-form">
+        <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setSavedDetail(undefined); void loadHistory() }}>{m.history}<span aria-live="polite">{historyLoaded ? historyError ? '—' : historyItems.length : '…'}</span></button>
+      </div>
+      {!historyOpen && <div className="ai-review-form">
       <p className="ai-review-mock">{m.mock}</p>
       <p className="ai-review-disclosure">{m.disclosure}</p>
       {!accepted ? <button type="button" onClick={() => { acceptAiDisclosure(); setAccepted(true) }}>{m.accept}</button> : <p>{m.accepted}</p>}
@@ -241,24 +241,27 @@ export default function AiFormulaReview({ formula, language, connection, trigger
         <button type="button" onClick={() => void saveReview()} disabled={saveState === 'saving' || saveState === 'saved' || saveState === 'session-only'}>{saveState === 'saving' ? m.savingReview : m.saveReview}</button>
         {saveState && <p role="status" aria-live="polite">{saveState === 'unsaved' ? m.reviewUnsaved : saveState === 'saving' ? m.savingReview : saveState === 'saved' ? m.reviewSaved : saveState === 'session-only' ? m.reviewNotDurable : m.reviewSaveFailed}</p>}
       </div>}
-      </div>
+      </div>}
       {historyOpen && reviews && <div className="ai-review-history" aria-label={m.history}>
         {savedDetail ? <div className="ai-review-saved-detail">
-          <div className="ai-review-history-nav"><button type="button" onClick={() => { setSavedDetail(undefined); setDeleteError(false) }}>{m.backToHistory}</button></div>
+          <div className="ai-review-detail-actions"><button type="button" onClick={() => { setSavedDetail(undefined); setDeleteError(false) }}>{m.backToHistory}</button></div>
           <p className="ai-review-saved-meta">{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(savedDetail.createdAt))} · {savedDetail.locale === 'ko' ? m.korean : m.english} · {savedDetail.sourceFormulaDisplayId ?? savedDetail.sourceFormulaId}{knownFormulaIds && !knownFormulaIds.includes(savedDetail.sourceFormulaId) ? ` · ${m.sourceUnavailable}` : ''}</p>
           <h3>{m.summary}</h3><p>{savedDetail.response.summary}</p>
           <h3>{m.observations}</h3><ul>{savedDetail.response.observations.map((item, index) => <li key={index}>{item.detail}</li>)}</ul>
           <h3>{m.next}</h3><ul>{savedDetail.response.nextChecks.map((item, index) => <li key={index}>{item.detail}</li>)}</ul>
-          <div className="ai-review-delete"><button type="button" onClick={() => void deleteSavedReview()}>{m.deleteReview}</button>{deleteError && <p role="alert">{m.deleteFailed}</p>}</div>
+          <div className="ai-review-delete"><button type="button" className="ai-review-delete-action" onClick={() => void deleteSavedReview(savedDetail)}>{m.deleteReview}</button></div>
+          {deleteError && <p className="ai-review-delete-error" role="alert">{m.deleteFailed}</p>}
         </div> : <>
         <div className="ai-review-history-heading"><div><p className="ai-review-eyebrow">AI REVIEW</p><h4>{m.savedReviews}</h4></div><div><button type="button" aria-pressed={historyScope === 'formula'} onClick={() => setHistoryScope('formula')}>{m.currentFormula}</button><button type="button" aria-pressed={historyScope === 'all'} onClick={() => setHistoryScope('all')}>{m.allReviews}</button><button type="button" onClick={() => void loadHistory()} disabled={historyLoading}>{m.refreshHistory}</button></div></div>
+        {deleteError && <p className="ai-review-delete-error" role="alert">{m.deleteFailed}</p>}
         {storageMode === 'memory' && <p role="status">{m.sessionOnlyHistory}</p>}
         {historyLoading && <p role="status">{m.historyLoading}</p>}
         {historyError && <p role="alert">{m.historyLoadFailed}</p>}
         {!historyLoading && !historyError && historyItems.length === 0 && <p role="status">{m.emptyHistory}</p>}
-        {!historyError && <ul className="ai-review-history-list">{historyItems.map(item => <li key={item.reviewId}><button type="button" className="ai-review-history-entry" onClick={() => { setSavedDetail(item); setDeleteError(false) }}>
+        {!historyError && <ul className="ai-review-history-list">{historyItems.map(item => <li key={item.reviewId}><div className="ai-review-history-entry">
           <strong>{item.sourceFormulaDisplayId ?? item.sourceFormulaId}</strong><span>{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt))} · {item.locale === 'ko' ? m.korean : m.english}{historyScope === 'all' && knownFormulaIds && !knownFormulaIds.includes(item.sourceFormulaId) ? ` · ${m.sourceUnavailable}` : ''}</span><span className="ai-review-history-preview">{item.response.summary}</span>
-        </button></li>)}</ul>}
+          <div className="ai-history-actions"><button type="button" onClick={() => { setSavedDetail(item); setDeleteError(false) }}>{m.openReview}</button><button type="button" className="ai-review-delete-action" onClick={() => void deleteSavedReview(item)}>{m.deleteReview}</button></div>
+        </div></li>)}</ul>}
         </>}
       </div>}
     </div>}
