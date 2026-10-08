@@ -1,4 +1,4 @@
-import type { ExperimentAiReviewRecord } from './aiReviewRecord'
+import type { AiReviewRecord } from './aiReviewRecord'
 // External transport DTOs. Review records use their existing strict, versioned snapshot contract.
 export interface WorkspaceDilution { enabled: boolean; percent: number; solvent: string }
 export interface WorkspaceRow {
@@ -79,6 +79,6 @@ export interface WorkspaceFile {
   formula: WorkspaceFormula
   versions: WorkspaceVersion[]
   experiments: WorkspaceExperiment[]
-  /** Required in v2; absent in legacy v1 files. Formula reviews are never accepted. */
-  reviews?: ExperimentAiReviewRecord[]
+  /** Required in v2; absent in legacy v1 files. Contains saved Formula and Experiment Reviews. */
+  reviews?: AiReviewRecord[]
 }

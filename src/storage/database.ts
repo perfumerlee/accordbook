@@ -50,7 +50,7 @@ function createMemoryDatabase(): StorageDatabase {
       const experimentIds = new Set(experiments.map(e => e.experimentId))
       return structuredClone({ formula,
         versions: [...stores.get('versions')!.values()].filter(v => (v as FormulaVersion).parentFormulaId === formulaId) as FormulaVersion[],
-        experiments, reviews: [...stores.get('reviews')!.values()].filter((r): r is ExperimentAiReviewRecord => typeof r === 'object' && r !== null && 'reviewType' in r && r.reviewType === 'experiment' && experimentIds.has(r.experimentId)) })
+        experiments, reviews: [...stores.get('reviews')!.values()].filter((r): r is AiReviewRecord => typeof r === 'object' && r !== null && 'reviewType' in r && (r.reviewType === 'formula' ? r.sourceFormulaId === formulaId : r.reviewType === 'experiment' && experimentIds.has(r.experimentId))) })
     },
     async appendWorkspaceAtomic(input) {
       const value = prepareWorkspaceAppend(input)

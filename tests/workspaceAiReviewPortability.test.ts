@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { IDBFactory, IDBObjectStore } from 'fake-indexeddb'
 import type { ExperimentAiCompareReviewRecord } from '../src/models/experimentAiReviewRecord'
 import type { ExperimentNextRoundReviewRecord } from '../src/models/experimentNextRoundAi'
+import type { FormulaAiReviewRecord } from '../src/models/aiReviewRecord'
 import type { Experiment } from '../src/models/experiment'
 import { createStorage } from '../src/storage/storageService'
 import { collectWorkspace } from '../src/services/workspaceCollector'
@@ -9,6 +10,8 @@ import { parseWorkspaceFile } from '../src/services/workspaceImport'
 import { importWorkspace } from '../src/services/workspaceImporter'
 import { validateWorkspaceFile } from '../src/services/workspaceValidation'
 import { toWorkspaceFile } from '../src/services/workspaceExport'
+import { createBackup } from '../src/services/exportJson'
+import { importBackup, parseBackup } from '../src/services/importJson'
 import { workspaceFixture, stamp } from './workspaceFixtures'
 
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
@@ -33,6 +36,12 @@ const nextRoundRecord = (experimentId: string, variantId: string, evaluationId: 
   return { reviewId, reviewType: 'experiment', operation: 'next_round', schemaVersion: 1, experimentId, experimentDisplayName: 'Saved Experiment', variantId, variantLabel: 'A', evaluationId,
     submittedContext, deterministicDelta: submittedContext.delta, response: { findings: 'Saved Next Round response', uncertainties: [], nextChecks: [], adjustmentDirections: [], advisoryOnly: true }, locale: 'en', createdAt: stamp }
 }
+const formulaRecord = (sourceFormulaId: string, reviewId = '5f6a7f2c-8084-4d9a-9c6f-5b03a3958174'): FormulaAiReviewRecord => ({
+  reviewId, reviewType: 'formula', sourceFormulaId, sourceFormulaDisplayId: 'ACC-2610-001',
+  snapshot: { type: 'accordbook-ai-context', version: 1, scope: 'formula_review', formula: { name: 'Submitted Formula', rows: [{ material: 'Submitted Rose', parts: 1000 }] } },
+  response: { summary: 'Saved Formula response', observations: [{ detail: 'Saved observation' }], nextChecks: [{ detail: 'Saved next check' }] },
+  locale: 'ko', createdAt: stamp, schemaVersion: 1,
+})
 function cloneExperimentWithFreshIds(value: Experiment): Experiment {
   const variants = new Map(value.variants.map(variant => [variant.variantId, `second-${variant.variantId}`]))
   const evaluations = new Map(value.variants.map(variant => [variant.variantId, new Map((variant.evaluations ?? []).map(item => [item.evaluationId, `second-${item.evaluationId}`]))]))
@@ -131,7 +140,7 @@ describe('Experiment AI Review workspace portability', () => {
     const importedExperimentIds = new Set(imported.experiments.map(experiment => experiment.experimentId))
     expect(imported.reviews!.every(review => importedExperimentIds.has(review.experimentId))).toBe(true)
   })
-  it('supports legacy v1 and rejects Formula, malformed and dangling review references', async () => {
+  it('supports legacy v1 and rejects malformed, mismatched and dangling Review references', async () => {
     const source = await workspaceFixture()
     const { reviews: _reviews, ...legacy } = toWorkspaceFile(source, stamp)
     const base = { ...legacy, formatVersion: 1 as const }
@@ -140,9 +149,95 @@ describe('Experiment AI Review workspace portability', () => {
     const review = compareRecord(source.experiments[0].experimentId, variant.variantId)
     const v2 = { ...base, formatVersion: 2, reviews: [review] }
     expect(validateWorkspaceFile(v2).reviews).toHaveLength(1)
-    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...review, reviewType: 'formula' }] })).toThrow('invalid Experiment Review record')
-    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...review, unexpected: true }] })).toThrow('invalid Experiment Review record')
+    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...review, reviewType: 'formula' }] })).toThrow('invalid AI Review record')
+    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...review, unexpected: true }] })).toThrow('invalid AI Review record')
     expect(() => validateWorkspaceFile({ ...v2, reviews: [compareRecord('missing-experiment', variant.variantId)] })).toThrow('missing Experiment owner')
+    const formulaReview = formulaRecord(source.formula.id)
+    expect(validateWorkspaceFile({ ...v2, reviews: [formulaReview] }).reviews).toEqual([formulaReview])
+    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...formulaReview, response: { raw: 'not validated' } }] })).toThrow('invalid AI Review record')
+    expect(() => validateWorkspaceFile({ ...v2, reviews: [formulaRecord('another-formula')] })).toThrow('wrong Formula owner')
+    expect(() => validateWorkspaceFile({ ...v2, reviews: [{ ...review, reviewType: 'unknown' }] })).toThrow('invalid AI Review record')
+  })
+  it.each(['memory', 'indexeddb'] as const)('exports and round-trips only the Formula Review for this Formula (%s)', async mode => {
+    const { storage, source, compare, next } = await sourceWithReviews(mode)
+    const formulaReview = formulaRecord(source.formula.id)
+    await storage.reviews.save(formulaReview)
+    await storage.reviews.save(formulaRecord('unrelated-formula', '6f6a7f2c-8084-4d9a-9c6f-5b03a3958174'))
+    const collected = await collectWorkspace(storage, source.formula.id)
+    expect(collected.ok).toBe(true)
+    if (!collected.ok) return
+    const file = parseWorkspaceFile(collected.serialized)
+    expect(file.formatVersion).toBe(2)
+    expect(file.reviews).toHaveLength(3)
+    expect(file.reviews).toContainEqual(formulaReview)
+    expect(file.reviews).toContainEqual(compare)
+    expect(file.reviews).toContainEqual(next)
+    expect(file.reviews).not.toContainEqual(expect.objectContaining({ sourceFormulaId: 'unrelated-formula' }))
+    if (mode === 'indexeddb') vi.stubGlobal('indexedDB', new IDBFactory())
+    const destination = await createStorage()
+    const result = await importWorkspace(destination, file, { now: new Date(stamp) })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const imported = (await destination.workspaces.readWorkspace(result.formulaId))!
+    const formulaCopy = imported.reviews!.find(review => review.reviewType === 'formula')!
+    expect(formulaCopy.sourceFormulaId).toBe(imported.formula.id)
+    expect(formulaCopy).toMatchObject({ ...formulaReview, sourceFormulaId: imported.formula.id })
+    expect(formulaCopy.snapshot).toEqual(formulaReview.snapshot)
+    expect(formulaCopy.response).toEqual(formulaReview.response)
+    expect(formulaCopy.locale).toBe(formulaReview.locale)
+    expect(formulaCopy.createdAt).toBe(formulaReview.createdAt)
+  })
+  it('keeps Formula and Experiment AI Reviews in the existing Notebook Backup v5 round trip', async () => {
+    const { storage, source, compare, next } = await sourceWithReviews()
+    const formulaReview = formulaRecord(source.formula.id)
+    await storage.reviews.save(formulaReview)
+    const backup = await createBackup(storage)
+    expect(backup.formatVersion).toBe(5)
+    expect(backup.data.reviews).toEqual(expect.arrayContaining([formulaReview, compare, next]))
+
+    const restored = await createStorage()
+    await importBackup(restored, parseBackup(JSON.stringify(backup)))
+    expect((await restored.exportData()).reviews).toEqual(expect.arrayContaining([formulaReview, compare, next]))
+  })
+  it('remaps a Formula Review source ID and preserves its snapshot when its Review ID collides', async () => {
+    const { storage, source } = await sourceWithReviews('indexeddb')
+    const formulaReview = formulaRecord(source.formula.id)
+    await storage.reviews.save(formulaReview)
+    const collection = await collectWorkspace(storage, source.formula.id)
+    if (!collection.ok) throw new Error('workspace collection failed')
+    vi.stubGlobal('indexedDB', new IDBFactory())
+    const destination = await createStorage()
+    const localReview = formulaRecord('keep-local-formula', formulaReview.reviewId)
+    await destination.reviews.save(localReview)
+    const result = await importWorkspace(destination, parseWorkspaceFile(collection.serialized), { now: new Date(stamp) })
+    expect(result.ok).toBe(true)
+    expect(await destination.reviews.get(localReview.reviewId)).toMatchObject(localReview)
+    if (!result.ok) return
+    const imported = (await destination.workspaces.readWorkspace(result.formulaId))!
+    const copied = imported.reviews!.find(review => review.reviewType === 'formula')!
+    expect(copied.reviewId).not.toBe(formulaReview.reviewId)
+    expect(copied.sourceFormulaId).toBe(imported.formula.id)
+    expect(copied.snapshot).toEqual(formulaReview.snapshot)
+    expect(copied.response).toEqual(formulaReview.response)
+    expect(copied.locale).toBe(formulaReview.locale)
+    expect(copied.createdAt).toBe(formulaReview.createdAt)
+  })
+  it('rejects a dangling Formula Review before any Workspace records are written', async () => {
+    const { storage, source } = await sourceWithReviews()
+    const formulaReview = formulaRecord(source.formula.id)
+    await storage.reviews.save(formulaReview)
+    const collected = await collectWorkspace(storage, source.formula.id)
+    if (!collected.ok) throw new Error('workspace collection failed')
+    const file = parseWorkspaceFile(collected.serialized)
+    file.reviews = [formulaRecord('wrong-formula')]
+    const destination = await createStorage()
+    const result = await importWorkspace(destination, file, { now: new Date(stamp) })
+    expect(result).toEqual({ ok: false, code: 'invalid-workspace' })
+    const after = await destination.exportData()
+    expect(after.formulas).toEqual([])
+    expect(after.versions).toEqual([])
+    expect(after.experiments).toEqual([])
+    expect(after.reviews).toEqual([])
   })
   it('remaps a colliding Review ID without replacing the existing local record', async () => {
     const { storage, source, compare } = await sourceWithReviews('indexeddb')
@@ -150,13 +245,14 @@ describe('Experiment AI Review workspace portability', () => {
     if (!collection.ok) throw new Error('workspace collection failed')
     vi.stubGlobal('indexedDB', new IDBFactory())
     const destination = await createStorage()
-    await destination.reviews.save({ ...compare, experimentId: 'local-existing-experiment', experimentDisplayName: 'Keep this unrelated review' })
+    const localFormulaReview = formulaRecord('local-existing-formula', compare.reviewId)
+    await destination.reviews.save(localFormulaReview)
     const result = await importWorkspace(destination, parseWorkspaceFile(collection.serialized), { now: new Date(stamp) })
     expect(result.ok).toBe(true)
-    expect(await destination.reviews.getExperimentReview(compare.reviewId)).toMatchObject({ experimentDisplayName: 'Keep this unrelated review' })
+    expect(await destination.reviews.get(compare.reviewId)).toMatchObject(localFormulaReview)
     if (!result.ok) return
     const imported = (await destination.workspaces.readWorkspace(result.formulaId))!
-    const copied = imported.reviews!.find(review => review.operation === 'compare')!
+    const copied = imported.reviews!.find(review => review.reviewType === 'experiment' && review.operation === 'compare')!
     expect(copied.reviewId).not.toBe(compare.reviewId)
     expect(copied.submittedContext).toEqual(compare.submittedContext)
   })

@@ -75,6 +75,7 @@ export function remapValidatedWorkspace(file: WorkspaceFile, displayFormulaId: s
     }
   })
   const reviews = (file.reviews ?? []).map(review => {
+    if (review.reviewType === 'formula') return { ...structuredClone(review), sourceFormulaId: formulaId }
     const experimentId = maps.experiments.get(review.experimentId)!
     const variants = maps.variants.get(review.experimentId)!
     if (review.operation === 'compare') return { ...structuredClone(review), experimentId,

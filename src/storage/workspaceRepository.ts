@@ -3,10 +3,10 @@ import type { WorkspaceSource } from '../services/workspaceExport'
 import { toWorkspaceFile } from '../services/workspaceExport'
 import { consumePreparedWorkspaceAppend } from '../services/workspaceExecution'
 import { profileWorkspace } from '../services/workspaceProfile'
-import type { ExperimentAiReviewRecord } from '../models/aiReviewRecord'
+import type { AiReviewRecord } from '../models/aiReviewRecord'
 
 /** Preserve a free review ID; collisions get a fresh local UUID, never overwrite. */
-export function allocateWorkspaceReviews(reviews: readonly ExperimentAiReviewRecord[], occupied: Set<string>): ExperimentAiReviewRecord[] {
+export function allocateWorkspaceReviews(reviews: readonly AiReviewRecord[], occupied: Set<string>): AiReviewRecord[] {
   return reviews.map(review => {
     let reviewId = review.reviewId
     for (let attempt = 0; occupied.has(reviewId); attempt++) {
@@ -60,7 +60,8 @@ export function readIndexedWorkspace(database: IDBDatabase, formulaId: string): 
     const tx = database.transaction(['formulas', 'versions', 'experiments', 'reviews'], 'readonly')
     let formula: WorkspaceRecords['formula'] | undefined
     const versions: WorkspaceRecords['versions'] = []; const experiments: WorkspaceRecords['experiments'] = []
-    const reviews: ExperimentAiReviewRecord[] = []
+    const reviews: AiReviewRecord[] = []
+    const reviewIds = new Set<string>()
     tx.oncomplete = () => resolve(formula ? { formula, versions, experiments, reviews } : undefined)
     tx.onabort = () => reject(tx.error ?? new Error('Workspace read aborted'))
     tx.onerror = () => {
@@ -69,6 +70,19 @@ export function readIndexedWorkspace(database: IDBDatabase, formulaId: string): 
     }
     tx.objectStore('formulas').get(formulaId).onsuccess = event => { formula = (event.target as IDBRequest).result }
     // All requests share one readonly snapshot. Old adapters deliberately fall back to a scan.
+    const reviewStore = tx.objectStore('reviews')
+    const formulaReviewRequest = reviewStore.indexNames.contains('sourceFormulaId')
+      ? reviewStore.index('sourceFormulaId').openCursor(formulaId)
+      : reviewStore.openCursor()
+    formulaReviewRequest.onsuccess = event => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result
+      if (!cursor) return
+      const review = cursor.value as AiReviewRecord
+      if (review.reviewType === 'formula' && review.sourceFormulaId === formulaId && !reviewIds.has(review.reviewId)) {
+        reviewIds.add(review.reviewId); reviews.push(review)
+      }
+      cursor.continue()
+    }
     for (const name of ['versions', 'experiments'] as const) {
       const store = tx.objectStore(name)
       const indexed = store.indexNames.contains('parentFormulaId')
@@ -80,14 +94,15 @@ export function readIndexedWorkspace(database: IDBDatabase, formulaId: string): 
           if (name === 'versions') versions.push(cursor.value)
           else {
             experiments.push(cursor.value)
-            const store = tx.objectStore('reviews')
-            const indexed = store.indexNames.contains('experimentId')
-            const reviewRequest = indexed ? store.index('experimentId').openCursor(cursor.value.experimentId) : store.openCursor()
+            const indexedReviews = reviewStore.indexNames.contains('experimentId')
+            const reviewRequest = indexedReviews ? reviewStore.index('experimentId').openCursor(cursor.value.experimentId) : reviewStore.openCursor()
             const experimentId = cursor.value.experimentId
             reviewRequest.onsuccess = () => {
               const reviewCursor = reviewRequest.result
               if (!reviewCursor) return
-              if (reviewCursor.value.reviewType === 'experiment' && reviewCursor.value.experimentId === experimentId) reviews.push(reviewCursor.value)
+              if (reviewCursor.value.reviewType === 'experiment' && reviewCursor.value.experimentId === experimentId && !reviewIds.has(reviewCursor.value.reviewId)) {
+                reviewIds.add(reviewCursor.value.reviewId); reviews.push(reviewCursor.value)
+              }
               reviewCursor.continue()
             }
           }

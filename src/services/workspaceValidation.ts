@@ -1,5 +1,6 @@
 import type { WorkspaceFile, WorkspaceProvenance } from '../models/workspaceFile'
 import { profileWorkspace } from './workspaceProfile'
+import { validateFormulaAiReviewRecord } from '../models/aiReviewRecord'
 import { validateExperimentAiCompareReviewRecord } from '../models/experimentAiReviewRecord'
 import { validateExperimentNextRoundReviewRecord } from '../models/experimentNextRoundAi'
 
@@ -131,9 +132,11 @@ const envelope = object({
     baseSource, baseSnapshot: snapshot, nextVariantOrdinal: integer(0), variants: array(variant, WORKSPACE_LIMITS.maxVariants, 'variants') }), WORKSPACE_LIMITS.maxExperiments),
   reviews: optional(array((value, path) => {
     try {
-      if ((value as { operation?: unknown } | null)?.operation === 'compare') validateExperimentAiCompareReviewRecord(value)
-      else validateExperimentNextRoundReviewRecord(value)
-    } catch { return fail(path, 'invalid Experiment Review record') }
+      if ((value as { reviewType?: unknown } | null)?.reviewType === 'formula') validateFormulaAiReviewRecord(value)
+      else if ((value as { reviewType?: unknown } | null)?.reviewType === 'experiment' && (value as { operation?: unknown }).operation === 'compare') validateExperimentAiCompareReviewRecord(value)
+      else if ((value as { reviewType?: unknown } | null)?.reviewType === 'experiment' && (value as { operation?: unknown }).operation === 'next_round') validateExperimentNextRoundReviewRecord(value)
+      else return fail(path, 'unsupported AI Review type')
+    } catch { return fail(path, 'invalid AI Review record') }
     return structuredClone(value)
   }, WORKSPACE_LIMITS.maxReviews)),
 })
@@ -144,6 +147,10 @@ export function validateWorkspaceGraph(file: WorkspaceFile): void {
   unique((file.reviews ?? []).map(review => review.reviewId), '$.reviews')
   const experimentMap = new Map(experiments.map(e => [e.experimentId, e]))
   for (const review of file.reviews ?? []) {
+    if (review.reviewType === 'formula') {
+      if (review.sourceFormulaId !== formula.id) fail('$.reviews.sourceFormulaId', 'wrong Formula owner')
+      continue
+    }
     const experiment = experimentMap.get(review.experimentId)
     if (!experiment) fail('$.reviews.experimentId', 'missing Experiment owner')
     const variants = new Map(experiment!.variants.map(v => [v.variantId, v]))
