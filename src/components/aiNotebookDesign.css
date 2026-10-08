@@ -111,8 +111,8 @@ html[lang='ko'] .experiments-layer .ai-notebook.ai-notebook :is(button, input, s
 .ai-notebook.ai-notebook :is(.experiment-ai-compare__history-list > li > div:last-child, .experiment-next-round__history-actions, .experiment-review-history__actions) button { min-width: 112px; flex: 0 0 auto; }
 .ai-notebook.ai-notebook .ai-history-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .ai-notebook.ai-notebook .ai-history-actions button { min-width: 112px; flex: 0 0 auto; }
-.ai-notebook.ai-notebook :is(.ai-history-detail-nav, .ai-review-detail-actions) { display: flex; justify-content: flex-start; margin: 0 0 14px; }
-.ai-notebook.ai-notebook .ai-history-detail-footer { display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--ai-rule); }
+.ai-notebook.ai-notebook .ai-history-detail-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--ai-rule); }
+.ai-notebook.ai-notebook .ai-history-detail-footer button { min-width: 112px; }
 .ai-notebook.ai-notebook .ai-review-delete-action { border-color: #b99c8b; color: #754d3b; background: transparent; }
 .ai-notebook.ai-notebook .ai-review-delete-action:hover:not(:disabled) { border-color: #986b54; background: #f3e8dc; }
 .ai-notebook.ai-notebook .ai-history-actions .ai-review-delete-action { order: 2; }

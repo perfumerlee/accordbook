@@ -244,12 +244,11 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       </div>}
       {historyOpen && reviews && <div className="ai-review-history" aria-label={m.history}>
         {savedDetail ? <div className="ai-review-saved-detail">
-          <div className="ai-review-detail-actions"><button type="button" onClick={() => { setSavedDetail(undefined); setDeleteError(false) }}>{m.backToHistory}</button></div>
           <p className="ai-review-saved-meta">{new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(savedDetail.createdAt))} · {savedDetail.locale === 'ko' ? m.korean : m.english} · {savedDetail.sourceFormulaDisplayId ?? savedDetail.sourceFormulaId}{knownFormulaIds && !knownFormulaIds.includes(savedDetail.sourceFormulaId) ? ` · ${m.sourceUnavailable}` : ''}</p>
           <h3>{m.summary}</h3><p>{savedDetail.response.summary}</p>
           <h3>{m.observations}</h3><ul>{savedDetail.response.observations.map((item, index) => <li key={index}>{item.detail}</li>)}</ul>
           <h3>{m.next}</h3><ul>{savedDetail.response.nextChecks.map((item, index) => <li key={index}>{item.detail}</li>)}</ul>
-          <div className="ai-review-delete"><button type="button" className="ai-review-delete-action" onClick={() => void deleteSavedReview(savedDetail)}>{m.deleteReview}</button></div>
+          <div className="ai-history-detail-footer"><button type="button" className="ai-review-delete-action" onClick={() => void deleteSavedReview(savedDetail)}>{m.deleteReview}</button><button type="button" onClick={() => { setSavedDetail(undefined); setDeleteError(false) }}>{m.backToHistory}</button></div>
           {deleteError && <p className="ai-review-delete-error" role="alert">{m.deleteFailed}</p>}
         </div> : <>
         <div className="ai-review-history-heading"><div><p className="ai-review-eyebrow">AI REVIEW</p><h4>{m.savedReviews}</h4></div><div><button type="button" aria-pressed={historyScope === 'formula'} onClick={() => setHistoryScope('formula')}>{m.currentFormula}</button><button type="button" aria-pressed={historyScope === 'all'} onClick={() => setHistoryScope('all')}>{m.allReviews}</button><button type="button" onClick={() => void loadHistory()} disabled={historyLoading}>{m.refreshHistory}</button></div></div>
