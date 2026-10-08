@@ -1,6 +1,8 @@
 export const workspaceMessages = {
   en: {
     export: 'Export formula workspace', import: 'Import .accordbook',
+    reviewExport: 'This workspace includes Formula and Experiment compositions, saved AI Compare context/results, and saved AI Next Round Evaluation context/results. Export?',
+    sessionExport: 'Reviews in this session are included in the file, but are not durably stored on this device.',
     importHint: 'Adds a new Formula with its saved history. Your current Formula stays unchanged.',
     preparing: 'Preparing workspace…', importing: 'Importing workspace…',
     exported: 'Workspace download started.', imported: 'Workspace imported.',
@@ -23,6 +25,8 @@ export const workspaceMessages = {
   },
   ko: {
     export: '포뮬러 작업공간 내보내기', import: '.accordbook 가져오기',
+    reviewExport: 'Formula·실험 배합과 저장된 AI Compare 전송 내용·결과, AI Next Round 평가 전송 내용·결과가 포함됩니다. 내보낼까요?',
+    sessionExport: '현재 세션의 리뷰도 파일에 포함되지만, 이 기기에 영구 저장된 상태는 아닙니다.',
     importHint: '저장된 이력과 함께 새 포뮬러를 추가합니다. 현재 포뮬러는 그대로 유지됩니다.',
     preparing: '작업공간 준비 중…', importing: '작업공간 가져오는 중…',
     exported: '작업공간 다운로드를 시작했습니다.', imported: '작업공간을 가져왔습니다.',

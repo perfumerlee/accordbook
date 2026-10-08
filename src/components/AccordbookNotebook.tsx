@@ -489,6 +489,7 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
     try {
       const prepared = await workspaceCoordinator.prepare(storage, active.id)
       if (!prepared.ready) { setWorkspaceFeedback({ key: preparationMessage(prepared), error: true }); return }
+      if (prepared.workspace.reviews?.length && !window.confirm(workspaceMessages[language].reviewExport + (storage.mode === 'memory' ? '\n' + workspaceMessages[language].sessionExport : ''))) { setWorkspaceFeedback(undefined); return }
       downloadWorkspace(prepared.serialized, prepared.workspace.formula.name)
       setWorkspaceFeedback({ key: 'exported' })
     } catch { setWorkspaceFeedback({ key: 'unknown', error: true }) }

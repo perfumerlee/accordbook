@@ -10,7 +10,7 @@ describe('Workspace DTO boundary', () => {
     const { formula } = await workspaceFixture()
     delete formula.releasedVersionId; delete formula.provenance; delete formula.rows[0].rowId
     const file = toWorkspaceFile({ formula, versions: [], experiments: [] }, stamp)
-    expect(file).toMatchObject({ type: 'accordbook-workspace', formatVersion: 1, exportedAt: stamp, versions: [], experiments: [] })
+    expect(file).toMatchObject({ type: 'accordbook-workspace', formatVersion: 2, exportedAt: stamp, versions: [], experiments: [], reviews: [] })
     expect(file.formula.rows[0]).not.toHaveProperty('id')
     expect(file.formula.rows[0]).not.toHaveProperty('rowId')
     expect(parseWorkspaceFile(serializeWorkspaceFile(file))).toEqual(file)
@@ -44,7 +44,7 @@ describe('Workspace DTO boundary', () => {
     expect(text).not.toContain('DO_NOT_EXPORT')
     expect(text).not.toContain('editor-only')
     expect(file.formula).not.toHaveProperty('archivedAt')
-    expect(Object.keys(file)).toEqual(['type', 'formatVersion', 'exportedAt', 'formula', 'versions', 'experiments'])
+    expect(Object.keys(file)).toEqual(['type', 'formatVersion', 'exportedAt', 'formula', 'versions', 'experiments', 'reviews'])
   })
   it('preserves historical Branch origin after the source Evaluation changes', async () => {
     const source = await workspaceFixture()

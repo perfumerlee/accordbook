@@ -1,4 +1,5 @@
-// External transport DTOs. Do not alias persisted models: this contract evolves independently.
+import type { ExperimentAiReviewRecord } from './aiReviewRecord'
+// External transport DTOs. Review records use their existing strict, versioned snapshot contract.
 export interface WorkspaceDilution { enabled: boolean; percent: number; solvent: string }
 export interface WorkspaceRow {
   rowId?: string
@@ -73,9 +74,11 @@ export interface WorkspaceExperiment {
 }
 export interface WorkspaceFile {
   type: 'accordbook-workspace'
-  formatVersion: 1
+  formatVersion: 1 | 2
   exportedAt: string
   formula: WorkspaceFormula
   versions: WorkspaceVersion[]
   experiments: WorkspaceExperiment[]
+  /** Required in v2; absent in legacy v1 files. Formula reviews are never accepted. */
+  reviews?: ExperimentAiReviewRecord[]
 }

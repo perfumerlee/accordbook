@@ -7,7 +7,7 @@ import { workspaceFixture } from './workspaceFixtures'
 
 const invalid: Array<[string, (f: WorkspaceFile) => void]> = [
   ['wrong type', f => { Object.assign(f, { type: 'accordbook-formula' }) }],
-  ['future version', f => { Object.assign(f, { formatVersion: 2 }) }],
+  ['future version', f => { Object.assign(f, { formatVersion: 3 }) }],
   ['bad timestamp', f => { f.exportedAt = 'yesterday' }],
   ['invalid timestamp calendar day', f => { f.exportedAt = '2026-02-30T00:00:00Z' }],
   ['bad date', f => { f.formula.date = '2026-02-30' }],

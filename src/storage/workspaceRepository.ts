@@ -3,6 +3,20 @@ import type { WorkspaceSource } from '../services/workspaceExport'
 import { toWorkspaceFile } from '../services/workspaceExport'
 import { consumePreparedWorkspaceAppend } from '../services/workspaceExecution'
 import { profileWorkspace } from '../services/workspaceProfile'
+import type { ExperimentAiReviewRecord } from '../models/aiReviewRecord'
+
+/** Preserve a free review ID; collisions get a fresh local UUID, never overwrite. */
+export function allocateWorkspaceReviews(reviews: readonly ExperimentAiReviewRecord[], occupied: Set<string>): ExperimentAiReviewRecord[] {
+  return reviews.map(review => {
+    let reviewId = review.reviewId
+    for (let attempt = 0; occupied.has(reviewId); attempt++) {
+      if (attempt >= 16) throw new Error('Unable to allocate Review identity')
+      reviewId = crypto.randomUUID()
+    }
+    occupied.add(reviewId)
+    return { ...review, reviewId }
+  })
+}
 
 export type WorkspaceRecords = WorkspaceSource
 export interface WorkspaceMetaUpdate {
@@ -43,10 +57,11 @@ export class WorkspaceRepository {
 
 export function readIndexedWorkspace(database: IDBDatabase, formulaId: string): Promise<WorkspaceRecords | undefined> {
   return new Promise((resolve, reject) => {
-    const tx = database.transaction(['formulas', 'versions', 'experiments'], 'readonly')
+    const tx = database.transaction(['formulas', 'versions', 'experiments', 'reviews'], 'readonly')
     let formula: WorkspaceRecords['formula'] | undefined
     const versions: WorkspaceRecords['versions'] = []; const experiments: WorkspaceRecords['experiments'] = []
-    tx.oncomplete = () => resolve(formula ? { formula, versions, experiments } : undefined)
+    const reviews: ExperimentAiReviewRecord[] = []
+    tx.oncomplete = () => resolve(formula ? { formula, versions, experiments, reviews } : undefined)
     tx.onabort = () => reject(tx.error ?? new Error('Workspace read aborted'))
     tx.onerror = () => {
       // Aborting also emits errors for pending requests; a second abort may throw.
@@ -63,7 +78,19 @@ export function readIndexedWorkspace(database: IDBDatabase, formulaId: string): 
         if (!cursor) return
         if (cursor.value.parentFormulaId === formulaId) {
           if (name === 'versions') versions.push(cursor.value)
-          else experiments.push(cursor.value)
+          else {
+            experiments.push(cursor.value)
+            const store = tx.objectStore('reviews')
+            const indexed = store.indexNames.contains('experimentId')
+            const reviewRequest = indexed ? store.index('experimentId').openCursor(cursor.value.experimentId) : store.openCursor()
+            const experimentId = cursor.value.experimentId
+            reviewRequest.onsuccess = () => {
+              const reviewCursor = reviewRequest.result
+              if (!reviewCursor) return
+              if (reviewCursor.value.reviewType === 'experiment' && reviewCursor.value.experimentId === experimentId) reviews.push(reviewCursor.value)
+              reviewCursor.continue()
+            }
+          }
         }
         cursor.continue()
       }
@@ -75,7 +102,7 @@ export function appendIndexedWorkspace(database: IDBDatabase, input: WorkspaceAp
   const value = profileWorkspace('storage-preparation', () => prepareWorkspaceAppend(input))
   return new Promise((resolve, reject) => {
     // Archive participates only for identity collision protection; it is never written.
-    const tx = database.transaction(['formulas', 'archive', 'versions', 'experiments', 'meta'], 'readwrite')
+    const tx = database.transaction(['formulas', 'archive', 'versions', 'experiments', 'reviews', 'meta'], 'readwrite')
     let failure: unknown
     tx.oncomplete = () => resolve()
     tx.onabort = () => reject(failure ?? tx.error ?? new Error('Workspace append aborted'))
@@ -89,25 +116,32 @@ export function appendIndexedWorkspace(database: IDBDatabase, input: WorkspaceAp
       archived.onsuccess = () => {
         if (archived.result !== undefined) { abort(new Error('Formula identity already exists in Archive')); return }
         const insert = () => {
-          const entries = [
-            { store: 'formulas', key: value.formula.id, record: value.formula },
-            ...value.versions.map(record => ({ store: 'versions', key: record.versionId, record })),
-            ...value.experiments.map(record => ({ store: 'experiments', key: record.experimentId, record })),
-          ]
-          let offset = 0
-          const enqueue = () => {
+          const keys = tx.objectStore('reviews').getAllKeys()
+          keys.onsuccess = () => {
             try {
-              profileWorkspace('idb-request-creation', () => {
-                let last: IDBRequest | undefined
-                const end = Math.min(offset + 8, entries.length)
-                while (offset < end) { const item = entries[offset++]; last = tx.objectStore(item.store).add(item.record, item.key) }
-                // The pending request keeps this SAME transaction alive across event-loop turns.
-                if (offset < entries.length) last!.onsuccess = enqueue
-                else if (value.metaUpdate) tx.objectStore('meta').put(value.metaUpdate.value, value.metaUpdate.key)
-              })
+              const reviews = allocateWorkspaceReviews(value.reviews ?? [], new Set(keys.result.map(String)))
+              const entries = [
+                { store: 'formulas', key: value.formula.id, record: value.formula },
+                ...value.versions.map(record => ({ store: 'versions', key: record.versionId, record })),
+                ...value.experiments.map(record => ({ store: 'experiments', key: record.experimentId, record })),
+                ...reviews.map(record => ({ store: 'reviews', key: record.reviewId, record })),
+              ]
+              let offset = 0
+              const enqueue = () => {
+                try {
+                  profileWorkspace('idb-request-creation', () => {
+                    let last: IDBRequest | undefined
+                    const end = Math.min(offset + 8, entries.length)
+                    while (offset < end) { const item = entries[offset++]; last = tx.objectStore(item.store).add(item.record, item.key) }
+                    // The pending request keeps this SAME transaction alive across event-loop turns.
+                    if (offset < entries.length) last!.onsuccess = enqueue
+                    else if (value.metaUpdate) tx.objectStore('meta').put(value.metaUpdate.value, value.metaUpdate.key)
+                  })
+                } catch (error) { abort(error) }
+              }
+              enqueue()
             } catch (error) { abort(error) }
           }
-          enqueue()
         }
         const checkDisplay = () => {
           if (!value.checkDisplayId) { insert(); return }

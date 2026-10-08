@@ -12,7 +12,7 @@ export function parseAccordbookEnvelope(text: string) {
   let raw: { type?: string; formatVersion?: number } | null
   try { raw = profileWorkspace('json-parse', () => JSON.parse(text)) } catch { throw new WorkspaceUiError('damaged') }
   if (raw?.type === 'accordbook-workspace') {
-    if (raw.formatVersion !== 1) throw new WorkspaceUiError('version')
+    if (raw.formatVersion !== 1 && raw.formatVersion !== 2) throw new WorkspaceUiError('version')
     return { kind: 'workspace' as const, raw }
   }
   if (raw?.type === 'accordbook-formula' || raw?.type === 'accordbook-paid-package') {

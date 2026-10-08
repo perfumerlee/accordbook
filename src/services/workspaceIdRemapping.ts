@@ -74,7 +74,18 @@ export function remapValidatedWorkspace(file: WorkspaceFile, displayFormulaId: s
       })),
     }
   })
-  const records = { formula, versions, experiments }
+  const reviews = (file.reviews ?? []).map(review => {
+    const experimentId = maps.experiments.get(review.experimentId)!
+    const variants = maps.variants.get(review.experimentId)!
+    if (review.operation === 'compare') return { ...structuredClone(review), experimentId,
+      selectedVariantIds: review.selectedVariantIds.map(id => variants.get(id)!),
+      variantIdsByLabel: Object.fromEntries(Object.entries(review.variantIdsByLabel).map(([label, id]) => [label, variants.get(id)!])),
+    }
+    return { ...structuredClone(review), experimentId, variantId: variants.get(review.variantId)!,
+      evaluationId: maps.evaluations.get(review.experimentId)!.get(review.variantId)!.get(review.evaluationId)!,
+    }
+  })
+  const records = { formula, versions, experiments, reviews }
   const logicalIds = formula.rows.map(row => row.rowId!)
   if (new Set(logicalIds).size !== logicalIds.length) throw new WorkspaceValidationError('$.formula.rows', 'duplicate identity')
   validateWorkspaceGraph({ ...file, ...records }) // Mapping can change references, not snapshot shapes.

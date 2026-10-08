@@ -118,7 +118,7 @@ describe('IndexedDB transaction event semantics', () => {
     spy.mockClear(); complete = false
     await db.readWorkspace(value.formula.id)
     expect(complete).toBe(true)
-    expect(spy).toHaveBeenCalledExactlyOnceWith(['formulas', 'versions', 'experiments'], 'readonly')
+    expect(spy).toHaveBeenCalledExactlyOnceWith(['formulas', 'versions', 'experiments', 'reviews'], 'readonly')
   })
   it('does not mix generations when another transaction writes during a coherent read', async () => {
     const value = await input(); await db.appendWorkspaceAtomic(value)

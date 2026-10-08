@@ -1,12 +1,14 @@
 import type { WorkspaceFile, WorkspaceProvenance } from '../models/workspaceFile'
 import { profileWorkspace } from './workspaceProfile'
+import { validateExperimentAiCompareReviewRecord } from '../models/experimentAiReviewRecord'
+import { validateExperimentNextRoundReviewRecord } from '../models/experimentNextRoundAi'
 
 // Transport abuse limits, not editor/product limits. Totals include all embedded snapshots.
 export const WORKSPACE_LIMITS = Object.freeze({
   maxFileBytes: 64 * 1024 * 1024, maxVersions: 10_000, maxExperiments: 10_000,
   maxVariants: 50_000, maxEvaluations: 100_000, maxSnapshotRows: 10_000,
   maxTotalRows: 500_000, maxStringLength: 1_000_000, maxRevisions: 100_000,
-  maxGenealogyDepth: 256,
+  maxGenealogyDepth: 256, maxReviews: 10_000,
 })
 export class WorkspaceValidationError extends Error {
   constructor(readonly path: string, readonly reason: string) { super(`${path}: ${reason}`); this.name = 'WorkspaceValidationError' }
@@ -120,18 +122,37 @@ const baseSource: Reader = (v, p, c) => {
   return fail(p, 'invalid BASE source')
 }
 const envelope = object({
-  type: enumeration('accordbook-workspace'), formatVersion: enumeration(1), exportedAt: date,
+  type: enumeration('accordbook-workspace'), formatVersion: enumeration(1, 2), exportedAt: date,
   formula: object({ id, formulaId: id, date: day, name: str, notes: str, rows: rows(false), createdAt: date, updatedAt: date,
     releasedVersionId: optional(id), provenance: optional(provenance) }),
   versions: array(object({ versionId: id, parentFormulaId: id, versionNumber: nullable(integer(1)), kind: enumeration('manual', 'restore-point'),
     createdAt: date, note: str, snapshot, sourceCurrentUpdatedAt: date, sourceFingerprint: optional(hash), sourceRevisionId: optional(id) }), WORKSPACE_LIMITS.maxVersions),
   experiments: array(object({ experimentId: id, parentFormulaId: id, name: str, createdAt: date, updatedAt: date,
     baseSource, baseSnapshot: snapshot, nextVariantOrdinal: integer(0), variants: array(variant, WORKSPACE_LIMITS.maxVariants, 'variants') }), WORKSPACE_LIMITS.maxExperiments),
+  reviews: optional(array((value, path) => {
+    try {
+      if ((value as { operation?: unknown } | null)?.operation === 'compare') validateExperimentAiCompareReviewRecord(value)
+      else validateExperimentNextRoundReviewRecord(value)
+    } catch { return fail(path, 'invalid Experiment Review record') }
+    return structuredClone(value)
+  }, WORKSPACE_LIMITS.maxReviews)),
 })
 function unique(ids: readonly (string | number)[], path: string) { if (new Set(ids).size !== ids.length) fail(path, 'duplicate identity') }
 
 export function validateWorkspaceGraph(file: WorkspaceFile): void {
   const { formula, versions, experiments } = file
+  unique((file.reviews ?? []).map(review => review.reviewId), '$.reviews')
+  const experimentMap = new Map(experiments.map(e => [e.experimentId, e]))
+  for (const review of file.reviews ?? []) {
+    const experiment = experimentMap.get(review.experimentId)
+    if (!experiment) fail('$.reviews.experimentId', 'missing Experiment owner')
+    const variants = new Map(experiment!.variants.map(v => [v.variantId, v]))
+    if (review.operation === 'compare') {
+      if (review.selectedVariantIds.some(id => !variants.has(id))) fail('$.reviews.selectedVariantIds', 'missing Variant reference')
+    } else if (!variants.get(review.variantId)?.evaluations?.some(e => e.evaluationId === review.evaluationId)) {
+      fail('$.reviews.evaluationId', 'missing Variant or Evaluation reference')
+    }
+  }
   unique(versions.map(v => v.versionId), '$.versions')
   unique(experiments.map(e => e.experimentId), '$.experiments')
   unique(versions.filter(v => v.kind === 'manual').map(v => v.versionNumber!), '$.versions.versionNumber')
@@ -184,6 +205,8 @@ export function validateWorkspaceFile(value: unknown): WorkspaceFile { return re
 export function projectWorkspaceFile(value: unknown): WorkspaceFile { return readWorkspaceDto(value, false) }
 function readWorkspaceDto(value: unknown, strict: boolean): WorkspaceFile {
   const file = profileWorkspace('shape-projection', () => envelope(value, '$', { strict, rows: 0, variants: 0, evaluations: 0, stringBytes: 0 })) as WorkspaceFile
+  if (file.formatVersion === 2 && !file.reviews) fail('$.reviews', 'missing Review collection')
+  if (file.formatVersion === 1 && file.reviews !== undefined) fail('$.reviews', 'unsupported field in v1')
   profileWorkspace('graph-validation', () => validateWorkspaceGraph(file))
   if (new TextEncoder().encode(JSON.stringify(file)).byteLength > WORKSPACE_LIMITS.maxFileBytes) fail('$', 'file byte limit exceeded')
   return file

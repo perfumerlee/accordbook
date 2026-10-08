@@ -3,7 +3,7 @@ import type { Experiment } from '../models/experiment'
 import type { AiReviewRecord, FormulaAiReviewRecord } from '../models/aiReviewRecord'
 import type { ExperimentAiReviewRecord } from '../models/aiReviewRecord'
 import type { AccordbookSettings } from '../models/settings'
-import { appendIndexedWorkspace, readIndexedWorkspace, prepareWorkspaceAppend, WorkspaceAppendConflict, type WorkspaceAppend, type WorkspaceRecords } from './workspaceRepository'
+import { appendIndexedWorkspace, readIndexedWorkspace, prepareWorkspaceAppend, allocateWorkspaceReviews, WorkspaceAppendConflict, type WorkspaceAppend, type WorkspaceRecords } from './workspaceRepository'
 
 export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments' | 'reviews'
 export type StorageMode = 'indexeddb' | 'memory'
@@ -46,14 +46,16 @@ function createMemoryDatabase(): StorageDatabase {
     async readWorkspace(formulaId) {
       const formula = stores.get('formulas')!.get(formulaId) as Formula | undefined
       if (!formula) return undefined
+      const experiments = [...stores.get('experiments')!.values()].filter(e => (e as Experiment).parentFormulaId === formulaId) as Experiment[]
+      const experimentIds = new Set(experiments.map(e => e.experimentId))
       return structuredClone({ formula,
         versions: [...stores.get('versions')!.values()].filter(v => (v as FormulaVersion).parentFormulaId === formulaId) as FormulaVersion[],
-        experiments: [...stores.get('experiments')!.values()].filter(e => (e as Experiment).parentFormulaId === formulaId) as Experiment[] })
+        experiments, reviews: [...stores.get('reviews')!.values()].filter((r): r is ExperimentAiReviewRecord => typeof r === 'object' && r !== null && 'reviewType' in r && r.reviewType === 'experiment' && experimentIds.has(r.experimentId)) })
     },
     async appendWorkspaceAtomic(input) {
       const value = prepareWorkspaceAppend(input)
       const staged = new Map(stores)
-      for (const name of ['formulas', 'versions', 'experiments', 'meta'] as const) staged.set(name, new Map(stores.get(name)!))
+      for (const name of ['formulas', 'versions', 'experiments', 'reviews', 'meta'] as const) staged.set(name, new Map(stores.get(name)!))
       if (stores.get('archive')!.has(value.formula.id)) throw new Error('Formula identity already exists in Archive')
       if (value.checkDisplayId && ['formulas', 'archive'].some(name => [...stores.get(name as StoreName)!.values()].some(record => (record as Formula).formulaId === value.formula.formulaId))) throw new WorkspaceAppendConflict('display-id-collision')
       const add = (store: StoreName, key: string, record: StoreValue) => {
@@ -63,6 +65,7 @@ function createMemoryDatabase(): StorageDatabase {
       add('formulas', value.formula.id, value.formula)
       for (const version of value.versions) add('versions', version.versionId, version)
       for (const experiment of value.experiments) add('experiments', experiment.experimentId, experiment)
+      for (const review of allocateWorkspaceReviews(value.reviews ?? [], new Set(staged.get('reviews')!.keys()))) add('reviews', review.reviewId, review)
       if (value.metaUpdate) {
         const { key, value: sequence, expectedValue } = value.metaUpdate
         if ((staged.get('meta')!.get(key) ?? null) !== expectedValue) throw new WorkspaceAppendConflict('meta-changed')
