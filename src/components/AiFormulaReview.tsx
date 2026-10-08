@@ -199,7 +199,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       {reviews && <div className="ai-review-view-switch" role="group" aria-label={m.history}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => { setHistoryOpen(false); setSavedDetail(undefined) }}>{m.reviewSetup}</button>
         <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setSavedDetail(undefined); void loadHistory() }}>{m.history}<span aria-live="polite">{historyLoaded ? historyError ? '—' : historyItems.length : '…'}</span></button>
-      </div>
+      </div>}
       {!historyOpen && <div className="ai-review-form">
       <p className="ai-review-mock">{m.mock}</p>
       <p className="ai-review-disclosure">{m.disclosure}</p>
