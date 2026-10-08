@@ -31,7 +31,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
   const [connected, setConnected] = useState(false); const token = useRef(''); const tokenInput = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<State>('idle'); const [error, setError] = useState(''); const [done, setDone] = useState<Done>()
   const [saving, setSaving] = useState(false); const [saved, setSaved] = useState<'saved' | 'session' | 'failed'>()
-  const [historyOpen, setHistoryOpen] = useState(false); const [history, setHistory] = useState<ExperimentNextRoundReviewRecord[]>([]); const [historySelected, setHistorySelected] = useState<ExperimentNextRoundReviewRecord>(); const [historyError, setHistoryError] = useState('')
+  const [historyOpen, setHistoryOpen] = useState(false); const [history, setHistory] = useState<ExperimentNextRoundReviewRecord[]>([]); const [historyLoaded, setHistoryLoaded] = useState(false); const [historySelected, setHistorySelected] = useState<ExperimentNextRoundReviewRecord>(); const [historyError, setHistoryError] = useState('')
   const controller = useRef<AbortController | undefined>(undefined); const generation = useRef(0)
   const identity = `${experiment.experimentId}:${variant.variantId}:${evaluation.evaluationId}`
   const preparation = useMemo(() => {
@@ -46,7 +46,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
   useEffect(() => { clear(); return () => { generation.current++; controller.current?.abort(); token.current = ''; if (tokenInput.current) tokenInput.current.value = '' } }, [identity, evaluation.updatedAt])
   useEffect(() => () => { generation.current++; controller.current?.abort(); token.current = ''; if (tokenInput.current) tokenInput.current.value = '' }, [])
   useEffect(() => { if (disabled && controller.current) cancel() }, [disabled])
-  useEffect(() => { if (!historyOpen || !reviews) return; let active = true; setHistoryError(''); void reviews.listAllExperimentReviews().then(items => { if (active) setHistory(items.filter((item): item is ExperimentNextRoundReviewRecord => item.operation === 'next_round')) }).catch(() => { if (active) setHistoryError(language === 'ko' ? '리뷰 기록을 불러오지 못했습니다.' : 'Could not load Review History.') }); return () => { active = false } }, [historyOpen, reviews, language])
+  useEffect(() => { if (!reviews) return; let active = true; setHistoryLoaded(false); setHistoryError(''); void reviews.listAllExperimentReviews().then(items => { if (active) { setHistory(items.filter((item): item is ExperimentNextRoundReviewRecord => item.operation === 'next_round')); setHistoryLoaded(true) } }).catch(() => { if (active) { setHistoryError(language === 'ko' ? '리뷰 기록을 불러오지 못했습니다.' : 'Could not load Review History.'); setHistoryLoaded(true) } }); return () => { active = false } }, [reviews, language])
   const run = async () => {
     if (!ready || !prepared || !accepted || !connected || !validAiToken(token.current) || controller.current) return
     const submitted = prepared; const submittedLocale = language; const requestGeneration = ++generation.current; const abort = new AbortController(); controller.current = abort
@@ -64,7 +64,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
     setSaving(true); setSaved(undefined)
     const record = makeExperimentNextRoundReviewRecord({ reviewId: done.reviewId, experimentId: experiment.experimentId, experimentDisplayName: experiment.name, variantId: variant.variantId, variantLabel: variant.label, evaluationId: evaluation.evaluationId, request: done.preparation.request, response: done.response, locale: done.locale, createdAt: done.createdAt })
     const result = await persistExperimentNextRoundReview(reviews, record, storageMode)
-    setSaved(result === 'saved-locally' ? 'saved' : result === 'session-only' ? 'session' : 'failed'); setSaving(false)
+    setSaved(result === 'saved-locally' ? 'saved' : result === 'session-only' ? 'session' : 'failed'); if (result !== 'failed') setHistory(items => items.some(item => item.reviewId === record.reviewId) ? items : [...items, record]); setSaving(false)
   }
   const deleteHistory = async (record: ExperimentNextRoundReviewRecord) => {
     if (!reviews || !window.confirm(language === 'ko' ? '저장된 다음 라운드 리뷰를 삭제할까요? 복구할 수 없습니다.' : 'Delete this saved Next Round Review? This cannot be undone.')) return
@@ -78,7 +78,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
       <header><div><p className="experiment-next-round__eyebrow">{t.title}</p><h3>{variant.label} · {new Date(evaluation.createdAt).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US')}</h3></div><button className="experiment-next-round__close" type="button" aria-label={t.close} onClick={() => { clear(); setOpen(false) }}>×</button></header>
       {reviews && <div className="experiment-next-round__view-switch" role="group" aria-label={t.title}>
         <button type="button" aria-pressed={!historyOpen} onClick={() => setHistoryOpen(false)}>{t.setupTab}</button>
-        <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setHistorySelected(undefined) }}>{t.historyTab}<span>{history.length}</span></button>
+        <button type="button" aria-pressed={historyOpen} onClick={() => { setHistoryOpen(true); setHistorySelected(undefined) }}>{t.historyTab}<span aria-live="polite">{historyLoaded ? historyError ? '—' : history.length : '…'}</span></button>
       </div>}
       {historyOpen ? <section className="experiment-next-round__history" aria-label={t.historyTitle}>
         <div className="experiment-next-round__history-heading"><div><p className="experiment-next-round__eyebrow">{t.title}</p><h4>{t.historyTitle}</h4></div>{historySelected && <button type="button" onClick={() => setHistorySelected(undefined)}>{language === 'ko' ? '목록' : 'Back to list'}</button>}</div>
