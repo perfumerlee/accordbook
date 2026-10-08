@@ -33,4 +33,10 @@ describe('Experiment Review History access UI', () => {
     expect(component).toContain('evaluation.createdAt')
     expect(component).toContain('experiment-review-history__target')
   })
+
+  it('lets the experiment modal history content scroll instead of clipping longer review lists', () => {
+    const css = readFileSync('src/components/experimentModalShell.css', 'utf8')
+    expect(css).toContain('.experiment-entry-content { flex:1 1 auto; min-height:0; overflow-x:hidden; overflow-y:auto;')
+    expect(css).toContain('overscroll-behavior:contain')
+  })
 })

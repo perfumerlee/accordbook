@@ -7,6 +7,6 @@
 .experiment-modal__close:hover{background:var(--paper-2);color:var(--ink)}
 .experiment-modal__close:focus-visible { outline:1px solid var(--accent); outline-offset:3px; }
 .experiment-modal__rule { height:1px; flex-shrink:0; background:var(--line); margin-bottom:20px; }
-.experiment-entry-content { min-height:0; overflow:hidden; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.experiment-entry-content { flex:1 1 auto; min-height:0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
 .experiment-modal button:disabled { opacity:.45; cursor:default; }
 @media(max-width:767px){.experiment-modal-backdrop{padding:12px}.experiment-modal{padding:22px 20px;max-height:calc(100dvh - 24px)}.experiment-modal__formula{font-size:20px}}
