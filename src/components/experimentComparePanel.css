@@ -335,7 +335,7 @@
 .experiment-ai-compare__history > header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   margin-bottom: 12px;
   padding-bottom: 9px;
@@ -392,6 +392,15 @@
   margin-top: 4px;
   color: var(--muted);
   font: 10px/1.5 var(--ws-mono);
+}
+
+.experiment-ai-compare__history-versions {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 7px;
+  border: 1px solid var(--line-soft);
+  color: var(--ink);
+  font: 11px/1.4 var(--ws-mono);
 }
 
 .experiment-ai-compare__history-list p {

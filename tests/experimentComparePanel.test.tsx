@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { Experiment } from '../src/models/experiment'
-import ExperimentComparePanel from '../src/components/ExperimentComparePanel'
+import ExperimentComparePanel, { compareReviewVersionText } from '../src/components/ExperimentComparePanel'
 import ExperimentComparisonSheet from '../src/components/ExperimentComparisonSheet'
 
 const experiment: Experiment = {
@@ -14,6 +14,15 @@ const experiment: Experiment = {
 }
 
 describe('Experiment Compare panel entry', () => {
+  it('identifies saved comparison scope from BASE to the selected variant labels', () => {
+    expect(compareReviewVersionText(['A'])).toBe('BASE ↔ A')
+    expect(compareReviewVersionText(['A', 'B'])).toBe('BASE ↔ A, B')
+    const source = readFileSync('src/components/ExperimentComparePanel.tsx', 'utf8')
+    expect(source).toContain('Compared versions')
+    expect(source).toContain('비교 버전')
+    expect(source).not.toContain('<h3>{t.history}</h3>')
+  })
+
   it('renders a closed localized entry point and does not open consent or submit on mount', () => {
     const html = renderToStaticMarkup(<ExperimentComparePanel experiment={experiment} variantIds={['local-variant-id']} language="en" />)
     expect(html).toContain('AI Compare')

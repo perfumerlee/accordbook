@@ -22,6 +22,21 @@ describe('AI Review History UI contract', () => {
     expect(icon.match(/<path\b/g)).toHaveLength(1)
   })
 
+  it('presents Review History as a sibling tab and loads its count when the panel opens', () => {
+    const component = readFileSync('src/components/AiFormulaReview.tsx', 'utf8')
+    const styles = readFileSync('src/components/aiFormulaReview.css', 'utf8')
+    const messages = readFileSync('src/i18n/aiMessages.ts', 'utf8')
+    expect(component).toContain('className="ai-review-view-switch" role="group"')
+    expect(component).toContain('{m.reviewSetup}')
+    expect(component).toContain('{m.history}<span aria-live="polite">{historyLoaded ? historyError ? \'—\' : historyItems.length : \'…\'}</span>')
+    expect(component).toContain('if (!open || !reviews) return')
+    expect(component).toContain('aria-label={m.close} onClick={close}')
+    expect(component).toContain("if (state === 'saved-locally' || state === 'session-only') void loadHistory()")
+    expect(styles).toContain('.ai-review-body:has(.ai-review-view-switch button:last-child[aria-pressed="true"])')
+    expect(messages).toContain("reviewSetup: 'Review setup'")
+    expect(messages).toContain("reviewSetup: '리뷰 설정'")
+  })
+
   it('uses Formula-scoped and global repository queries, preserving newest-first repository order', async () => {
     vi.stubGlobal('indexedDB', new IDBFactory())
     const reviews = (await createStorage()).reviews
