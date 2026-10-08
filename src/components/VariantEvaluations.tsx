@@ -141,12 +141,10 @@ export default function VariantEvaluations({ experiment, variant, language, disa
         </tbody></table></div></details>
         {branches.length > 0 && <p className="evaluation-hint">{t.linked}: {branches.map(child => `${child.label}${child.evaluationBranchPurpose ? ` (${t.branchPurposes[child.evaluationBranchPurpose]})` : ''}`).join(', ')}</p>}
         {item.verdict === 'stop' && <p className="evaluation-hint">{direction.hint}</p>}
+        <ExperimentNextRoundPanel experiment={experiment} variant={variant} evaluation={item} language={language} disabled={disabled || !!draft} requestLimitBytes={requestLimitBytes} requestLimitVerified={requestLimitVerified} reviews={reviews} storageMode={storageMode}/>
         <div className="evaluation-actions">
-          <div className="evaluation-action-main">
-            <ExperimentNextRoundPanel experiment={experiment} variant={variant} evaluation={item} language={language} disabled={disabled || !!draft} requestLimitBytes={requestLimitBytes} requestLimitVerified={requestLimitVerified} reviews={reviews} storageMode={storageMode}/>
-            <div className="evaluation-secondary-actions"><button type="button" disabled={disabled || !!draft} onClick={() => edit(item)}>{t.edit}</button>
-            <button type="button" disabled={disabled || !!draft || branches.length > 0} title={branches.length ? t.deleteBlocked : undefined} onClick={() => { if (window.confirm(t.confirmDelete)) act(() => removeVariantEvaluation(experiment, variant.variantId, item.evaluationId)) }}>{t.remove}</button></div>
-          </div>
+          <div className="evaluation-secondary-actions"><button type="button" disabled={disabled || !!draft} onClick={() => edit(item)}>{t.edit}</button>
+          <button type="button" disabled={disabled || !!draft || branches.length > 0} title={branches.length ? t.deleteBlocked : undefined} onClick={() => { if (window.confirm(t.confirmDelete)) act(() => removeVariantEvaluation(experiment, variant.variantId, item.evaluationId)) }}>{t.remove}</button></div>
           {purpose && <button className="evaluation-create-branch" type="button" disabled={disabled || !!draft || !canBranch} title={!canBranch ? t.limit : undefined} onClick={() => setBranchDraft({evaluationId:item.evaluationId,purpose,intent:{changeIntent:item.nextAction,hypothesis:''}})}>{direction.branch}</button>}
         </div>
         {branchDraft?.evaluationId === item.evaluationId && purpose && <form className="branch-intent-form" onSubmit={event=>{event.preventDefault();if(!branchDraft.intent.changeIntent.trim()||!branchDraft.intent.hypothesis.trim())return;if(act(()=>addVariantFromEvaluation(experiment,variant.variantId,item.evaluationId,{branchPurpose:branchDraft.purpose,...branchDraft.intent})))setBranchDraft(undefined)}}>

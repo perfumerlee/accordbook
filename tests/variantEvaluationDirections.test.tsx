@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import VariantEvaluations from '../src/components/VariantEvaluations'
 import type { EvaluationVerdict, Experiment } from '../src/models/experiment'
@@ -44,6 +45,12 @@ describe('evaluation direction presentation', () => {
     expect(aiAction).toBeLessThan(editAction)
     expect(editAction).toBeLessThan(deleteAction)
     expect(deleteAction).toBeLessThan(branchAction)
-    expect(html).toContain('evaluation-action-main')
+    expect(html).toContain('class="evaluation-actions"')
+  })
+  it('keeps record actions and Branch creation in a stable two-column footer while the AI panel expands above', () => {
+    const css = readFileSync('src/components/variantEvaluations.css', 'utf8')
+    expect(css).toContain('.evaluation-actions { display: grid; grid-template-columns:minmax(0,1fr) auto;')
+    expect(css).toContain('.evaluation-create-branch { justify-self:end; white-space:nowrap; }')
+    expect(css).toContain('@media (max-width: 760px)')
   })
 })

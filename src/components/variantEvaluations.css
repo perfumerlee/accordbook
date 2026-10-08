@@ -56,24 +56,19 @@ html[lang="ko"] .experiments-layer .branch-intent-fields :is(legend,label,textar
 .evaluation-observation, .evaluation-next span { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
 .evaluation-next { display: grid; gap: 4px; }
 .evaluation-next strong { font-size: 12px; color: var(--muted, #756858); }
-.evaluation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; font-size: 13px; }
-.evaluation-action-main { display:flex; flex:1 1 auto; min-width:0; align-items:center; flex-wrap:wrap; gap:12px; }
-.evaluation-action-main:has(.experiment-next-round__trigger[aria-expanded="true"]) { display:grid; grid-template-columns:minmax(0,1fr); }
-.evaluation-action-main:has(.experiment-next-round__trigger[aria-expanded="true"]) .experiment-next-round { grid-column:1; }
-.evaluation-action-main:has(.experiment-next-round__trigger[aria-expanded="true"]) .evaluation-secondary-actions { grid-column:1; }
-.evaluation-action-main .experiment-next-round { margin:0; }
-.evaluation-action-main .experiment-next-round__trigger { min-height:40px; padding:9px 15px; border-color:#9a7049; background:#f3e8d5; color:#44372c; font-size:13px; font-weight:600; box-shadow:inset 0 -2px 0 rgba(154,112,73,.12); }
-.evaluation-action-main .experiment-next-round__trigger:hover,
-.evaluation-action-main .experiment-next-round__trigger[aria-expanded="true"] { border-color:#805837; background:#ead9bd; }
+.evaluation-actions { display: grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap: 8px 12px; width:100%; box-sizing:border-box; margin-top: 14px; font-size: 13px; }
+.evaluation-card .experiment-next-round { margin-top:14px; }
+.evaluation-card .experiment-next-round__trigger { min-height:40px; padding:9px 15px; border-color:#9a7049; background:#f3e8d5; color:#44372c; font-size:13px; font-weight:600; box-shadow:inset 0 -2px 0 rgba(154,112,73,.12); }
+.evaluation-card .experiment-next-round__trigger:hover,
+.evaluation-card .experiment-next-round__trigger[aria-expanded="true"] { border-color:#805837; background:#ead9bd; }
 .evaluation-secondary-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.evaluation-create-branch { margin-left:auto; align-self:center; }
+.evaluation-create-branch { justify-self:end; white-space:nowrap; }
 .evaluation-card summary { cursor: pointer; font-size: 13px; width: fit-content; padding: 6px 0; }
 .evaluation-snapshot { overflow-x: auto; margin-top: 8px; }
 .evaluation-snapshot table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .evaluation-snapshot th, .evaluation-snapshot td { text-align: left; padding: 8px; border-bottom: 1px solid rgba(185,168,144,.4); overflow-wrap: anywhere; }
 @media (max-width: 760px) {
-  .evaluation-actions { align-items:flex-start; }
-  .evaluation-action-main { flex-basis:100%; }
-  .evaluation-action-main:has(.experiment-next-round__trigger[aria-expanded="true"]) { width:100%; }
-  .evaluation-create-branch { margin-left:auto; }
+  .evaluation-actions { grid-template-columns:minmax(0,1fr); align-items:start; }
+  .evaluation-secondary-actions { flex-basis:auto; }
+  .evaluation-create-branch { justify-self:start; }
 }
