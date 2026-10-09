@@ -2,9 +2,6 @@
 .app > .sidebar{display:flex;flex-direction:column;min-height:100vh}
 .app > .sidebar .formula-list{min-height:0;max-height:64vh;overflow-y:auto}
 .app > .sidebar .archive-panel.open{max-height:24vh;overflow-y:auto}
-.app .main .table-head > div:nth-child(2) span:last-child{color:rgba(80, 70, 55, 0.9) !important;font-size:11px !important;font-weight:600 !important}
-.app .main .table-head > div:nth-child(2) span:last-child::before{content:'[';margin-right:2px}
-.app .main .table-head > div:nth-child(2) span:last-child::after{content:']';margin-left:2px}
 .app .main .resolver-candidates{max-width:150px;border:0;background:transparent;color:#6a5945;font:10px "Courier New",monospace}
 .app .main .material-wrap.first-material-empty{position:relative}
 .app .main .material-wrap.first-material-empty::after{content:"";position:absolute;left:4px;top:50%;width:1px;height:1.25em;background:currentColor;opacity:.62;pointer-events:none;transform:translateY(-50%);animation:first-material-caret-blink 1s steps(1,end) infinite}

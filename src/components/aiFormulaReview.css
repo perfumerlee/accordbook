@@ -25,6 +25,17 @@
   .app .main .editor-actions .ai-review-trigger { padding-inline: 6px; font-size: 11px; }
   .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { gap: 6px; }
   .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right .btn { padding-inline: 6px; }
+  .app .main .editor-actions:has(.ai-review-action-slot) { display: flex; width: 100%; box-sizing: border-box; justify-content: space-between; align-items: center; gap: clamp(4px, 1.6vw, 8px); }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-left,
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right { display: contents; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-action-slot,
+  .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-trigger,
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right .btn { flex: 1 1 0; min-width: 0; width: auto; min-height: 44px; box-sizing: border-box; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-action-slot { display: flex; margin: 0; }
+  .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-trigger { justify-content: center; padding-inline: clamp(4px, 1.6vw, 8px); font-size: clamp(10px, 2.8vw, 12px); }
+  .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right .btn { padding: 7px clamp(4px, 1.6vw, 8px); font-size: clamp(10px, 2.8vw, 12px); white-space: nowrap; }
+  .app .main .editor-actions:has(.ai-review-trigger.is-open) { align-items: center; }
+  .app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-right { margin-bottom: 0; }
 }
 .ai-review *, .ai-review *::before, .ai-review *::after { box-sizing: border-box; }
 .ai-review button { font: inherit; color: inherit; background: transparent; border: 1px solid #a99e8b; padding: 9px 14px; min-height: 44px; cursor: pointer; white-space: normal; }

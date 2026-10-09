@@ -9,7 +9,14 @@ import { MaterialPaletteForm } from './MaterialPaletteWorkspace'
 interface Props { rows: readonly FormulaMaterial[]; records: readonly MaterialPaletteRecord[]; repository: MaterialPaletteRepository; language: 'en' | 'ko'; onChanged: () => Promise<void> }
 export default function PaletteCoverage(props: Props) {
   const [open, setOpen] = useState(false), coverage = useMemo(() => calculatePaletteCoverage(props.rows, props.records), [props.rows, props.records]), ko = props.language === 'ko'
-  return <><button type="button" className="palette-coverage" aria-label={`${ko ? '팔레트' : 'In Palette'} ${coverage.matchedMaterials} / ${coverage.totalUniqueMaterials}. ${ko ? '누락 원료 보기' : 'View missing materials'}`} onClick={() => setOpen(true)}><span className="palette-coverage-full">{ko ? '팔레트 ' : ''}{coverage.matchedMaterials}/{coverage.totalUniqueMaterials}{ko ? '' : ' IN PALETTE'}</span><span className="palette-coverage-short">P {coverage.matchedMaterials}/{coverage.totalUniqueMaterials}</span></button>{open && <MissingMaterials {...props} missing={coverage.missingMaterials} onClose={() => setOpen(false)} />}</>
+  const missingCount = coverage.missingMaterials.length
+  const label = ko
+    ? `팔레트 ${coverage.matchedMaterials}/${coverage.totalUniqueMaterials} · 누락 ${missingCount}`
+    : `Palette ${coverage.matchedMaterials}/${coverage.totalUniqueMaterials} · Missing ${missingCount}`
+  const accessibleLabel = ko
+    ? `팔레트에 등록된 원료 ${coverage.matchedMaterials}개 / 고유 원료 ${coverage.totalUniqueMaterials}개, 누락 ${missingCount}개. 누락 원료 보기.`
+    : `Material Palette: ${coverage.matchedMaterials} of ${coverage.totalUniqueMaterials} unique materials, ${missingCount} missing. View missing materials.`
+  return <><button type="button" className="palette-coverage" aria-label={accessibleLabel} aria-haspopup="dialog" onClick={() => setOpen(true)}>{label}<span className="palette-coverage-chevron" aria-hidden="true">⌄</span></button>{open && <MissingMaterials {...props} missing={coverage.missingMaterials} onClose={() => setOpen(false)} />}</>
 }
 function MissingMaterials({ records, missing, repository, language, onChanged, onClose }: Props & { missing: PaletteCoverageMaterial[]; onClose: () => void }) {
   const ko = language === 'ko', [selected, setSelected] = useState<string[]>([]), [reviewed, setReviewed] = useState<Record<string, MaterialPaletteInput>>({}), [editing, setEditing] = useState<PaletteCoverageMaterial>(), [busy, setBusy] = useState(false), [error, setError] = useState('')

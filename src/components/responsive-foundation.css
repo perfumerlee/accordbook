@@ -289,7 +289,8 @@
   .title-primary > label { display: block; margin: 4px 0 8px; color: #8b765d; font: 10px/1.2 ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
   .formula-name { max-width: 100%; width: 100%; font-size: clamp(24px, 7vw, 34px); }
   .header-tools { flex-wrap: wrap; }
-  .table-head, .row { grid-template-columns: 64px minmax(0, 1fr) minmax(92px, auto); gap: 5px; }
+  .table-head { grid-template-columns: 64px minmax(0, 1fr); gap: 5px; }
+  .row { grid-template-columns: 64px minmax(0, 1fr) minmax(92px, auto); gap: 5px; }
   .table-head > :nth-child(3), .row > .cas, .table-head > :nth-child(4), .table-head > :nth-child(5), .row > .percent { display: none !important; }
   .row { min-height: 48px; }
   .row input, .note-header input, .note-header textarea, .note-header select, .mobile-detail-sheet input, .mobile-detail-sheet select { min-width: 0; font-size: 16px; }
