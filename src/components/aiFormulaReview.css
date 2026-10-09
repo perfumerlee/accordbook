@@ -1,5 +1,6 @@
 .ai-review { margin: 0 0 20px; color: inherit; min-width: 0; font: inherit; overflow-wrap: anywhere; }
 .ai-review:not(:has(.ai-review-body)) { margin: 0; }
+.ai-review:has(.ai-review-body) { margin-top: 10px; }
 .ai-review-action-slot { display: inline-flex; flex: 0 0 auto; margin-right: 12px; }
 .app .main .editor-actions .ai-review-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; letter-spacing: .04em; }
 .app .main .editor-actions .ai-review-trigger { background: #f4ede0; border-color: #8f806d; color: #4f4539; }

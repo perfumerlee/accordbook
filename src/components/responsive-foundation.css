@@ -380,7 +380,7 @@ html[lang="ko"] .app .title-primary > label {
 
 @media (max-width: 767px) {
   .actions-heading { position: relative; }
-  .table-head > :nth-child(5) { display: flex !important; position: relative; justify-content: center; min-width: 0; }
+  .table-head > :nth-child(5) { display: flex !important; position: relative; grid-column: 3; justify-content: flex-end; min-width: 0; }
   .actions-heading > span, .actions-heading > button { display: none; }
   .mobile-cas-action-slot { position: relative; display: block; width: max-content; }
   .mobile-cas-badge { display: inline-flex; align-items: center; min-width: max-content; margin-left: 0; padding: 4px 7px; border: 1px solid #b9a98b; border-radius: 999px; background: #f4ead8; color: #604c3a; font: 10px/1 ui-monospace, monospace; cursor: pointer; white-space: nowrap; }
