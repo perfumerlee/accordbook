@@ -16,6 +16,7 @@ describe('Palette Coverage UI', () => {
   it('shows matched, unique total, and missing counts in an accessible button', () => {
     const html = renderToStaticMarkup(<PaletteCoverage {...props} />)
     expect(html).toContain('Palette 1/2 · Missing 1')
+    expect(html).toContain('2 MATERIALS')
     expect(html).toContain('Material Palette: 1 of 2 unique materials, 1 missing. View missing materials.')
     expect(html).toContain('aria-haspopup="dialog"')
     expect(html).toContain('class="palette-coverage-chevron"')
@@ -24,6 +25,22 @@ describe('Palette Coverage UI', () => {
   it('localizes the status and accessible label to Korean', () => {
     const html = renderToStaticMarkup(<PaletteCoverage {...props} language="ko" />)
     expect(html).toContain('팔레트 1/2 · 누락 1')
+    expect(html).toContain('원료 2개')
     expect(html).toContain('팔레트에 등록된 원료 1개 / 고유 원료 2개, 누락 1개. 누락 원료 보기.')
+  })
+  it('keeps an empty Formula quiet', () => {
+    const html = renderToStaticMarkup(<PaletteCoverage {...props} rows={[]} />)
+    expect(html).toContain('0 MATERIALS')
+    expect(html).toContain('Palette 0/0')
+    expect(html).not.toContain('Missing 0')
+    expect(html).not.toContain('palette-coverage-chevron')
+  })
+  it('marks full coverage without a missing warning', () => {
+    const html = renderToStaticMarkup(<PaletteCoverage {...props} records={[...props.records, createPaletteRecord({ materialName: 'White musk' })]} />)
+    expect(html).toContain('2 MATERIALS')
+    expect(html).toContain('Palette 2/2')
+    expect(html).toContain('✓')
+    expect(html).not.toContain('Missing 0')
+    expect(html).toContain('View Palette status.')
   })
 })

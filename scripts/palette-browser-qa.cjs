@@ -19,7 +19,7 @@ const viewports = [[1440,900],[1920,1080],[1180,820],[1024,768],[820,1180],[768,
  });
  await page.reload();await page.locator('.accordbook-intro').waitFor({state:'hidden'});if(await page.locator('.first-start-modal').count())await page.keyboard.press('Escape');
  console.log('INITIAL', (await page.locator('body').innerText()).slice(0,500));
- const tools=()=>page.getByRole('button',{name:'Data Tools ▾',exact:true});
+ const tools=()=>page.getByRole('button',{name:'Data Tools',exact:true});
  const closeDialog=async()=>{await page.locator('dialog[open]').last().getByRole('button',{name:'Close / 닫기',exact:true}).click()};
  const openTools=async()=>{if(!(await tools().isVisible()) || (await tools().boundingBox())?.x<0){await page.getByRole('button',{name:'Open notebook',exact:true}).click()}await tools().click()};
  await openTools(); await page.keyboard.press('Escape');assert(await tools().evaluate(e=>e===document.activeElement));
@@ -42,7 +42,7 @@ const viewports = [[1440,900],[1920,1080],[1180,820],[1024,768],[820,1180],[768,
  const results=[];
  for(const [width,height] of viewports){
   await page.setViewportSize({width,height});await material.fill('Missing Material');await parts.click();
-  const header=await page.locator('.table-head').boundingBox(),coverage=await page.locator('.palette-coverage').boundingBox(),materialHeading=page.locator('.palette-material-heading > span:first-child');assert(coverage.y>=header.y-1 && coverage.y+coverage.height<=header.y+header.height+1,'coverage stays inside header');assert.match(await page.locator('.palette-coverage').innerText(),/Palette \d+\/\d+ · Missing \d+/,'coverage explains matched, total, and missing materials');assert.match(await page.locator('.palette-coverage').getAttribute('aria-label'),/unique materials, \d+ missing/,'coverage has a descriptive accessible name');
+  const header=await page.locator('.table-head').boundingBox(),coverage=await page.locator('.palette-coverage').boundingBox(),materialHeading=page.locator('.palette-material-heading > span:first-child');assert(coverage.y+coverage.height<=header.y+1,'coverage stays above header');assert.match(await page.locator('.palette-coverage').innerText(),/Palette \d+\/\d+/,'coverage explains matched, total, and missing materials');assert.match(await page.locator('.palette-coverage').getAttribute('aria-label'),/unique materials, \d+ missing/,'coverage has a descriptive accessible name');
   if(width===375){const headingLayout=await materialHeading.evaluate(e=>({text:e.textContent,width:e.clientWidth,scrollWidth:e.scrollWidth}));assert.equal(headingLayout.text.toLowerCase(),'material name');assert(headingLayout.width>0 && headingLayout.width>=headingLayout.scrollWidth,'Material name is fully readable beside coverage at iPhone XS width');assert(await page.locator('.mobile-cas-badge').isVisible(),'mobile CAS control remains visible');}
   const aiButton=page.locator('.editor-actions .ai-review-trigger');
   if(await aiButton.count()){

@@ -289,7 +289,7 @@
   .title-primary > label { display: block; margin: 4px 0 8px; color: #8b765d; font: 10px/1.2 ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
   .formula-name { max-width: 100%; width: 100%; font-size: clamp(24px, 7vw, 34px); }
   .header-tools { flex-wrap: wrap; }
-  .table-head { grid-template-columns: 64px minmax(0, 1fr); gap: 5px; }
+  .table-head { grid-template-columns: 64px minmax(0, 1fr) 92px; gap: 5px; align-items: center; }
   .row { grid-template-columns: 64px minmax(0, 1fr) minmax(92px, auto); gap: 5px; }
   .table-head > :nth-child(3), .row > .cas, .table-head > :nth-child(4), .table-head > :nth-child(5), .row > .percent { display: none !important; }
   .row { min-height: 48px; }
@@ -379,13 +379,10 @@ html[lang="ko"] .app .title-primary > label {
 }
 
 @media (max-width: 767px) {
-  .table-head > :nth-child(5) { position: relative; }
   .actions-heading { position: relative; }
-  .table-head > :nth-child(5) { display: block !important; position: absolute; top: 0; right: 0; width: 58px; }
+  .table-head > :nth-child(5) { display: flex !important; position: relative; justify-content: center; min-width: 0; }
   .actions-heading > span, .actions-heading > button { display: none; }
-  .mobile-cas-action-slot { position: absolute; left: 50%; right: auto; top: -28px; display: block; width: max-content; transform: translateX(-50%); }
-  .table-head > :nth-child(5) { position: relative; }
-  .mobile-cas-action-slot { position: absolute; left: 50%; right: auto; bottom: auto; display: block; }
+  .mobile-cas-action-slot { position: relative; display: block; width: max-content; }
   .mobile-cas-badge { display: inline-flex; align-items: center; min-width: max-content; margin-left: 0; padding: 4px 7px; border: 1px solid #b9a98b; border-radius: 999px; background: #f4ead8; color: #604c3a; font: 10px/1 ui-monospace, monospace; cursor: pointer; white-space: nowrap; }
   .mobile-cas-hint { position: absolute; z-index: 20; top: 30px; left: 50%; right: auto; display: grid; gap: 4px; width: max-content; max-width: min(150px, calc(100vw - 32px)); box-sizing: border-box; padding: 10px 11px; border: 1px solid #d8c7aa; border-radius: 7px; background: #fffaf0; color: #30291f; box-shadow: 0 8px 22px rgba(48,41,31,.18); font-size: 10px; line-height: 1.4; white-space: normal; transform: translateX(-75%); }
   .mobile-cas-hint::before { content: ""; position: absolute; top: -6px; right: 28px; width: 10px; height: 10px; border-top: 1px solid #d8c7aa; border-left: 1px solid #d8c7aa; background: #fffaf0; transform: rotate(45deg); }
@@ -395,7 +392,6 @@ html[lang="ko"] .app .title-primary > label {
   .mobile-cas-result { display: grid; gap: 3px; margin: 6px 0 -2px; color: #6a5945; font: 10px/1.35 "Courier New", monospace; white-space: normal; }
   .mobile-cas-result strong { font-size: 11px; }
   .app .main .cas-result { top: calc(100% + 2px); left: -320%; right: auto; width: max-content; min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; transform: none; }
-  .mobile-cas-action-slot { left: 85% !important; right: auto !important; top: -10px !important; bottom: auto !important; transform: none !important; }
   .mobile-cas-hint { z-index: 100; background: #fffaf0 !important; opacity: 1; isolation: isolate; }
 }
 .material-wrap{position:relative;min-width:0}
