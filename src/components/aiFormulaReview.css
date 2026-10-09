@@ -1,6 +1,5 @@
 .ai-review { margin: 0 0 20px; color: inherit; min-width: 0; font: inherit; overflow-wrap: anywhere; }
 .ai-review:not(:has(.ai-review-body)) { margin: 0; }
-.ai-review:has(.ai-review-body) { margin-top: 10px; }
 .ai-review-action-slot { display: inline-flex; flex: 0 0 auto; margin-right: 12px; }
 .app .main .editor-actions .ai-review-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; letter-spacing: .04em; }
 .app .main .editor-actions .ai-review-trigger { background: #f4ede0; border-color: #8f806d; color: #4f4539; }
@@ -37,6 +36,7 @@
   .app .main .editor-actions:has(.ai-review-action-slot) .editor-actions-right .btn { padding: 7px clamp(4px, 1.6vw, 8px); font-size: clamp(10px, 2.8vw, 12px); white-space: nowrap; }
   .app .main .editor-actions:has(.ai-review-trigger.is-open) { align-items: center; }
   .app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-right { margin-bottom: 0; }
+  .app .main .editor-actions:has(.ai-review-trigger.is-open) .editor-actions-right .btn { align-self: flex-start; height: 36px; min-height: 36px; padding-block: 4px; }
 }
 .ai-review *, .ai-review *::before, .ai-review *::after { box-sizing: border-box; }
 .ai-review button { font: inherit; color: inherit; background: transparent; border: 1px solid #a99e8b; padding: 9px 14px; min-height: 44px; cursor: pointer; white-space: normal; }
