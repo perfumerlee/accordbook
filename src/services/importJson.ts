@@ -1,3 +1,4 @@
+import { validatePaletteRecords } from './materialPalette'
 import type { ClaimedSource, Formula, FormulaMaterial, FormulaVersion, ProvenanceOriginType } from '../models/formula'
 import type { AccordbookBackup, AccordbookBackupData } from '../models/backup'
 import type { AccordbookStorage } from '../storage/storageService'
@@ -19,9 +20,11 @@ export function parseBackup(input: string): AccordbookBackup {
   try { raw = JSON.parse(input) } catch { throw new BackupImportError('Invalid JSON backup file.') }
   if (!raw || typeof raw !== 'object') throw new BackupImportError('Invalid Accordbook backup file.')
   const value = raw as { app?: unknown; formatVersion?: unknown; exportedAt?: unknown; data?: unknown }
-  if (value.app !== 'Accordbook' || ![1, 2, 3, 4, 5].includes(value.formatVersion as number) || !value.data || typeof value.data !== 'object') throw new BackupImportError('Unsupported or invalid backup version.')
+  if (value.app !== 'Accordbook' || ![1, 2, 3, 4, 5, 6].includes(value.formatVersion as number) || !value.data || typeof value.data !== 'object') throw new BackupImportError('Unsupported or invalid backup version.')
   const data = value.data as Partial<AccordbookBackupData>
   if (!Array.isArray(data.formulas) || !Array.isArray(data.archive) || !data.settings || typeof data.settings !== 'object' || !data.meta || typeof data.meta !== 'object') throw new BackupImportError('Invalid Accordbook backup structure.')
+  let palette
+  if (value.formatVersion === 6) { try { palette = validatePaletteRecords(data.palette) } catch { throw new BackupImportError('Invalid Material Palette backup data.') } }
   const formulas = data.formulas.map((item, index) => normalizeFormula(item, index))
   const archive = data.archive.map((item, index) => normalizeFormula(item, index))
   const versions = Array.isArray(data.versions) ? data.versions.map((item, index) => normalizeVersion(item, index)) : []
@@ -33,7 +36,7 @@ export function parseBackup(input: string): AccordbookBackup {
     if (version.kind === 'manual' && (version.versionNumber === null || !Number.isInteger(version.versionNumber) || version.versionNumber < 1)) throw new BackupImportError('Invalid manual version number.')
     if (version.kind === 'restore-point' && version.versionNumber !== null) throw new BackupImportError('Invalid restore-point version number.')
   }
-  const experiments = (value.formatVersion === 3 || value.formatVersion === 4 || value.formatVersion === 5)
+  const experiments = (value.formatVersion === 3 || value.formatVersion === 4 || (value.formatVersion === 5 || value.formatVersion === 6))
     ? (Array.isArray(data.experiments) ? data.experiments as Experiment[] : (() => { throw new BackupImportError('Invalid Experiment backup structure.') })())
     : []
   if (new Set(experiments.map(item => item.experimentId)).size !== experiments.length) throw new BackupImportError('Duplicate Experiment id.')
@@ -42,7 +45,7 @@ export function parseBackup(input: string): AccordbookBackup {
     try { validateExperiment(experiment) } catch { throw new BackupImportError('Invalid Experiment data.') }
   }
   let reviews: AiReviewRecord[] | undefined
-  if (value.formatVersion === 4 || value.formatVersion === 5) {
+  if (value.formatVersion === 4 || (value.formatVersion === 5 || value.formatVersion === 6)) {
     if (!Array.isArray(data.reviews)) throw new BackupImportError('Invalid AI Review backup structure.')
     reviews = data.reviews as AiReviewRecord[]
     if (new Set(reviews.map(item => item?.reviewId)).size !== reviews.length) throw new BackupImportError('Duplicate AI Review id.')
@@ -65,11 +68,12 @@ export function parseBackup(input: string): AccordbookBackup {
   const manualKeys = versions.filter(version => version.kind === 'manual').map(version => `${version.parentFormulaId}:${version.versionNumber}`)
   if (new Set(manualKeys).size !== manualKeys.length) throw new BackupImportError('Duplicate manual version number.')
   return {
-    app: 'Accordbook', formatVersion: value.formatVersion as 1 | 2 | 3 | 4 | 5,
+    app: 'Accordbook', formatVersion: value.formatVersion as 1 | 2 | 3 | 4 | 5 | 6,
     exportedAt: typeof value.exportedAt === 'string' ? value.exportedAt : new Date().toISOString(),
     data: {
       settings: { formulaIdPrefix: typeof data.settings.formulaIdPrefix === 'string' ? data.settings.formulaIdPrefix : 'ACC', language: data.settings.language === 'ko' ? 'ko' : 'en' },
       formulas, archive, versions, experiments,
+      ...(palette === undefined ? {} : { palette }),
       ...(reviews === undefined ? {} : { reviews }),
       meta: Object.fromEntries(Object.entries(data.meta).filter((entry): entry is [string, number] => typeof entry[1] === 'number')),
     },

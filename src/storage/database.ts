@@ -1,3 +1,5 @@
+import type { MaterialPaletteRecord } from '../models/materialPalette'
+import { mergePaletteRecords, validatePaletteRecords } from '../services/materialPalette'
 import type { Formula, FormulaVersion } from '../models/formula'
 import type { Experiment } from '../models/experiment'
 import type { AiReviewRecord, FormulaAiReviewRecord } from '../models/aiReviewRecord'
@@ -5,10 +7,10 @@ import type { ExperimentAiReviewRecord } from '../models/aiReviewRecord'
 import type { AccordbookSettings } from '../models/settings'
 import { appendIndexedWorkspace, readIndexedWorkspace, prepareWorkspaceAppend, allocateWorkspaceReviews, WorkspaceAppendConflict, type WorkspaceAppend, type WorkspaceRecords } from './workspaceRepository'
 
-export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments' | 'reviews'
+export type StoreName = 'formulas' | 'archive' | 'versions' | 'settings' | 'meta' | 'experiments' | 'reviews' | 'palette'
 export type StorageMode = 'indexeddb' | 'memory'
 
-type StoreValue = Formula | FormulaVersion | Experiment | AiReviewRecord | AccordbookSettings | number
+type StoreValue = MaterialPaletteRecord | Formula | FormulaVersion | Experiment | AiReviewRecord | AccordbookSettings | number
 type StoreMap = Map<string, StoreValue>
 const sourceFormulaId = (value: StoreValue): string | undefined => {
   if (typeof value !== 'object' || value === null) return undefined
@@ -18,10 +20,11 @@ const sourceFormulaId = (value: StoreValue): string | undefined => {
 }
 
 const DB_NAME = 'accordbook'
-const DB_VERSION = 6
-const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments', 'reviews']
+const DB_VERSION = 7
+const STORE_NAMES: StoreName[] = ['formulas', 'archive', 'versions', 'settings', 'meta', 'experiments', 'reviews', 'palette']
 
 export interface StorageDatabase {
+  writePaletteAtomic(records: MaterialPaletteRecord[], mode: 'add' | 'add-formula' | 'update' | 'replace'): Promise<void>
   readonly mode: StorageMode
   readWorkspace(formulaId: string): Promise<WorkspaceRecords | undefined>
   appendWorkspaceAtomic(input: WorkspaceAppend): Promise<void>
@@ -36,13 +39,14 @@ export interface StorageDatabase {
   add(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
   clear(): Promise<void>
-  replaceAll(data: { formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; reviews?: AiReviewRecord[]; settings?: AccordbookSettings; meta: Record<string, number> }, options?: { preserveExperimentReviews?: boolean }): Promise<void>
+  replaceAll(data: { palette?: MaterialPaletteRecord[]; formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; reviews?: AiReviewRecord[]; settings?: AccordbookSettings; meta: Record<string, number> }, options?: { preserveExperimentReviews?: boolean }): Promise<void>
 }
 
 function createMemoryDatabase(): StorageDatabase {
   let stores = new Map<StoreName, StoreMap>(STORE_NAMES.map((name) => [name, new Map()]))
   return {
     mode: 'memory',
+    async writePaletteAtomic(records, mode) { const result = mergePaletteRecords([...stores.get('palette')!.values()] as MaterialPaletteRecord[], records, mode); stores.set('palette', new Map(result.map(item => [item.materialId, structuredClone(item)]))) },
     async readWorkspace(formulaId) {
       const formula = stores.get('formulas')!.get(formulaId) as Formula | undefined
       if (!formula) return undefined
@@ -84,17 +88,21 @@ function createMemoryDatabase(): StorageDatabase {
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
     async clear() { stores.forEach((store) => store.clear()) },
     async replaceAll(data, options = {}) {
+      const palette = data.palette === undefined ? undefined : validatePaletteRecords(data.palette)
+      const staged = new Map<StoreName, StoreMap>(STORE_NAMES.map(name => [name, new Map(stores.get(name)!)]))
       const existingExperimentReviews = options.preserveExperimentReviews ? [...stores.get('reviews')!.values()].filter((value): value is ExperimentAiReviewRecord => typeof value === 'object' && value !== null && 'reviewType' in value && (value as ExperimentAiReviewRecord).reviewType === 'experiment') : []
       const importedReviews = [...(data.reviews ?? []), ...existingExperimentReviews]
       if (new Set(importedReviews.map(item => item.reviewId)).size !== importedReviews.length) throw new Error('Duplicate review ID during backup import')
-      for (const name of STORE_NAMES) if (name !== 'reviews' || data.reviews !== undefined || options.preserveExperimentReviews) stores.get(name)!.clear()
-      for (const item of data.formulas) await this.put('formulas', item.id, item)
-      for (const item of data.archive) await this.put('archive', item.id, item)
-      for (const item of data.versions ?? []) await this.put('versions', item.versionId, item)
-      for (const item of data.experiments ?? []) await this.put('experiments', item.experimentId, item)
-      for (const item of importedReviews) await this.put('reviews', item.reviewId, item)
-      if (data.settings) await this.put('settings', 'current', data.settings)
-      for (const [key, value] of Object.entries(data.meta)) await this.put('meta', key, value)
+      for (const name of STORE_NAMES) if ((name !== 'palette' || palette !== undefined) && (name !== 'reviews' || data.reviews !== undefined || options.preserveExperimentReviews)) staged.get(name)!.clear()
+      for (const item of data.formulas) staged.get('formulas')!.set(item.id, item)
+      for (const item of data.archive) staged.get('archive')!.set(item.id, item)
+      for (const item of data.versions ?? []) staged.get('versions')!.set(item.versionId, item)
+      for (const item of data.experiments ?? []) staged.get('experiments')!.set(item.experimentId, item)
+      for (const item of importedReviews) staged.get('reviews')!.set(item.reviewId, item)
+      if (data.settings) staged.get('settings')!.set('current', data.settings)
+      for (const [key, value] of Object.entries(data.meta)) staged.get('meta')!.set(key, value)
+      for (const item of palette ?? []) staged.get('palette')!.set(item.materialId, structuredClone(item))
+      stores = staged
     },
   }
 }
@@ -114,6 +122,20 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
   }
   return {
     mode: 'indexeddb',
+    async writePaletteAtomic(records, mode) {
+      const incoming = validatePaletteRecords(records)
+      await new Promise<void>((resolve, reject) => {
+        const tx = database.transaction('palette', 'readwrite'), store = tx.objectStore('palette')
+        let failure: unknown
+        tx.oncomplete = () => resolve()
+        tx.onerror = event => { failure ??= (event.target as IDBRequest)?.error ?? tx.error }
+        tx.onabort = () => reject(failure ?? tx.error ?? new Error('Palette transaction aborted'))
+        store.getAll().onsuccess = event => {
+          try { const result = mergePaletteRecords((event.target as IDBRequest<MaterialPaletteRecord[]>).result, incoming, mode); if (mode === 'replace') store.clear(); for (const item of mode === 'replace' ? result : incoming) store.put(item, item.materialId) }
+          catch (error) { failure = error; tx.abort() }
+        }
+      })
+    },
     readWorkspace(formulaId) { return readIndexedWorkspace(database, formulaId) },
     async appendWorkspaceAtomic(input) { await appendIndexedWorkspace(database, input) },
     async get<T extends StoreValue>(store: StoreName, key: string) { return run(store, (objectStore) => objectStore.get(key)) as Promise<T | undefined> },
@@ -183,13 +205,19 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
     async delete(store: StoreName, key: string) { await run(store, (objectStore) => objectStore.delete(key)) },
     async clear() { for (const store of STORE_NAMES) await run(store, (objectStore) => objectStore.clear()) },
     async replaceAll(data, options = {}) {
+      const palette = data.palette === undefined ? undefined : validatePaletteRecords(data.palette)
       await new Promise<void>((resolve, reject) => {
         const transaction = database.transaction(STORE_NAMES, 'readwrite')
-        transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB replacement failed'))
+        let failure: unknown
+        transaction.onabort = () => reject(failure ?? transaction.error ?? new Error('IndexedDB replacement aborted'))
+        transaction.oncomplete = () => resolve()
+        transaction.onerror = event => { failure ??= (event.target as IDBRequest)?.error ?? transaction.error }
         const applyReplacement = (existingExperimentReviews: ExperimentAiReviewRecord[] = []) => {
+          try {
           const importedReviews = [...(data.reviews ?? []), ...existingExperimentReviews]
           if (new Set(importedReviews.map(item => item.reviewId)).size !== importedReviews.length) { transaction.abort(); return }
-          for (const name of STORE_NAMES) if (name !== 'reviews' || data.reviews !== undefined || options.preserveExperimentReviews) transaction.objectStore(name).clear()
+          for (const name of STORE_NAMES) if ((name !== 'palette' || palette !== undefined) && (name !== 'reviews' || data.reviews !== undefined || options.preserveExperimentReviews)) transaction.objectStore(name).clear()
+          for (const item of palette ?? []) transaction.objectStore('palette').put(item, item.materialId)
           for (const item of data.formulas) transaction.objectStore('formulas').put(item, item.id)
           for (const item of data.archive) transaction.objectStore('archive').put(item, item.id)
           for (const item of data.versions ?? []) transaction.objectStore('versions').put(item, item.versionId)
@@ -197,12 +225,12 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
           if (data.reviews !== undefined || options.preserveExperimentReviews) for (const item of importedReviews) transaction.objectStore('reviews').put(item, item.reviewId)
           if (data.settings) transaction.objectStore('settings').put(data.settings, 'current')
           for (const [key, value] of Object.entries(data.meta)) transaction.objectStore('meta').put(value, key)
+          } catch (error) { failure = error; transaction.abort() }
         }
         if (options.preserveExperimentReviews) {
           const request = transaction.objectStore('reviews').getAll()
           request.onsuccess = () => applyReplacement((request.result as AiReviewRecord[]).filter((value): value is ExperimentAiReviewRecord => typeof value === 'object' && value !== null && value.reviewType === 'experiment'))
         } else applyReplacement()
-        transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB replacement aborted'))
       })
     },
   }

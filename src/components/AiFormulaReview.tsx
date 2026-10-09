@@ -1,8 +1,9 @@
+import { useAiAccessToken, AiAccessTokenButton } from './AiAccessToken'
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Formula } from '../models/formula'
 import { buildAIContext } from '../services/aiContextBuilder'
-import { AiClientError, reviewFormula, supportedAiContext, validAiToken, type AiConnection, type AiReview } from '../services/aiClient'
+import { AiClientError, reviewFormula, supportedAiContext, type AiConnection, type AiReview } from '../services/aiClient'
 import { acceptAiDisclosure, hasAiDisclosure } from '../services/aiDisclosure'
 import { aiSnapshotMarker, AiRequestGate } from '../services/aiReviewRequest'
 import { makeFormulaAiReviewRecord, persistFormulaAiReview, type CompletedFormulaReview } from '../services/aiReviewPersistence'
@@ -23,7 +24,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
   const [includeName, setIncludeName] = useState(false)
   const [includeNotes, setIncludeNotes] = useState(false)
   const [accepted, setAccepted] = useState(hasAiDisclosure)
-  const [connected, setConnected] = useState(false)
+  const { token, connected } = useAiAccessToken()
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState<AiReview>()
   const [reviewDraft, setReviewDraft] = useState<CompletedFormulaReview>()
@@ -41,8 +42,6 @@ export default function AiFormulaReview({ formula, language, connection, trigger
   const historyRequest = useRef(0)
   const [composingMessage, setComposingMessage] = useState(false)
   const trigger = useRef<HTMLButtonElement>(null)
-  const tokenInput = useRef<HTMLInputElement>(null)
-  const token = useRef('')
   const composing = useRef(false)
   const busy = useRef(false)
   const saving = useRef(false)
@@ -103,12 +102,13 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       document.removeEventListener('compositionend', end)
       clearTimeout(scheduled.current)
       gate.current.invalidate()
-      token.current = ''
+
     }
   }, [])
+  useEffect(() => { if (!connected) { invalidate(); setResult(undefined); setReviewDraft(undefined); setError('') } }, [connected])
   const close = () => {
     historyRequest.current++
-    invalidate(); token.current = ''; setConnected(false); setResult(undefined); setError('')
+    invalidate();   setResult(undefined); setError('')
     setReviewDraft(undefined); setSaveState(undefined)
     setIncludeName(false); setIncludeNotes(false); setStale(false); submitted.current = false
     setOpen(false); trigger.current?.focus()
@@ -139,7 +139,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
       busy.current = true; submitted.current = true
       setPending(true); setStale(false); setError(''); setResult(undefined); setReviewDraft(undefined); setSaveState(undefined)
       const isCurrent = () => gate.current.isCurrent(request, latest.current.formula?.id, latest.current.marker)
-      void reviewFormula({ connection, context: submittedReview.snapshot, locale: submittedReview.locale, token: token.current,
+      void reviewFormula({ connection, context: submittedReview.snapshot, locale: submittedReview.locale, token: token,
         disclosureVersion: 1, signal: request.controller.signal }).then(value => {
         if (isCurrent()) {
           setResult(value)
@@ -209,16 +209,7 @@ export default function AiFormulaReview({ formula, language, connection, trigger
         <label><input type="checkbox" checked={includeNotes} onChange={e => setIncludeNotes(e.target.checked)} />{m.notes}</label>
       </fieldset>
       <div className="ai-review-connection">
-        {!connected ? <><label htmlFor={id + '-token'}>{m.token}</label><div className="ai-review-controls">
-          <input ref={tokenInput} id={id + '-token'} type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" maxLength={128} />
-          <button type="button" onClick={() => {
-            const candidate = tokenInput.current?.value.trim() ?? ''
-            if (tokenInput.current) tokenInput.current.value = ''
-            if (!validAiToken(candidate)) { setError('NO_TOKEN'); return }
-            token.current = candidate; setConnected(true); setError('')
-          }}>{m.connect}</button></div></> : <><p>{m.connected}</p><button type="button" onClick={() => {
-            invalidate(); token.current = ''; setConnected(false); setResult(undefined); setError(''); setStale(submitted.current)
-          }}>{m.clear}</button></>}
+        <AiAccessTokenButton language={language} />
       </div>
       {!formula && <p role="status">{m.empty}</p>}
       {built && !built.ok && <p role="status">{m.builder}{built.error.rowIndex !== undefined ? ' (' + (built.error.rowIndex + 1) + ')' : ''}</p>}

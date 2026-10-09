@@ -187,12 +187,12 @@ describe('Experiment AI Review workspace portability', () => {
     expect(formulaCopy.locale).toBe(formulaReview.locale)
     expect(formulaCopy.createdAt).toBe(formulaReview.createdAt)
   })
-  it('keeps Formula and Experiment AI Reviews in the existing Notebook Backup v5 round trip', async () => {
+  it('keeps Formula and Experiment AI Reviews in the existing Notebook Backup v6 round trip', async () => {
     const { storage, source, compare, next } = await sourceWithReviews()
     const formulaReview = formulaRecord(source.formula.id)
     await storage.reviews.save(formulaReview)
     const backup = await createBackup(storage)
-    expect(backup.formatVersion).toBe(5)
+    expect(backup.formatVersion).toBe(6)
     expect(backup.data.reviews).toEqual(expect.arrayContaining([formulaReview, compare, next]))
 
     const restored = await createStorage()

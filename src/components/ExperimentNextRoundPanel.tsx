@@ -1,3 +1,4 @@
+import { useAiAccessToken, AiAccessTokenButton } from './AiAccessToken'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Experiment, ExperimentVariant, VariantEvaluation } from '../models/experiment'
 import type { ExperimentNextRoundResultV1 } from '../models/experimentNextRoundAi'
@@ -28,7 +29,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
   const { experiment, variant, evaluation, language, requestLimitBytes, requestLimitVerified, reviews, storageMode, disabled } = props
   const t = strings[language]
   const [open, setOpen] = useState(false); const [accepted, setAccepted] = useState(false); const [includeNote, setIncludeNote] = useState(false)
-  const [connected, setConnected] = useState(false); const token = useRef(''); const tokenInput = useRef<HTMLInputElement>(null)
+  const { token, connected } = useAiAccessToken()
   const [phase, setPhase] = useState<State>('idle'); const [error, setError] = useState(''); const [done, setDone] = useState<Done>()
   const [saving, setSaving] = useState(false); const [saved, setSaved] = useState<'saved' | 'session' | 'failed'>()
   const [historyOpen, setHistoryOpen] = useState(false); const [history, setHistory] = useState<ExperimentNextRoundReviewRecord[]>([]); const [historyLoaded, setHistoryLoaded] = useState(false); const [historySelected, setHistorySelected] = useState<ExperimentNextRoundReviewRecord>(); const [historyError, setHistoryError] = useState('')
@@ -51,17 +52,18 @@ export default function ExperimentNextRoundPanel(props: Props) {
       if (historyGeneration.current === current) { setHistory(items.filter((item): item is ExperimentNextRoundReviewRecord => item.operation === 'next_round')); setHistoryLoaded(true) }
     } catch { if (historyGeneration.current === current) { setHistoryError(language === 'ko' ? '리뷰 기록을 불러오지 못했습니다.' : 'Could not load Review History.'); setHistoryLoaded(true) } }
   }
-  const clear = () => { generation.current++; controller.current?.abort(); controller.current = undefined; token.current = ''; if (tokenInput.current) tokenInput.current.value = ''; setConnected(false); setAccepted(false); setIncludeNote(false); setPhase('idle'); setError(''); setDone(undefined); setSaved(undefined); setHistoryOpen(false); setHistorySelected(undefined) }
-  useEffect(() => { clear(); return () => { generation.current++; controller.current?.abort(); token.current = ''; if (tokenInput.current) tokenInput.current.value = '' } }, [identity, evaluation.updatedAt])
-  useEffect(() => () => { generation.current++; controller.current?.abort(); token.current = ''; if (tokenInput.current) tokenInput.current.value = '' }, [])
+  const clear = () => { generation.current++; controller.current?.abort(); controller.current = undefined;    setAccepted(false); setIncludeNote(false); setPhase('idle'); setError(''); setDone(undefined); setSaved(undefined); setHistoryOpen(false); setHistorySelected(undefined) }
+  useEffect(() => { clear(); return () => { generation.current++; controller.current?.abort();   } }, [identity, evaluation.updatedAt])
+  useEffect(() => () => { generation.current++; controller.current?.abort();   }, [])
   useEffect(() => { if (disabled && controller.current) cancel() }, [disabled])
   useEffect(() => { void loadHistory(); return () => { historyGeneration.current++ } }, [reviews, language])
+  useEffect(() => { if (!connected) clear() }, [connected])
   const run = async () => {
-    if (!ready || !prepared || !accepted || !connected || !validAiToken(token.current) || controller.current) return
+    if (!ready || !prepared || !accepted || !connected || !validAiToken(token) || controller.current) return
     const submitted = prepared; const submittedLocale = language; const requestGeneration = ++generation.current; const abort = new AbortController(); controller.current = abort
     setAccepted(false); setError(''); setPhase('running'); setDone(undefined); setSaved(undefined)
     try {
-      const response = await executeExperimentNextRound({ preparation: submitted, consent: { accepted: true, scope: 'experiment_next_round', contractVersion: 1 }, token: token.current, signal: abort.signal })
+      const response = await executeExperimentNextRound({ preparation: submitted, consent: { accepted: true, scope: 'experiment_next_round', contractVersion: 1 }, token: token, signal: abort.signal })
       if (generation.current !== requestGeneration || abort.signal.aborted) return
       setDone({ response, preparation: submitted, locale: submittedLocale, createdAt: new Date().toISOString(), reviewId: crypto.randomUUID() }); setPhase('complete')
     } catch (failure) { if (generation.current === requestGeneration && !abort.signal.aborted) { setError(errorText(failure, t)); setPhase('failed') } }
@@ -102,7 +104,7 @@ export default function ExperimentNextRoundPanel(props: Props) {
         {!requestLimitVerified && <p className="experiment-next-round__warning" role="status">{t.limit}</p>}{!aiConnection.enabled && <p className="experiment-next-round__warning" role="status">{t.notConfigured}</p>}{Boolean(failure) && <p className="experiment-next-round__warning" role="status">{errorText(failure, t)}</p>}
         {prepared && <p className="experiment-next-round__meta">{t.byteLimit}: {prepared.byteLength} / {prepared.maxRequestBytes} · {t.locale}: {language === 'ko' ? t.korean : t.english}</p>}
         <label className="experiment-next-round__consent"><input type="checkbox" checked={accepted} disabled={!ready || phase === 'running'} onChange={event => { setAccepted(event.target.checked); setError('') }}/><span>{t.consent}</span></label>
-        <div className="experiment-next-round__token"><label htmlFor={`next-round-token-${evaluation.evaluationId}`}>{t.token}</label>{!connected ? <div><input ref={tokenInput} id={`next-round-token-${evaluation.evaluationId}`} type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" maxLength={128}/><button type="button" disabled={!ready} onClick={() => { const candidate = tokenInput.current?.value.trim() ?? ''; if (tokenInput.current) tokenInput.current.value = ''; if (!validAiToken(candidate)) { setError(t.tokenInvalid); return } token.current = candidate; setConnected(true); setError('') }}>{t.connect}</button></div> : <div><span>{t.connected}</span><button type="button" disabled={phase === 'running'} onClick={() => { token.current = ''; setConnected(false); setDone(undefined); setSaved(undefined); setAccepted(false) }}>{t.clear}</button></div>}</div>
+      <AiAccessTokenButton language={language} />
         {error && <p role="alert" className="experiment-next-round__warning">{error}</p>}{phase === 'cancelled' && <p role="status">{t.noProvider}</p>}
         <div className="experiment-next-round__actions"><button className="experiment-next-round__run" type="button" disabled={!ready || !accepted || !connected || phase === 'running'} onClick={() => void run()}>{phase === 'running' ? t.running : t.run}</button>{phase === 'running' && <button type="button" onClick={cancel}>{t.cancel}</button>}</div>
         {done && <section className="experiment-next-round__result" aria-live="polite"><h4>{t.findings}</h4><p>{done.response.findings}</p><h4>{t.delta}</h4><p>{done.preparation.request.delta.totalDeltaParts > 0 ? '+' : ''}{done.preparation.request.delta.totalDeltaParts} {t.parts}</p><ul>{done.preparation.request.delta.changes.filter(change => change.kind !== 'unchanged').map((change, index) => <li key={index}>{change.kind} · {change.deltaParts > 0 ? '+' : ''}{change.deltaParts} {t.parts} · {change.changedFields.join(', ') || '—'}</li>)}</ul><h4>{t.uncertainties}</h4>{list(done.response.uncertainties)}<h4>{t.checks}</h4>{list(done.response.nextChecks)}<h4>{t.directions}</h4>{list(done.response.adjustmentDirections)}<p className="experiment-next-round__advisory">{t.advisory}</p>{reviews && <div className="experiment-next-round__save"><button type="button" disabled={saving || saved === 'saved' || saved === 'session' || disabled} onClick={() => void save()}>{saving ? t.saveBusy : t.save}</button>{saved && <span role="status">{saved === 'saved' ? t.saved : saved === 'session' ? t.session : t.saveFailed}</span>}</div>}</section>}

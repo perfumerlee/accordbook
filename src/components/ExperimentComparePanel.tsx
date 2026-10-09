@@ -1,3 +1,4 @@
+import { useAiAccessToken, AiAccessTokenButton } from './AiAccessToken'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Experiment } from '../models/experiment'
 import type { ExperimentCompareResultV1 } from '../models/experimentCompareAi'
@@ -104,7 +105,7 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
   const identityKey = `${experiment.parentFormulaId}:${experiment.experimentId}:${experiment.updatedAt}:${variantKey}`
   const [open, setOpen] = useState(false)
   const [consented, setConsented] = useState(false)
-  const [connected, setConnected] = useState(false)
+  const { token, connected } = useAiAccessToken()
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState('')
   const [completed, setCompleted] = useState<{ result: ExperimentCompareResultV1; request: ReturnType<typeof prepareExperimentCompare>['request']; variantIdsByLabel: Readonly<Record<string, string>>; locale: 'en' | 'ko'; reviewId: string; createdAt: string; experimentId: string; experimentDisplayName: string; selectedVariantIds: readonly string[]; selectedVariantLabels: readonly string[] }>()
@@ -119,8 +120,6 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
   const [saveBusy, setSaveBusy] = useState(false)
   const [saveState, setSaveState] = useState<'saved' | 'session' | 'failed'>()
   const historyGeneration = useRef(0)
-  const tokenInput = useRef<HTMLInputElement>(null)
-  const token = useRef('')
   const controller = useRef<AbortController | undefined>(undefined)
   const generation = useRef(0)
   const busy = useRef(false)
@@ -163,22 +162,23 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
 
   useEffect(() => { if (open && phase === 'preparing') setPhase('idle') }, [open, preparation, phase])
 
-  useEffect(() => () => { token.current = ''; if (tokenInput.current) tokenInput.current.value = '' }, [])
 
+
+  useEffect(() => { if (!connected) { generation.current++; controller.current?.abort(); controller.current = undefined; busy.current = false; setPhase('idle'); setConsented(false); setCompleted(undefined) } }, [connected])
   const close = () => {
     generation.current++
     controller.current?.abort()
     controller.current = undefined
     busy.current = false
-    token.current = ''
-    if (tokenInput.current) tokenInput.current.value = ''
-    setConnected(false); setConsented(false); setPhase('idle'); setError(''); setCompleted(undefined); setOpen(false)
+
+
+     setConsented(false); setPhase('idle'); setError(''); setCompleted(undefined); setOpen(false)
     setHistoryOpen(false); setHistoryDetail(undefined); setSaveState(undefined); historyGeneration.current++
   }
   const run = async () => {
     if (!ready || !prepared || busy.current || phase === 'running') return
     if (!consented) { setError(t.consentRequired); return }
-    if (!connected || !validAiToken(token.current)) { setError(t.tokenInvalid); return }
+    if (!connected || !validAiToken(token)) { setError(t.tokenInvalid); return }
     const submittedLocale = language
     busy.current = true
     const requestGeneration = ++generation.current
@@ -187,7 +187,7 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
     setConsented(false) // One explicit consent receipt authorizes exactly one execution.
     setPhase('running'); setError(''); setCompleted(undefined); setRequestBytes(prepared.byteLength)
     try {
-      const output = await executeExperimentCompare({ preparation: prepared, consent: { accepted: true, scope: 'experiment_compare', contractVersion: 1 }, token: token.current, signal: abortController.signal, ...(fetcher ? { fetcher } : {}) })
+      const output = await executeExperimentCompare({ preparation: prepared, consent: { accepted: true, scope: 'experiment_compare', contractVersion: 1 }, token: token, signal: abortController.signal, ...(fetcher ? { fetcher } : {}) })
       if (generation.current !== requestGeneration || abortController.signal.aborted) return
       setCompleted({ result: output.result, request: prepared.request, variantIdsByLabel: output.metadata.variantIdsByLabel, locale: submittedLocale, reviewId: crypto.randomUUID(), createdAt: new Date().toISOString(), experimentId: experiment.experimentId, experimentDisplayName: experiment.name, selectedVariantIds: [...orderedVariantIds], selectedVariantLabels: orderedVariantIds.map((id, index) => experiment.variants.find(item => item.variantId === id)?.label ?? labels[index]) }); setSaveState(undefined); setHistoryDetail(undefined); setPhase('complete')
     } catch (failure) {
@@ -253,7 +253,7 @@ export default function ExperimentComparePanel({ experiment, variantIds, languag
       {!isLimitValid && <p role="status" className="experiment-ai-compare__warning">{t.unknownLimit}</p>}
       {!aiConnection.enabled && <p role="status" className="experiment-ai-compare__warning">{t.unavailable}</p>}
       <label className="experiment-ai-compare__consent"><input type="checkbox" checked={consented} disabled={!ready || phase === 'running'} onChange={event => { setConsented(event.target.checked); setError('') }}/><span>{t.consent}</span></label>
-      <div className="experiment-ai-compare__token"><label htmlFor="experiment-compare-token">{t.token}</label>{!connected ? <div><input ref={tokenInput} id="experiment-compare-token" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" maxLength={128}/><button type="button" disabled={!ready} onClick={() => { const candidate = tokenInput.current?.value.trim() ?? ''; if (tokenInput.current) tokenInput.current.value = ''; if (!validAiToken(candidate)) { setError(t.tokenInvalid); return } token.current = candidate; setConnected(true); setError('') }}>{t.connect}</button></div> : <div><span>{t.connected}</span><button type="button" disabled={phase === 'running'} onClick={() => { token.current = ''; setConnected(false); setCompleted(undefined); setPhase('idle'); setError(''); setConsented(false) }}>{t.clear}</button></div>}</div>
+      <AiAccessTokenButton language={language} />
       <div className="experiment-ai-compare__actions"><button type="button" disabled={!ready || !consented || !connected || phase === 'running' || phase === 'preparing'} onClick={() => void run()}>{phase === 'running' ? t.running : phase === 'preparing' ? t.preparing : t.run}</button>{phase === 'running' && <button type="button" onClick={() => { generation.current++; busy.current = false; controller.current?.abort(); controller.current = undefined; setConsented(false); setError(''); setPhase('cancelled') }}>{t.cancel}</button>}</div>
       {phase === 'complete' && completed && reviews && <div className="experiment-ai-compare__history-actions"><button type="button" disabled={saveBusy || saveState === 'saved' || saveState === 'session'} onClick={() => void saveReview()}>{saveBusy ? t.saveBusy : t.saveReview}</button>{saveState && <span role="status">{saveState === 'saved' ? t.saved : saveState === 'session' ? t.sessionOnly : t.saveFailed}</span>}</div>}
       </>}

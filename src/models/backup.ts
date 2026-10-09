@@ -1,9 +1,11 @@
+import type { MaterialPaletteRecord } from './materialPalette'
 import type { Formula, FormulaVersion } from './formula'
 import type { AccordbookSettings } from './settings'
 import type { Experiment } from './experiment'
 import type { AiReviewRecord } from './aiReviewRecord'
 
 export interface AccordbookBackupData {
+  palette?: MaterialPaletteRecord[]
   settings: AccordbookSettings
   formulas: Formula[]
   archive: Formula[]
@@ -16,7 +18,7 @@ export interface AccordbookBackupData {
 
 export interface AccordbookBackup {
   app: 'Accordbook'
-  formatVersion: 1 | 2 | 3 | 4 | 5
+  formatVersion: 1 | 2 | 3 | 4 | 5 | 6
   exportedAt: string
   data: AccordbookBackupData
 }

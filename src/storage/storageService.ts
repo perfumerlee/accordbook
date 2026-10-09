@@ -1,3 +1,4 @@
+import { MaterialPaletteRepository } from './materialPaletteRepository'
 import { ArchiveRepository } from './archiveRepository'
 import { FormulaRepository } from './formulaRepository'
 import { MetaRepository } from './metaRepository'
@@ -13,6 +14,7 @@ import { AiReviewRepository } from './aiReviewRepository'
 export type AutosaveStatus = 'saving' | 'saved-locally' | 'session-only'
 
 export interface AccordbookStorage {
+  palette: MaterialPaletteRepository
   mode: StorageMode
   formulas: FormulaRepository
   archive: ArchiveRepository
@@ -32,6 +34,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
   const formulas = new FormulaRepository(database)
   return {
     mode: database.mode,
+    palette: new MaterialPaletteRepository(database),
     formulas,
     archive: new ArchiveRepository(database),
     settings: new SettingsRepository(database),
@@ -48,7 +51,7 @@ export async function createStorage(): Promise<AccordbookStorage> {
         return 'session-only'
       }
     },
-    async exportData() { const reviews = new AiReviewRepository(database); return { settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), experiments: await (new ExperimentRepository(database)).list(), reviews: [...await reviews.listAll(), ...await reviews.listAllExperimentReviews()], meta: await (new MetaRepository(database)).getAll() } },
+    async exportData() { const reviews = new AiReviewRepository(database); return { palette: await new MaterialPaletteRepository(database).list(), settings: (await database.get('settings', 'current')) ?? { formulaIdPrefix: 'ACC', language: 'en' }, formulas: await formulas.list(), archive: await (new ArchiveRepository(database)).list(), versions: await database.getAll('versions'), experiments: await (new ExperimentRepository(database)).list(), reviews: [...await reviews.listAll(), ...await reviews.listAllExperimentReviews()], meta: await (new MetaRepository(database)).getAll() } },
     async importData(data, options) { await database.replaceAll(data, options) },
   }
 }

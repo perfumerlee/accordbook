@@ -1,6 +1,7 @@
+import { normalizeMaterialName } from './materialIdentity'
 import type { Formula } from '../models/formula'
 
-const normalize = (value: string) => value.trim().toLocaleLowerCase()
+const normalize = normalizeMaterialName
 
 export function collectMaterialCandidates(formulas: readonly Formula[], archive: readonly Formula[]): string[] {
   const seen = new Set<string>()

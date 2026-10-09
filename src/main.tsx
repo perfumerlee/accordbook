@@ -1,3 +1,4 @@
+import { AiAccessTokenProvider } from './components/AiAccessToken'
 import { Component, StrictMode, useCallback, useState, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import AccordbookNotebook from './components/AccordbookNotebook'
@@ -39,7 +40,7 @@ root.render(
 function ProductionWithIntro() {
   const [introDone, setIntroDone] = useState(false)
   const handleIntroDone = useCallback(() => setIntroDone(true), [])
-  return <><AccordbookNotebook introComplete={introDone} /><GuideEntryLink /><>{!introDone && <IntroSplashBoundary onDone={handleIntroDone} />}</></>
+  return <><AiAccessTokenProvider><AccordbookNotebook introComplete={introDone} /></AiAccessTokenProvider><GuideEntryLink /><>{!introDone && <IntroSplashBoundary onDone={handleIntroDone} />}</></>
 }
 
 class IntroSplashBoundary extends Component<{ onDone: () => void; children?: ReactNode }, { failed: boolean }> {

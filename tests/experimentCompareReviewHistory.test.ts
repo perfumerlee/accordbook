@@ -66,12 +66,12 @@ describe('Experiment Compare Review History', () => {
     expect(await persistExperimentCompareReview(memory, { ...made, reviewId: '3f6a7f2c-8084-4d9a-9c6f-5b03a3958174' }, 'memory')).toBe('session-only')
   })
 
-  it('includes Compare and Next Round records in v5 backups and preserves both on legacy v4 import', async () => {
+  it('includes Compare and Next Round records in v6 backups and preserves both on legacy v4 import', async () => {
     vi.stubGlobal('indexedDB', new IDBFactory())
     const storage = await createStorage(), compare = record(), nextRound = nextRoundRecord()
     await storage.reviews.save(compare); await storage.reviews.save(nextRound)
     const full = await createBackup(storage)
-    expect(full.formatVersion).toBe(5)
+    expect(full.formatVersion).toBe(6)
     expect(full.data.reviews).toHaveLength(2)
     await importBackup(storage, parseBackup(JSON.stringify(full)))
     expect((await storage.reviews.listAllExperimentReviews()).map(item => item.reviewId).sort()).toEqual([compare.reviewId, nextRound.reviewId].sort())
