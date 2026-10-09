@@ -208,14 +208,11 @@ export default function AiFormulaReview({ formula, language, connection, trigger
         <label><input type="checkbox" checked={includeName} onChange={e => setIncludeName(e.target.checked)} />{m.name}</label>
         <label><input type="checkbox" checked={includeNotes} onChange={e => setIncludeNotes(e.target.checked)} />{m.notes}</label>
       </fieldset>
-      <div className="ai-review-connection">
-        <AiAccessTokenButton language={language} />
-      </div>
       {!formula && <p role="status">{m.empty}</p>}
       {built && !built.ok && <p role="status">{m.builder}{built.error.rowIndex !== undefined ? ' (' + (built.error.rowIndex + 1) + ')' : ''}</p>}
       {built?.ok && built.warnings.length > 0 && <p role="status">{m.cas} ({built.warnings.map(w => w.rowIndex + 1).join(', ')})</p>}
       {built?.ok && !supported && <p role="status">{m.unsupported}</p>}
-      <button type="button" className="ai-review-execute" disabled={pending || !formula || !supported || !accepted || !connected} onClick={execute}>{pending ? m.pending : m.execute}</button>
+      <div className="ai-panel-footer"><AiAccessTokenButton language={language} /><div className="ai-panel-run-actions"><button type="button" className="ai-review-execute" disabled={pending || !formula || !supported || !accepted || !connected} onClick={execute}>{pending ? m.pending : m.execute}</button></div></div>
       <div aria-live="polite" aria-atomic="true">
         {pending && <p role="status">{m.pending}</p>}
         {composingMessage && <p role="status">{m.composition}</p>}

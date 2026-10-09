@@ -158,3 +158,11 @@ html .experiments-layer .ai-history-trigger:hover { background: #eee5d4; }
   .app .main .editor-actions:has(.ai-review-action-slot) .ai-review-trigger, html .experiments-layer .ai-history-trigger { min-height: 44px; padding-inline: 12px; font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .ai-notebook.ai-notebook button { transition: none; } }
+
+/* Shared connection and execution row for all AI setup panels. */
+.ai-notebook.ai-notebook .ai-panel-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; margin-top:4px; border-top:1px solid var(--ai-rule); min-width:0; }
+.ai-notebook.ai-notebook .ai-panel-footer > .btn { flex:0 0 auto; width:auto; margin:0; }
+.ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; width:auto; margin:0 0 0 auto; padding:0; border:0; }
+.ai-notebook.ai-notebook .ai-panel-footer button { min-height:40px; width:auto; flex:0 0 auto; }
+@media(max-width:767px) { .ai-notebook.ai-notebook .ai-panel-footer button { min-height:44px; } }
+@media(max-width:380px) { .ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { flex-basis:100%; } }
