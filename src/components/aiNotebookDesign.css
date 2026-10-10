@@ -171,3 +171,27 @@ html .experiments-layer .ai-history-trigger:hover { background: #eee5d4; }
   .ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { min-width:0; max-width:100%; margin:0; justify-self:end; }
   .ai-notebook.ai-notebook .ai-panel-footer button { min-width:0; max-width:100%; min-height:44px; padding:7px 6px; font-size:11px; white-space:normal; overflow-wrap:anywhere; }
 }
+/* Formula AI Review: keep its two mobile footer buttons readable on one row. */
+@media (max-width:767px) {
+  .ai-notebook.ai-notebook .ai-review-form > .ai-panel-footer {
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:8px;
+    container-type:inline-size;
+  }
+  .ai-notebook.ai-notebook .ai-review-form > .ai-panel-footer > .ai-panel-run-actions {
+    flex-wrap:nowrap;
+    margin-left:auto;
+    flex-shrink:0;
+  }
+  .ai-notebook.ai-notebook .ai-review-form > .ai-panel-footer button {
+    height:44px;
+    min-height:44px;
+    font-size:13px;
+    padding:7px 14px;
+    padding-inline:clamp(4px,calc((100cqw - 230px) / 4),14px);
+    white-space:nowrap;
+    overflow-wrap:normal;
+  }
+}
