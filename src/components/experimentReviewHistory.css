@@ -39,3 +39,6 @@
   .experiment-review-history__detail .ai-history-detail-footer__left { width:100%; }
   .experiment-review-history__detail .ai-history-detail-footer__left button,.experiment-review-history__detail .ai-history-detail-footer > button { flex:1 1 auto; }
 }
+
+/* Keep the History title and return action visible in the modal scroll area. */
+.experiment-entry-content .experiment-review-history > header { position:sticky; top:0; z-index:2; background:var(--paper); padding-top:4px; }

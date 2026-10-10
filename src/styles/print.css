@@ -15,7 +15,11 @@
   .app .main .summary-grid > .metrics { order: 0; min-width: 0; padding-left: 22px; border-left: 1px solid rgba(201,119,60,.32); }
   .tablet-utility-row, .tablet-row-actions, .mobile-row-actions { display: none !important; }
   .notebook { break-inside: auto !important; }
-  .app .main .note-header { min-height: 0; padding: 8px 28px 14px 95px; grid-template-columns: minmax(0, 1fr) 230px; grid-template-rows: auto; align-items: start; gap: 18px; border-bottom: 2px solid rgba(201,119,60,.55); }
+  .app .main .note-header { min-height: 0; padding: 8px 28px 8px 95px; grid-template-columns: minmax(0, 1fr) 230px; grid-template-rows: auto; align-items: start; column-gap: 18px; row-gap: 0; border-bottom: 2px solid rgba(201,119,60,.55); }
+  .app .main .note-header .workspace-actions,
+  .app .main .note-header .experiments-page-action,
+  .app .main .note-header .utility-actions { display: none !important; }
+  .app .main .note-header .page-box { border-bottom: 0 !important; }
   .app .main .content { padding-left: 95px; padding-right: 28px; }
   .app .main .note-footer { padding-left: 95px; }
   .app .main .summary-title-row { flex-wrap: wrap; gap: 4px 12px; }

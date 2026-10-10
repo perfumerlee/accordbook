@@ -165,4 +165,9 @@ html .experiments-layer .ai-history-trigger:hover { background: #eee5d4; }
 .ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; width:auto; margin:0 0 0 auto; padding:0; border:0; }
 .ai-notebook.ai-notebook .ai-panel-footer button { min-height:40px; width:auto; flex:0 0 auto; }
 @media(max-width:767px) { .ai-notebook.ai-notebook .ai-panel-footer button { min-height:44px; } }
-@media(max-width:380px) { .ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { flex-basis:100%; } }
+@media(max-width:767px) {
+  .ai-notebook.ai-notebook .ai-panel-footer { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start; gap:8px; }
+  .ai-notebook.ai-notebook .ai-panel-footer > .btn { justify-self:start; max-width:100%; }
+  .ai-notebook.ai-notebook .ai-panel-footer > :is(.ai-panel-run-actions,.experiment-ai-compare__actions,.experiment-next-round__actions) { min-width:0; max-width:100%; margin:0; justify-self:end; }
+  .ai-notebook.ai-notebook .ai-panel-footer button { min-width:0; max-width:100%; min-height:44px; padding:7px 6px; font-size:11px; white-space:normal; overflow-wrap:anywhere; }
+}
