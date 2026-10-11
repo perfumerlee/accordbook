@@ -9,6 +9,8 @@ import type {
 import { guideAssetPublicUrl, resolveGuideMedia } from '../../services/guideContracts'
 import { guideNavigation, loadGuideDocuments } from '../../services/guideContent'
 import { resolveGuideHrefForLocale, resolveGuideRoute } from '../../services/guideRoutes'
+import { persistExplicitLanguageChoice } from '../../i18n/languageHint'
+import { isLanguageToggleShortcut } from '../../i18n/languageShortcut'
 import './guide.css'
 import "./guide-media-sizing.css";
 
@@ -121,6 +123,7 @@ export default function GuidePage({
     : locale
 
   const changeLocale = (nextLocale: GuideLocale) => {
+    persistExplicitLanguageChoice(nextLocale)
     writeGuideLocalePreference(nextLocale)
     const nextPath = guidePathForLocale(route, nextLocale)
     if (window.location.pathname !== nextPath) {
@@ -128,6 +131,16 @@ export default function GuidePage({
     }
     setLocale(nextLocale)
   }
+
+  useEffect(() => {
+    const toggleLanguage = (event: KeyboardEvent) => {
+      if (!isLanguageToggleShortcut(event)) return
+      event.preventDefault()
+      changeLocale(locale === 'ko' ? 'en' : 'ko')
+    }
+    window.addEventListener('keydown', toggleLanguage, true)
+    return () => window.removeEventListener('keydown', toggleLanguage, true)
+  }, [locale, route.kind, route.kind === 'GUIDE_CHAPTER' ? route.slug : ''])
 
   useEffect(() => {
     writeGuideLocalePreference(locale)

@@ -62,6 +62,7 @@ import FirstStartModal from './FirstStartModal'
 import KoreanLanguageHint from './KoreanLanguageHint'
 import { hasExplicitLanguageChoice, persistExplicitLanguageChoice, shouldShowKoreanLanguageHint } from '../i18n/languageHint'
 import { browserLanguage, savedDropLanguage, savedDropSessionLanguage } from '../i18n/language'
+import { isLanguageToggleShortcut } from '../i18n/languageShortcut'
 import { starterFormulas, type StarterFormulaTemplate } from '../data/starterFormulas'
 import { createStarterFormula } from '../services/starterFormulaLifecycle'
 import { StarterFormulaPicker } from './StarterFormulaPicker'
@@ -226,11 +227,7 @@ export default function AccordbookNotebook({ introComplete = true, onWorkspacePr
   }
   useEffect(() => {
     const toggleLanguage = (event: KeyboardEvent) => {
-      if (event.repeat || event.isComposing || !(event.ctrlKey || event.metaKey) || !event.altKey || event.shiftKey || (event.code !== 'KeyL' && event.key.toLowerCase() !== 'l')) return
-      const target = event.target
-      if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [inert]')) return
-      const blockingDialog = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).some(dialog => !dialog.closest('.tm-panel, .experiments-layer'))
-      if (blockingDialog) return
+      if (!isLanguageToggleShortcut(event)) return
       event.preventDefault()
       chooseLanguage(language === 'ko' ? 'en' : 'ko')
     }
