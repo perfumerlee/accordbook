@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "guideId": "faq",
   "slug": "faq",
-  "order": 8,
+  "order": 10,
   "metadata": {
-    "lastUpdated": "2026-09-16",
+    "lastUpdated": "2026-10-11",
     "productVersion": "1.07"
   },
   "locales": {
@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:fee81ff25c4c5f00e13b9291b1534e378fa229ed8db16c14777b470f13cf3e8b",
-        "reviewedAgainstFingerprint": "v1:fee81ff25c4c5f00e13b9291b1534e378fa229ed8db16c14777b470f13cf3e8b",
-        "reviewedKoFingerprint": "v1:a1c893945aa980ebf73b767f0a46058e4f66a143554359c2a8e60902adc12cce"
+        "translatedFromFingerprint": "v1:555e6f7221d87bf17afa69e81ef6025346d23b49440eccb457fa7ea50f05ea84",
+        "reviewedAgainstFingerprint": "v1:555e6f7221d87bf17afa69e81ef6025346d23b49440eccb457fa7ea50f05ea84",
+        "reviewedKoFingerprint": "v1:08927509cffde2f32f1447482e55bd1ee5e221385b97631ce1a081fdaaa98d61"
       }
     }
   },
@@ -393,6 +393,131 @@
         },
         "ko": {
           "text": "현재는 지원하지 않습니다. 작업 노트북은 브라우저에 로컬로 저장되므로 기기 간에 자동으로 동기화되지 않습니다. 노트북을 옮길 때는 노트북 백업과 복원을 사용하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-token-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Is my AI Access Token saved?"
+        },
+        "ko": {
+          "text": "AI Access Token은 저장되나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-token-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. It is held in memory for the current session and is not included in notebook data or backups. The connected indicator means the token is present, not that the AI service has already authorized it."
+        },
+        "ko": {
+          "text": "아니요. 현재 세션 메모리에만 있으며 노트북 데이터나 백업에 포함되지 않습니다. 연결 표시는 토큰이 입력된 상태를 뜻할 뿐, AI 서비스 인증이 완료됐다는 의미는 아닙니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-data-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "What information does an AI request send?"
+        },
+        "ko": {
+          "text": "AI 요청은 어떤 정보를 전송하나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-data-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "It depends on the feature. Each AI panel shows its request scope and consent before execution. Formula Review can include selected Formula fields; Compare sends BASE and selected Variants; Next Round uses BASE, a saved composition snapshot, and the selected Evaluation. See the AI Features guide for details."
+        },
+        "ko": {
+          "text": "기능에 따라 다릅니다. 각 AI 패널에서 실행 전에 전송 범위와 동의를 확인할 수 있습니다. Formula Review는 선택한 포뮬러 정보를, Compare는 BASE와 선택 시안을, Next Round는 BASE·저장된 배합 스냅샷·선택 평가를 사용합니다. 자세한 항목은 AI 기능 가이드를 확인하세요."
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-change-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Can an AI result change my Formula or Experiment?"
+        },
+        "ko": {
+          "text": "AI 결과가 포뮬러나 실험을 바꾸나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-change-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "No. AI responses are advisory. You decide whether to apply any suggested change yourself."
+        },
+        "ko": {
+          "text": "아니요. AI 응답은 참고 의견입니다. 제안된 변경을 적용할지는 직접 결정합니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-history-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Where can I find saved Experiment AI reviews?"
+        },
+        "ko": {
+          "text": "저장한 실험 AI 리뷰는 어디에서 확인하나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-ai-history-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open AI Review History from the Experiments list. You can open or delete records there. Their storage durability depends on whether the browser is using persistent local storage or session-only storage."
+        },
+        "ko": {
+          "text": "실험 목록에서 AI Review History를 여세요. 기록을 열거나 삭제할 수 있습니다. 기록의 유지 여부는 브라우저가 영구 로컬 저장소를 쓰는지 세션 전용 저장소를 쓰는지에 따라 달라집니다."
+        }
+      }
+    },
+    {
+      "blockId": "faq-palette-missing-question",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "How do I add a missing material to my Palette?"
+        },
+        "ko": {
+          "text": "팔레트에 없는 원료를 어떻게 추가하나요?"
+        }
+      }
+    },
+    {
+      "blockId": "faq-palette-missing-answer",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open the Formula’s Owned/Missing status, select the missing entry, resolve any requested CAS or dilution review, then add the selected materials. The Formula itself is not changed. See the Material Palette guide for the full workflow."
+        },
+        "ko": {
+          "text": "포뮬러의 보유·미보유 현황을 열고 항목을 선택하세요. CAS나 희석 정보 검토 요청이 있으면 먼저 확인한 뒤 선택 원료를 추가합니다. 포뮬러 내용은 바뀌지 않습니다. 전체 절차는 Material Palette 가이드를 확인하세요."
         }
       }
     }

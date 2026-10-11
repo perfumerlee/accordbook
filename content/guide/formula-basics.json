@@ -4,7 +4,7 @@
   "slug": "formula-basics",
   "order": 2,
   "metadata": {
-    "lastUpdated": "2026-09-16",
+    "lastUpdated": "2026-10-11",
     "productVersion": "1.07"
   },
   "locales": {
@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:5269166c5f92eaf699030eba625d72d91df4b180051746c55a9507feb2a1ab04",
-        "reviewedAgainstFingerprint": "v1:5269166c5f92eaf699030eba625d72d91df4b180051746c55a9507feb2a1ab04",
-        "reviewedKoFingerprint": "v1:d8eae279c79626798e3a6e47872140caef631f88a3510c9d9095012a88712747"
+        "translatedFromFingerprint": "v1:3c2dbea71d47c2b06bb7ab9002acb562c4a29cb23c8bdf7f3b4ca8d13d5c4880",
+        "reviewedAgainstFingerprint": "v1:3c2dbea71d47c2b06bb7ab9002acb562c4a29cb23c8bdf7f3b4ca8d13d5c4880",
+        "reviewedKoFingerprint": "v1:d6f18eca9720ff694cf2ab498e3d1124504a14304b9025d5be2c59e6ec24713e"
       }
     }
   },
@@ -241,6 +241,31 @@
         },
         "ko": {
           "text": "포뮬러는 완성되지 않아도 유용할 수 있습니다. Accordbook은 현재 작업 상태를 명확히 보존하도록 설계되어, 이전 판단의 맥락을 잃지 않고 다음 변경을 이어갈 수 있습니다."
+        }
+      }
+    },
+    {
+      "blockId": "formula-material-palette",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Track Materials in the Material Palette"
+        },
+        "ko": {
+          "text": "Material Palette로 원료 관리하기"
+        }
+      }
+    },
+    {
+      "blockId": "formula-material-palette-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "The Formula header summarizes how many distinct materials are in the Formula and how many are already in your Material Palette. Open the status control to review missing materials and add selected entries. This reference does not change your Formula. See the Material Palette guide for matching and conflict review."
+        },
+        "ko": {
+          "text": "포뮬러 상단에서 고유 원료 수와 Material Palette에 등록된 원료 수를 확인할 수 있습니다. 현황 버튼을 열어 미보유 원료를 검토하고 선택 항목을 추가하세요. 이 참고 기능은 포뮬러를 변경하지 않습니다. 연결 기준과 정보 충돌 검토는 Material Palette 가이드를 확인하세요."
         }
       }
     }

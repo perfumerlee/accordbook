@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "guideId": "ai-features",
+  "slug": "ai-features",
+  "order": 9,
+  "metadata": {
+    "lastUpdated": "2026-10-11",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "AI Features",
+      "subtitle": "Review selected Formula or Experiment context with optional AI tools.",
+      "seo": {
+        "title": "AI Features — Accordbook Guide",
+        "description": "Understand the AI Access Token, what each AI feature sends, and how review history works."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "AI 기능",
+      "subtitle": "선택한 포뮬러나 실험 정보를 AI 도구로 검토합니다.",
+      "seo": {
+        "title": "AI 기능 — Accordbook 가이드",
+        "description": "AI Access Token, 기능별 전송 정보, 리뷰 기록을 안내합니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:9c56da19a8ac5c9a00bcaf1ce291da4e0edaa1416801bee975cc8c596db8e38e",
+        "reviewedAgainstFingerprint": "v1:9c56da19a8ac5c9a00bcaf1ce291da4e0edaa1416801bee975cc8c596db8e38e",
+        "reviewedKoFingerprint": "v1:a37fa0a8e80029709163b020e3188b280916b6cc16554a9efc8c645f2bb1421d"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "ai-features-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "AI features are optional. Read the disclosure shown in the panel, review the request scope, and give consent for each request. AI results are advisory and do not edit your Formula or Experiment automatically."
+        },
+        "ko": {
+          "text": "AI 기능은 선택 사항입니다. 패널에 표시된 안내와 전송 범위를 확인하고 요청할 때마다 동의해야 합니다. AI 결과는 참고 의견이며 포뮬러나 실험을 자동으로 수정하지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "ai-token",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Connect an AI Access Token"
+        },
+        "ko": {
+          "text": "AI Access Token 연결"
+        }
+      }
+    },
+    {
+      "blockId": "ai-token-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open AI Access Token from Data Tools or an AI panel and enter the beta token. The token remains in application memory for the current session; it is not saved in the notebook or browser storage. Disconnect it or end the session to clear it. A connected indicator means a token is present in this session; the service confirms authorization when a request is made."
+        },
+        "ko": {
+          "text": "데이터 도구 또는 AI 패널에서 AI Access Token을 열고 베타 토큰을 입력합니다. 토큰은 현재 세션의 메모리에만 유지되며 노트북이나 브라우저 저장소에 기록되지 않습니다. 연결 해제하거나 세션을 끝내면 지워집니다. 연결 표시는 세션에 토큰이 입력됐다는 뜻이며, 서비스의 인증 여부는 요청 시 확인됩니다."
+        }
+      }
+    },
+    {
+      "blockId": "ai-formula-review",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "AI Review for a Formula"
+        },
+        "ko": {
+          "text": "포뮬러 AI Review"
+        }
+      }
+    },
+    {
+      "blockId": "ai-formula-review-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "AI Review can send the selected Formula’s material names, parts, active dilution, and valid CAS references. Formula name and notes are excluded unless you select those optional fields. Other Formulas and Version or Experiment history are excluded. Review the disclosure and consent before running it."
+        },
+        "ko": {
+          "text": "AI Review는 선택한 포뮬러의 원료명, 배합량, 활성 희석 정보, 유효한 CAS 참조를 전송할 수 있습니다. 포뮬러 이름과 Notes는 선택 항목을 직접 켠 경우에만 포함됩니다. 다른 포뮬러와 Version·Experiment 이력은 제외됩니다. 실행 전에 안내를 확인하고 동의하세요."
+        }
+      }
+    },
+    {
+      "blockId": "ai-compare",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "AI Compare for Experiments"
+        },
+        "ko": {
+          "text": "실험 AI Compare"
+        }
+      }
+    },
+    {
+      "blockId": "ai-compare-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "AI Compare sends BASE and only the Variants selected for comparison, with material names, parts, valid CAS references, active dilution, and computed differences. Formula and Experiment names, Variant notes, evaluations, branch intent, and unselected Variants are excluded. Consent applies to that one request."
+        },
+        "ko": {
+          "text": "AI Compare는 BASE와 비교 대상으로 선택한 시안만 전송하며 원료명, 배합량, 유효한 CAS 참조, 활성 희석 정보와 계산된 차이를 포함합니다. Formula·Experiment 이름, 시안 노트, 평가, 분기 의도, 선택하지 않은 시안은 제외됩니다. 동의는 해당 요청 한 번에 적용됩니다."
+        }
+      }
+    },
+    {
+      "blockId": "ai-next-round",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "AI Next Round from an Evaluation"
+        },
+        "ko": {
+          "text": "평가를 바탕으로 한 AI Next Round"
+        }
+      }
+    },
+    {
+      "blockId": "ai-next-round-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "AI Next Round uses the BASE, the composition snapshot saved with one selected Evaluation, computed differences, and that Evaluation’s observation, verdict, and next action. Its optional decision note is off by default and is included only when selected. The advice does not change the Experiment."
+        },
+        "ko": {
+          "text": "AI Next Round는 BASE, 선택한 평가에 저장된 당시 배합 스냅샷, 계산된 차이, 관찰·판정·다음 행동을 사용합니다. 선택 메모는 기본적으로 꺼져 있으며 직접 선택한 경우에만 포함됩니다. 결과는 실험을 변경하지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "ai-history",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Save and Find AI Review History"
+        },
+        "ko": {
+          "text": "AI 리뷰 기록 저장 및 확인"
+        }
+      }
+    },
+    {
+      "blockId": "ai-history-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Saved Formula and Experiment reviews appear in their History views and can be opened or deleted. They are stored locally with the notebook when durable browser storage is available; in session-only storage mode, a save is temporary. Full Notebook backups can include review history, so protect backup files as carefully as the notebook itself."
+        },
+        "ko": {
+          "text": "저장한 포뮬러·실험 리뷰는 각 History 화면에서 열거나 삭제할 수 있습니다. 브라우저의 영구 저장소를 사용할 수 있으면 노트북과 함께 로컬에 보관되며, 세션 전용 저장 모드에서는 임시로만 유지됩니다. 전체 노트북 백업에 리뷰 기록이 포함될 수 있으므로 백업 파일도 노트북처럼 안전하게 보관하세요."
+        }
+      }
+    },
+    {
+      "blockId": "ai-retention",
+      "type": "warning",
+      "content": {
+        "en": {
+          "text": "AI requests are sent to an external service. Accordbook does not guarantee how an external provider retains submitted information. Do not include sensitive information unless you are comfortable sending it."
+        },
+        "ko": {
+          "text": "AI 요청은 외부 서비스로 전송됩니다. 외부 제공자의 정보 보관 여부를 Accordbook이 보장하지 않습니다. 전송해도 괜찮다고 판단한 정보만 포함하세요."
+        }
+      }
+    }
+  ]
+}

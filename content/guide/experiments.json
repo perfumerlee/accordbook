@@ -4,7 +4,7 @@
   "slug": "experiments",
   "order": 4,
   "metadata": {
-    "lastUpdated": "2026-09-16",
+    "lastUpdated": "2026-10-11",
     "productVersion": "1.07"
   },
   "locales": {
@@ -27,9 +27,9 @@
       },
       "translation": {
         "state": "READY",
-        "translatedFromFingerprint": "v1:5d557ce2b1e99186da82367492a010d05095c3ec4bd9421053ded004834566b5",
-        "reviewedAgainstFingerprint": "v1:5d557ce2b1e99186da82367492a010d05095c3ec4bd9421053ded004834566b5",
-        "reviewedKoFingerprint": "v1:0903f707865cc0451f52ae2915243649dac95d6d69a7353247a9f7bd7268fd89"
+        "translatedFromFingerprint": "v1:a05723c31fc758e21e5f8384b795486501e85fdc2520881e6ca40f445294fbd2",
+        "reviewedAgainstFingerprint": "v1:a05723c31fc758e21e5f8384b795486501e85fdc2520881e6ca40f445294fbd2",
+        "reviewedKoFingerprint": "v1:f83134e58d498315de54f6df4b866d6d9ce3ed8c2ce525888b28aa637a03fbef"
       }
     }
   },
@@ -254,6 +254,56 @@
         },
         "ko": {
           "text": "실험은 상위 포뮬러에 연결된 별도의 작업 문서입니다. 실험 안의 변경 사항은 포뮬러나 타임머신 기록을 조용히 대체하지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "experiment-ai-tools",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Use AI Review Tools Carefully"
+        },
+        "ko": {
+          "text": "AI Review 도구 사용하기"
+        }
+      }
+    },
+    {
+      "blockId": "experiment-ai-tools-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "AI Compare reviews BASE against selected Variants. AI Next Round uses a saved Evaluation to suggest what to check in a later round. Both tools are optional, require request-specific consent, and return advice without changing the Experiment. See AI Features for the exact information sent by each tool."
+        },
+        "ko": {
+          "text": "AI Compare는 BASE와 선택한 시안을 비교합니다. AI Next Round는 저장된 평가를 바탕으로 다음 라운드에서 확인할 점을 제안합니다. 두 기능은 선택 사항이며 요청별 동의가 필요하고, 실험을 변경하지 않은 채 조언을 제공합니다. 기능별 전송 정보는 AI 기능 가이드를 확인하세요."
+        }
+      }
+    },
+    {
+      "blockId": "experiment-ai-history",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Review Saved AI History"
+        },
+        "ko": {
+          "text": "저장된 AI 리뷰 기록 확인하기"
+        }
+      }
+    },
+    {
+      "blockId": "experiment-ai-history-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open AI Review History from the Experiments list to browse saved Compare and Next Round reviews. Open a record for its full response, return to the source Experiment when it is still available, or delete the record. The history heading stays visible while a long record list scrolls."
+        },
+        "ko": {
+          "text": "실험 목록에서 AI Review History를 열어 저장된 Compare·Next Round 리뷰를 확인합니다. 기록을 열어 전체 응답을 보고, 원본 실험이 남아 있으면 해당 실험으로 이동하거나 기록을 삭제할 수 있습니다. 목록이 길어 스크롤해도 제목 영역은 고정됩니다."
         }
       }
     }

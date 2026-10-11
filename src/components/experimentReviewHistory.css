@@ -40,5 +40,8 @@
   .experiment-review-history__detail .ai-history-detail-footer__left button,.experiment-review-history__detail .ai-history-detail-footer > button { flex:1 1 auto; }
 }
 
-/* Keep the History title and return action visible in the modal scroll area. */
-.experiment-entry-content .experiment-review-history > header { position:sticky; top:0; z-index:2; background:var(--paper); padding-top:4px; }
+/* Keep the History heading fixed while only its records or detail view scroll. */
+.experiment-entry-content:has(> .experiment-review-history) { display:flex; flex-direction:column; overflow:hidden; }
+.experiment-entry-content > .experiment-review-history { flex:1 1 auto; min-height:0; overflow:hidden; grid-template-rows:auto minmax(0,1fr); gap:14px; }
+.experiment-review-history > header { position:static; flex:none; background:var(--paper); }
+.experiment-review-history__content { min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }

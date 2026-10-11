@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "guideId": "material-palette",
+  "slug": "material-palette",
+  "order": 8,
+  "metadata": {
+    "lastUpdated": "2026-10-11",
+    "productVersion": "1.07"
+  },
+  "locales": {
+    "en": {
+      "status": "PUBLISHED",
+      "title": "Material Palette",
+      "subtitle": "Keep a local reference for the materials you use.",
+      "seo": {
+        "title": "Material Palette — Accordbook Guide",
+        "description": "Learn how the Material Palette, Formula coverage, and missing material review work."
+      }
+    },
+    "ko": {
+      "status": "PUBLISHED",
+      "title": "Material Palette",
+      "subtitle": "사용하는 원료의 로컬 기준 목록을 관리합니다.",
+      "seo": {
+        "title": "Material Palette — Accordbook 가이드",
+        "description": "Material Palette와 포뮬러 원료 현황, 미보유 원료 검토 방법을 안내합니다."
+      },
+      "translation": {
+        "state": "READY",
+        "translatedFromFingerprint": "v1:3b4bc2a62da641d81c74ba81c11de1ddd1594fba8ed950152c01467d78cda4f9",
+        "reviewedAgainstFingerprint": "v1:3b4bc2a62da641d81c74ba81c11de1ddd1594fba8ed950152c01467d78cda4f9",
+        "reviewedKoFingerprint": "v1:49ca118682ef3be15631303bc2d67f5796c673b139fcc2fe829470e9887b925f"
+      }
+    }
+  },
+  "blocks": [
+    {
+      "blockId": "material-palette-intro",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Material Palette is a reusable local list of material names and reference details. Formula coverage compares the distinct, usable materials in the current Formula with that list."
+        },
+        "ko": {
+          "text": "Material Palette는 원료명과 참고 정보를 재사용할 수 있도록 보관하는 로컬 목록입니다. 포뮬러 현황은 현재 포뮬러의 유효한 고유 원료를 이 목록과 비교합니다."
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-manage",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Manage the Palette"
+        },
+        "ko": {
+          "text": "팔레트 관리하기"
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-manage-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Open Data Tools and choose Material Palette to add, edit, search, or remove palette entries. Include reliable CAS and dilution details when you have them; the Palette is a reference list and does not change Formula rows."
+        },
+        "ko": {
+          "text": "데이터 도구에서 Material Palette를 열어 항목을 추가·수정·검색·삭제할 수 있습니다. 확인된 CAS와 희석 정보를 알고 있다면 함께 기록하세요. 팔레트는 참고 목록이며 포뮬러 행을 변경하지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-coverage",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Read Formula Coverage"
+        },
+        "ko": {
+          "text": "포뮬러 원료 현황 읽기"
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-coverage-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "The Formula header shows the number of distinct materials, then the counts marked Owned and Missing. Select the coverage control to open the detail panel. Matching uses the Palette names and recognized aliases; duplicate Formula rows count as one material."
+        },
+        "ko": {
+          "text": "포뮬러 상단에는 고유 원료 개수와 보유·미보유 개수가 표시됩니다. 현황 버튼을 누르면 상세 패널이 열립니다. 팔레트 이름과 인식된 별칭을 기준으로 연결하며, 포뮬러에 같은 원료가 여러 번 있어도 한 종류로 계산합니다."
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-missing",
+      "type": "heading",
+      "level": 2,
+      "content": {
+        "en": {
+          "text": "Review and Add Missing Materials"
+        },
+        "ko": {
+          "text": "미보유 원료 검토 및 추가하기"
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-missing-copy",
+      "type": "paragraph",
+      "content": {
+        "en": {
+          "text": "Select the materials you want to add, review ambiguous entries when requested, then add the selected items to the Palette. Conflicting CAS or dilution details require review before an item can be selected. Adding a material records it in the Palette; it does not rewrite the Formula."
+        },
+        "ko": {
+          "text": "팔레트에 추가할 원료를 선택하고, 검토가 필요한 항목은 먼저 확인한 뒤 선택 항목을 추가합니다. CAS나 희석 정보가 서로 다르면 검토를 마쳐야 선택할 수 있습니다. 원료를 추가해도 포뮬러 내용은 바뀌지 않습니다."
+        }
+      }
+    },
+    {
+      "blockId": "material-palette-status",
+      "type": "note",
+      "content": {
+        "en": {
+          "text": "Coverage is a convenience for organizing material references. It does not verify supplier identity, CAS correctness, or the physical contents of a material."
+        },
+        "ko": {
+          "text": "현황 표시는 원료 참고 정보를 정리하기 위한 기능입니다. 공급처, CAS의 정확성 또는 실제 원료의 성분을 검증하지는 않습니다."
+        }
+      }
+    }
+  ]
+}
