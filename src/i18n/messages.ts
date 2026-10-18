@@ -4,6 +4,23 @@ export const messages = {
 } as const
 
 export type Language = keyof typeof messages
+export const solventInputMessages: Record<Language, {
+  suggestionsLabel: string
+  useCode: string
+  suggestionsAvailable: (count: number) => string
+}> = {
+  en: {
+    suggestionsLabel: 'Solvent suggestions',
+    useCode: 'Use solvent code',
+    suggestionsAvailable: count => `${count} solvent suggestion${count === 1 ? '' : 's'} available. Use the arrow keys to navigate and Enter to select.`,
+  },
+  ko: {
+    suggestionsLabel: '용매 제안',
+    useCode: '용매 코드 사용',
+    suggestionsAvailable: count => `용매 제안 ${count}개. 방향키로 이동하고 Enter 키로 선택할 수 있습니다.`,
+  },
+}
+
 export type MessageSet = {
   [Key in keyof typeof messages.en]: typeof messages.en[Key] extends (...args: infer Args) => infer Result
     ? (...args: Args) => Result
@@ -42,6 +59,90 @@ export const branchMessages = {
   en: { addBranch: '+ ADD BRANCH', createBranchFrom: (label: string) => `Create Branch from ${label}`, deleteBlocked: 'This Variant has Branches.\nDelete its child Branches first.' },
   ko: { addBranch: '+ 브랜치 추가', createBranchFrom: (label: string) => `${label}에서 브랜치 생성`, deleteBlocked: '이 브랜치에 하위 브랜치가 있습니다.\n먼저 하위 브랜치를 삭제해주세요.' },
 } as const
+
+export const formulaPasteMessages = {
+  en: {
+    title: 'Excel to Accordbook', paste: 'Paste from Excel', review: 'Import Review', reviewAction: 'Review',
+    instructions: 'Copy material names and Parts from Excel or Google Sheets, then paste the cells below.',
+    source: 'Paste spreadsheet data', limits: 'Up to 200 material rows · 100 KiB of UTF-8 text',
+    materialColumn: 'Material Column', partsColumn: 'Parts Column', selectColumn: 'Select a column',
+    column: (n: number) => `Column ${n}`, headerDetected: 'Header detected', manualMapping: 'Manual mapping required',
+    headerRow: 'Treat the first nonempty row as a header', ignoredColumns: 'Additional columns',
+    ignoreColumn: (n: number) => `Ignore Column ${n}`, ignoredHint: 'Select each additional column you want to leave out. Pasted data stays available until you close this dialog.',
+    remapHint: 'Changing columns resets row corrections. The pasted source is kept.',
+    formulaName: 'Formula Name', defaultName: 'Imported Formula', material: 'Material', parts: 'Parts',
+    sourceRow: (n: number) => `Source Row ${n}`, count: (n: number) => `${n} material rows`,
+    total: 'Total Parts', subtotal: 'Valid rows subtotal', subtotalHint: 'Rows with errors are excluded from this subtotal.',
+    difference: 'Difference from 1,000', needsReview: 'Review required', ready: 'Row checks complete',
+    back: 'Back to Paste', cancel: 'Cancel', createFormula: 'Create Formula', creating: 'Creating Formula…',
+    createFailed: 'Unable to create Formula. Please try again.', nameRequired: 'Enter a Formula name.', validationFailed: 'Some rows need attention. Review the errors and try again.',
+    notice: 'Review the imported rows, then create a separate Formula when they are ready.',
+    rowError: 'Error', rowWarning: 'Warning', mappingReady: 'Columns selected',
+    dilutionDetected: (percent: number, solvent?: string) => `${percent}% dilution detected${solvent ? ` in ${solvent}` : ''}`,
+    reviewDilution: 'Review dilution', originalMaterial: 'Original material', proposedMaterial: 'Suggested material',
+    applyDilution: 'Apply Dilution', keepOriginal: 'Keep Original Material Name', dilutionPercent: 'Dilution (%)', solvent: 'Solvent',
+    dilutionPending: 'This is only a suggestion. The original material name will be used until you choose an option.',
+    dilutionKept: 'The original material name will be kept.', dilutionSolventRequired: 'Enter or confirm a solvent before applying this dilution.',
+    dilutionPercentInvalid: 'Enter a dilution percentage from 0 to 100.', dilutionMaterialRequired: 'Enter a material name before applying this dilution.',
+    dilutionAmbiguous: 'This percentage notation is ambiguous. The original material name is preserved.',
+    dilutionInvalid: 'This dilution notation is invalid. The original material name is preserved.',
+    dilutionReviewIncomplete: 'Complete or reject every invalid dilution decision before creating this Formula.',
+  },
+  ko: {
+    title: 'Excel to Accordbook', paste: 'Excel에서 붙여넣기', review: '가져오기 검토', reviewAction: '검토',
+    instructions: 'Excel 또는 Google Sheets에서 원료명과 배합량 셀을 복사해 아래에 붙여넣으세요.',
+    source: '스프레드시트 데이터 붙여넣기', limits: '원료 최대 200행 · UTF-8 텍스트 100 KiB',
+    materialColumn: '원료명 열', partsColumn: '배합량 열', selectColumn: '열 선택',
+    column: (n: number) => `${n}열`, headerDetected: '헤더를 감지했습니다', manualMapping: '열을 직접 선택해주세요',
+    headerRow: '첫 번째 비어 있지 않은 행을 헤더로 사용', ignoredColumns: '추가 열',
+    ignoreColumn: (n: number) => `${n}열 제외`, ignoredHint: '가져오지 않을 추가 열을 각각 선택해주세요. 붙여넣은 원문은 창을 닫기 전까지 유지됩니다.',
+    remapHint: '열을 변경하면 행 수정 내용이 초기화됩니다. 붙여넣은 원문은 유지됩니다.',
+    formulaName: '포뮬러 이름', defaultName: '가져온 포뮬러', material: '원료명', parts: '배합량',
+    sourceRow: (n: number) => `원본 ${n}행`, count: (n: number) => `원료 ${n}행`,
+    total: '총 배합량', subtotal: '유효한 행의 소계', subtotalHint: '오류가 있는 행은 이 소계에서 제외됩니다.',
+    difference: '1,000 대비 차이', needsReview: '검토가 필요합니다', ready: '행 검증 완료',
+    back: '붙여넣기로 돌아가기', cancel: '취소', createFormula: '포뮬러 생성', creating: '포뮬러 생성 중…',
+    createFailed: '포뮬러를 생성하지 못했습니다. 다시 시도해주세요.', nameRequired: '포뮬러 이름을 입력해주세요.', validationFailed: '확인이 필요한 행이 있습니다. 오류를 수정한 뒤 다시 시도해주세요.',
+    notice: '검토한 원료 행으로 새 포뮬러를 생성합니다.',
+    rowError: '오류', rowWarning: '주의', mappingReady: '열을 선택했습니다',
+    dilutionDetected: (percent: number, solvent?: string) => `희석률 ${percent}% 감지${solvent ? ` · 용매 ${solvent}` : ''}`,
+    reviewDilution: '희석 정보 검토', originalMaterial: '원본 원료명', proposedMaterial: '제안 원료명',
+    applyDilution: '희석 정보 적용', keepOriginal: '원본 원료명 유지', dilutionPercent: '희석률 (%)', solvent: '용매',
+    dilutionPending: '아직 제안 상태입니다. 선택하기 전까지 원본 원료명을 사용합니다.',
+    dilutionKept: '원본 원료명을 유지합니다.', dilutionSolventRequired: '희석 정보를 적용하려면 용매를 입력하거나 확인해주세요.',
+    dilutionPercentInvalid: '0부터 100 사이의 희석률을 입력해주세요.', dilutionMaterialRequired: '희석 정보를 적용할 원료명을 입력해주세요.',
+    dilutionAmbiguous: '퍼센트 표기가 모호합니다. 원본 원료명을 그대로 유지합니다.',
+    dilutionInvalid: '희석 표기가 올바르지 않습니다. 원본 원료명을 그대로 유지합니다.',
+    dilutionReviewIncomplete: '잘못된 희석 정보를 수정하거나 원본 원료명 유지를 선택한 뒤 포뮬러를 생성해주세요.',
+  },
+} as const
+
+export const formulaPasteIssueMessages: Record<Language, Record<import('../services/formulaPasteImport').FormulaPasteIssueCode, string>> = {
+  en: {
+    INPUT_EMPTY: 'Paste material names and Parts to begin.', INPUT_TOO_LARGE: 'The pasted text exceeds 100 KiB.',
+    TOO_MANY_ROWS: 'Use no more than 200 material rows.', MALFORMED_QUOTING: 'A quoted cell is malformed. Check the source text.',
+    MULTILINE_QUOTED_CELL: 'Line breaks inside quoted cells are not supported.', UNSUPPORTED_LINE_ENDING: 'Use LF or CRLF line endings.',
+    COLUMN_MAPPING_REQUIRED: 'Select the Material and Parts columns.', COLUMN_MAPPING_INVALID: 'Select two different valid columns.',
+    UNMAPPED_NONEMPTY_COLUMN: 'An additional column contains data. Explicitly select it to ignore it.', NO_IMPORTABLE_ROWS: 'There are no material rows to review.',
+    MATERIAL_EMPTY: 'Missing material name.', PARTS_EMPTY: 'Enter Parts.', PARTS_INVALID: 'Invalid Parts. Enter a nonnegative integer.',
+    PARTS_NEGATIVE: 'Parts cannot be negative.', PARTS_DECIMAL: 'Parts must be an integer. Decimals are not changed automatically.',
+    PARTS_AMBIGUOUS_COMMA: 'Comma format is ambiguous. Enter an integer without separators.', PARTS_UNSAFE_INTEGER: 'Parts exceeds the safe integer range.',
+    TOTAL_UNSAFE_INTEGER: 'The total cannot be calculated safely. Reduce the entered values.',
+    DUPLICATE_MATERIAL: 'Duplicate material. This row is kept separately.', TOTAL_NOT_1000: 'Incomplete Formula: the total differs from 1,000 Parts. This warning does not block later creation.',
+  },
+  ko: {
+    INPUT_EMPTY: '원료명과 배합량을 붙여넣어 시작하세요.', INPUT_TOO_LARGE: '붙여넣은 텍스트가 100 KiB를 초과합니다.',
+    TOO_MANY_ROWS: '원료는 최대 200행까지 사용할 수 있습니다.', MALFORMED_QUOTING: '셀의 따옴표 형식이 올바르지 않습니다. 원문을 확인해주세요.',
+    MULTILINE_QUOTED_CELL: '따옴표로 묶인 셀 내부의 줄바꿈은 지원하지 않습니다.', UNSUPPORTED_LINE_ENDING: 'LF 또는 CRLF 줄바꿈을 사용해주세요.',
+    COLUMN_MAPPING_REQUIRED: '원료명 열과 배합량 열을 선택해주세요.', COLUMN_MAPPING_INVALID: '서로 다른 유효한 열 두 개를 선택해주세요.',
+    UNMAPPED_NONEMPTY_COLUMN: '선택하지 않은 열에 데이터가 있습니다. 제외할 열을 명시적으로 선택해주세요.', NO_IMPORTABLE_ROWS: '검토할 원료 행이 없습니다.',
+    MATERIAL_EMPTY: '원료명을 입력해주세요.', PARTS_EMPTY: '배합량을 입력해주세요.', PARTS_INVALID: '올바르지 않은 배합량입니다. 0 이상의 정수를 입력해주세요.',
+    PARTS_NEGATIVE: '배합량은 음수일 수 없습니다.', PARTS_DECIMAL: '배합량은 정수여야 합니다. 소수는 자동 변경되지 않습니다.',
+    PARTS_AMBIGUOUS_COMMA: '쉼표 형식이 모호합니다. 구분자 없이 정수를 입력해주세요.', PARTS_UNSAFE_INTEGER: '배합량이 안전하게 계산할 수 있는 정수 범위를 초과합니다.',
+    TOTAL_UNSAFE_INTEGER: '합계를 안전하게 계산할 수 없습니다. 입력값을 줄여주세요.',
+    DUPLICATE_MATERIAL: '중복 원료입니다. 이 행은 별도로 유지됩니다.', TOTAL_NOT_1000: '배합 미완료: 합계가 1,000 Parts와 다릅니다. 이 경고만으로 이후 생성이 차단되지는 않습니다.',
+  },
+}
 
 
 

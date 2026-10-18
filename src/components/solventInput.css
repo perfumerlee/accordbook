@@ -1,0 +1,64 @@
+.solvent-input-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.solvent-input-shell > .solvent-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.solvent-suggestions {
+  position: absolute;
+  z-index: 120;
+  inset: calc(100% + 4px) 0 auto;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #b9a98b;
+  border-radius: 5px;
+  background: #fffbf3;
+  color: #30291f;
+  box-shadow: 0 5px 14px rgba(48, 41, 31, .16);
+}
+
+.solvent-suggestions.is-floating {
+  position: fixed;
+  z-index: 2147483000;
+  inset: auto;
+}
+
+.solvent-suggestions[hidden] { display: none; }
+
+.solvent-suggestion {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.solvent-suggestion + .solvent-suggestion { border-top: 1px solid #e6dac5; }
+.solvent-suggestion:hover, .solvent-suggestion.is-active { background: #f0e5d1; }
+.solvent-input-shell :focus-visible { outline: 2px solid #986426; outline-offset: 2px; }
+
+.solvent-suggestion-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 767px) {
+  .solvent-suggestion { min-height: 48px; padding: 11px 12px; }
+}

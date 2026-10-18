@@ -1,0 +1,62 @@
+.formula-paste-dialog { width:min(820px,calc(100vw - 32px)); max-width:none; max-height:calc(100dvh - 32px); padding:0; margin:auto; box-sizing:border-box; border:1px solid #b9a98b; border-radius:10px; background:#fbf5e8; color:#30291f; overflow:hidden; }
+.formula-paste-dialog[open] { display:flex; flex-direction:column; }
+.formula-paste-dialog::backdrop { background:rgba(48,41,31,.35); }
+.formula-paste-dialog * { box-sizing:border-box; }
+.formula-paste-dialog .fp-header { flex:none; padding:20px 24px 16px; border-bottom:1px solid #d8c7aa; }
+.formula-paste-dialog .fp-kicker { margin:0 0 6px; font-size:12px; letter-spacing:.04em; }
+.formula-paste-dialog h2 { margin:0; font-size:24px; font-weight:400; }
+.formula-paste-dialog .fp-body { padding:16px 24px; flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+.formula-paste-dialog p { font-size:14px; line-height:1.5; margin:0 0 12px; overflow-wrap:anywhere; }
+.formula-paste-dialog .fp-field { display:flex; flex-direction:column; min-width:0; gap:6px; font-size:13px; }
+.formula-paste-dialog input:not([type=checkbox]), .formula-paste-dialog textarea, .formula-paste-dialog select { min-width:0; width:100%; min-height:44px; padding:9px 10px; border:1px solid #b9a98b; border-radius:5px; background:#fffbf3; color:inherit; font-family:inherit; font-size:16px; }
+.formula-paste-dialog .fp-source { min-height:160px; resize:vertical; white-space:pre; }
+.formula-paste-dialog .fp-mapping { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.formula-paste-dialog .fp-check { display:flex; align-items:center; gap:9px; min-height:44px; font-size:14px; overflow-wrap:anywhere; }
+.formula-paste-dialog .fp-check input { flex:none; width:18px; height:18px; }
+.formula-paste-dialog .fp-check span { min-width:0; }
+.formula-paste-dialog .fp-extra { border:1px solid #d8c7aa; margin:12px 0; padding:12px; min-width:0; }
+.formula-paste-dialog .fp-preview { display:block; overflow-wrap:anywhere; color:#6d5c48; }
+.formula-paste-dialog .fp-hint { color:#6d5c48; font-size:12px; margin:8px 0; }
+.formula-paste-dialog .fp-rows { display:grid; gap:10px; }
+.formula-paste-dialog .fp-row { min-width:0; border:1px solid #d8c7aa; border-radius:6px; padding:12px; background:#fffaf1; }
+.formula-paste-dialog .fp-row h3 { font-size:12px; font-weight:400; color:#6d5c48; margin:0 0 8px; }
+.formula-paste-dialog .fp-row-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(100px,150px); gap:12px; }
+.formula-paste-dialog .fp-dilution { display:grid; gap:8px; min-width:0; margin-top:12px; padding:10px 12px; border-left:2px solid #b9a98b; background:#f7efdf; }
+.formula-paste-dialog .fp-dilution-heading { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; font-size:13px; }
+.formula-paste-dialog .fp-dilution-heading span, .formula-paste-dialog .fp-dilution > p > span { color:#6d5c48; font-size:12px; }
+.formula-paste-dialog .fp-dilution > p { margin:0; overflow-wrap:anywhere; }
+.formula-paste-dialog .fp-dilution-choices { display:flex; flex-wrap:wrap; gap:8px; }
+.formula-paste-dialog .fp-dilution-choices .btn { min-height:40px; }
+.formula-paste-dialog .fp-dilution-choices .btn[aria-pressed=true] { border-color:#795426; background:#eee1c9; box-shadow:inset 0 0 0 1px #795426; }
+.formula-paste-dialog .fp-dilution-fields { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(100px,.7fr) minmax(0,1fr); gap:8px; }
+.formula-paste-dialog .fp-dilution-error, .formula-paste-dialog .fp-dilution-warning { color:#8a2e23; font-size:12px; margin:0; }
+.formula-paste-dialog .fp-dilution-status { color:#6d5c48; font-size:12px; margin:0; }
+.formula-paste-dialog .fp-dilution-block-notice { margin:10px 0 0; padding:10px 12px; border-left:2px solid #a63b2f; background:#f7efdf; color:#6d3a2e; font-size:13px; }
+.formula-paste-dialog .fp-issues { margin:10px 0; padding-left:20px; font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.formula-paste-dialog .fp-error { color:#8a2e23; }
+.formula-paste-dialog .fp-warning { color:#795426; }
+.formula-paste-dialog [aria-invalid=true] { border-color:#a63b2f!important; }
+.formula-paste-dialog .fp-totals { margin-top:16px; padding:14px; border-top:1px solid #d8c7aa; }
+.formula-paste-dialog .fp-totals p { margin:6px 0 0; }
+.formula-paste-dialog .fp-footer { flex:none; padding:14px 24px 20px; border-top:1px solid #d8c7aa; }
+.formula-paste-dialog .fp-footer p { font-size:12px; color:#6d5c48; margin-bottom:10px; }
+.formula-paste-dialog .fp-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+.formula-paste-dialog .fp-actions .btn { min-height:44px; width:auto; margin:0; padding:10px 14px; white-space:nowrap; }
+.formula-paste-dialog .fp-back { margin-right:auto!important; }
+.formula-paste-dialog :focus-visible { outline:2px solid #986426; outline-offset:3px; }
+@media(max-width:767px) {
+  .formula-paste-dialog { width:calc(100vw - 16px); max-height:calc(100dvh - 16px); }
+  .formula-paste-dialog .fp-header, .formula-paste-dialog .fp-body, .formula-paste-dialog .fp-footer { padding:14px; }
+  .formula-paste-dialog .fp-mapping { grid-template-columns:minmax(0,1fr); }
+  .formula-paste-dialog .fp-row-fields { grid-template-columns:minmax(0,1fr) 90px; gap:8px; }
+  .formula-paste-dialog .fp-dilution-fields { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  .formula-paste-dialog .fp-dilution-fields .fp-field:first-child { grid-column:1 / -1; }
+  .formula-paste-dialog .fp-row { padding:10px; }
+  .formula-paste-dialog .fp-actions .btn { padding:10px; font-size:13px; }
+}
+@media(max-height:500px) {
+  .formula-paste-dialog .fp-header, .formula-paste-dialog .fp-footer { padding:8px 14px; }
+  .formula-paste-dialog .fp-kicker { display:none; }
+  .formula-paste-dialog h2 { font-size:20px; }
+}
+@media print { .formula-paste-dialog { display:none!important; } }
