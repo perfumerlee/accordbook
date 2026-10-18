@@ -69,10 +69,14 @@ const { chromium } = require('playwright');
       if (await menu().count()) await page.keyboard.press('Escape');
     });
     await test('Import entry opens a modal and closes its menu', async () => {
+      const beforeModal = await page.evaluate(() => ({ scrollY: window.scrollY, sidebarTop: document.querySelector('.sidebar')?.getBoundingClientRect().top }));
       await open();
       assert.equal(await menu().count(), 0);
       assert(await dialog().evaluate(element => element.matches(':modal')));
       assert(await dialog().locator('h2').evaluate(element => element === document.activeElement));
+      const afterModal = await page.evaluate(() => ({ scrollY: window.scrollY, sidebarTop: document.querySelector('.sidebar')?.getBoundingClientRect().top }));
+      assert(Math.abs(afterModal.scrollY - beforeModal.scrollY) < 1, `page scroll changed when modal opened: ${JSON.stringify({ beforeModal, afterModal })}`);
+      assert(Math.abs(afterModal.sidebarTop - beforeModal.sidebarTop) < 1, `sidebar moved when modal opened: ${JSON.stringify({ beforeModal, afterModal })}`);
       assert.equal(await dialog().getByRole('button', { name: /Create Formula/ }).count(), 0);
     });
     await test('malformed paste reports an error and cannot proceed', async () => {

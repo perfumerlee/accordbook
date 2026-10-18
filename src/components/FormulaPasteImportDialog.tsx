@@ -56,7 +56,7 @@ export default function FormulaPasteImportDialog({ language, onClose, onCreateFo
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
     element?.showModal()
-    heading.current?.focus()
+    heading.current?.focus({ preventScroll: true })
     return () => {
       element?.close()
       document.documentElement.style.overflow = htmlOverflow
@@ -64,7 +64,7 @@ export default function FormulaPasteImportDialog({ language, onClose, onCreateFo
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true })
     }
   }, [])
-  useEffect(() => { heading.current?.focus(); if (body.current) body.current.scrollTop = 0 }, [step])
+  useEffect(() => { heading.current?.focus({ preventScroll: true }); if (body.current) body.current.scrollTop = 0 }, [step])
 
   const changeSource = (text: string) => { setRawText(text); setSelectedMapping(undefined); setEdits({}); setDilutionReviews({}); setSubmitError(undefined) }
   const changeMapping = (next: FormulaPasteMapping) => {
