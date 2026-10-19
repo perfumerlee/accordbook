@@ -9,6 +9,8 @@ export class MaterialPaletteRepository {
   async add(input: MaterialPaletteInput) { const record = createPaletteRecord(input); await this.database.writePaletteAtomic([record], 'add'); return record }
   async update(id: string, input: MaterialPaletteInput) { const previous = await this.get(id); if (!previous) throw new Error('Material no longer exists'); const record = createPaletteRecord(input, previous); await this.database.writePaletteAtomic([record], 'update'); return record }
   async remove(id: string) { await this.database.delete('palette', id) }
+  async removeMany(ids: readonly string[]) { await this.database.deleteMany('palette', ids) }
+  async removeAll() { await this.database.clearStore('palette') }
   async addAtomic(inputs: readonly MaterialPaletteInput[]) { const records = inputs.map(input => createPaletteRecord(input)); await this.database.writePaletteAtomic(records, 'add'); return records }
   async addFromFormulaAtomic(inputs: readonly MaterialPaletteInput[]) { const records = inputs.map(input => createPaletteRecord(input)); await this.database.writePaletteAtomic(records, 'add-formula'); return records }
   async replaceAtomic(records: MaterialPaletteRecord[]) { await this.database.writePaletteAtomic(records, 'replace') }

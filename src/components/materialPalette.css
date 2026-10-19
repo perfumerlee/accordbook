@@ -18,6 +18,21 @@ html[lang="ko"] .material-status-count{font-family:"Noto Serif KR","Nanum Myeong
 @media print{.material-status-row,.palette-coverage,.palette-quick-add,.data-tools-popover,.palette-dialog{display:none!important}}
 .material-suggestions .palette-quick-add{position:static;width:100%;max-width:100%;border:0;box-shadow:none;text-align:left}
 
+/* Material Palette bulk selection and destructive actions. */
+.palette-bulk-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin:-6px 0 4px;padding:10px 0;border-top:1px solid rgba(139,105,66,.18);border-bottom:1px solid rgba(139,105,66,.18)}
+.palette-bulk-select{display:flex!important;grid-template-columns:none!important;align-items:center;gap:8px;min-height:40px;font-size:12px;color:#6d5c48}
+.palette-bulk-select input,.palette-record-select input{width:18px!important;height:18px;min-height:18px!important;margin:0;accent-color:#735334}
+.palette-bulk-count{color:#796b5e;font-size:12px;white-space:nowrap}
+.palette-bulk-actions{display:flex;flex-wrap:wrap;gap:8px}
+.palette-dialog .palette-danger{border-color:#c99a89;color:#8b3b24}
+.palette-dialog .palette-danger:hover:not(:disabled){background:rgba(139,59,36,.07)}
+.palette-record-main{display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1 1 auto}
+.palette-record-select{display:flex!important;grid-template-columns:none!important;align-items:center;justify-content:center;flex:none;width:24px;min-height:40px}
+.palette-record-details{display:grid;gap:2px;min-width:0;flex:1 1 auto}
+.palette-record-details>strong{font-size:14px}
+.palette-record-details>span{overflow-wrap:anywhere}
+@media(max-width:767px){.palette-bulk-toolbar{align-items:flex-start}.palette-bulk-select{flex:1 1 100%}.palette-bulk-count{align-self:center;margin-right:auto}.palette-bulk-actions{width:100%}.palette-bulk-actions .btn{flex:1 1 auto;min-width:0;padding-inline:8px;white-space:normal}.palette-record-main{gap:8px}.palette-record-select{width:22px}.palette-record-details>strong{font-size:13px}}
+
 /* Missing materials: selection above, per-item editing beside, save below. */
 .palette-missing-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-bottom:8px}
 .palette-missing-toolbar p{flex:1 1 180px;margin:0}

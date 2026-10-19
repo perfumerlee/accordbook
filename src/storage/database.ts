@@ -38,6 +38,8 @@ export interface StorageDatabase {
   put(store: StoreName, key: string, value: StoreValue): Promise<void>
   add(store: StoreName, key: string, value: StoreValue): Promise<void>
   delete(store: StoreName, key: string): Promise<void>
+  deleteMany(store: StoreName, keys: readonly string[]): Promise<void>
+  clearStore(store: StoreName): Promise<void>
   clear(): Promise<void>
   replaceAll(data: { palette?: MaterialPaletteRecord[]; formulas: Formula[]; archive: Formula[]; versions?: FormulaVersion[]; experiments?: Experiment[]; reviews?: AiReviewRecord[]; settings?: AccordbookSettings; meta: Record<string, number> }, options?: { preserveExperimentReviews?: boolean }): Promise<void>
 }
@@ -86,6 +88,8 @@ function createMemoryDatabase(): StorageDatabase {
     async put(store: StoreName, key: string, value: StoreValue) { stores.get(store)!.set(key, value) },
     async add(store: StoreName, key: string, value: StoreValue) { const target = stores.get(store)!; if (target.has(key)) throw new Error('Record identity already exists'); target.set(key, structuredClone(value)) },
     async delete(store: StoreName, key: string) { stores.get(store)!.delete(key) },
+    async deleteMany(store: StoreName, keys: readonly string[]) { for (const key of new Set(keys)) stores.get(store)!.delete(key) },
+    async clearStore(store: StoreName) { stores.get(store)!.clear() },
     async clear() { stores.forEach((store) => store.clear()) },
     async replaceAll(data, options = {}) {
       const palette = data.palette === undefined ? undefined : validatePaletteRecords(data.palette)
@@ -203,6 +207,19 @@ function createIndexedDbDatabase(database: IDBDatabase): StorageDatabase {
     async put(store: StoreName, key: string, value: StoreValue) { await run(store, (objectStore) => objectStore.put(value, key)) },
     async add(store: StoreName, key: string, value: StoreValue) { await run(store, (objectStore) => objectStore.add(value, key)) },
     async delete(store: StoreName, key: string) { await run(store, (objectStore) => objectStore.delete(key)) },
+    async deleteMany(store: StoreName, keys: readonly string[]) {
+      if (!keys.length) return
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(store, 'readwrite'), objectStore = transaction.objectStore(store)
+        let failure: unknown
+        transaction.oncomplete = () => resolve()
+        transaction.onabort = () => reject(failure ?? transaction.error ?? new Error('Bulk delete transaction aborted'))
+        transaction.onerror = event => { failure ??= (event.target as IDBRequest)?.error ?? transaction.error }
+        try { for (const key of new Set(keys)) objectStore.delete(key) }
+        catch (error) { failure = error; transaction.abort() }
+      })
+    },
+    async clearStore(store: StoreName) { await run(store, objectStore => objectStore.clear()) },
     async clear() { for (const store of STORE_NAMES) await run(store, (objectStore) => objectStore.clear()) },
     async replaceAll(data, options = {}) {
       const palette = data.palette === undefined ? undefined : validatePaletteRecords(data.palette)
