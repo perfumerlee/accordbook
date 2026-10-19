@@ -51,7 +51,7 @@ export default function PalettePasteImportDialog({ language, records, repository
   return <PaletteDialog title={reviewing ? (ko ? '팔레트 가져오기 검토' : 'Palette import review') : (ko ? 'Excel에서 붙여넣기' : 'Paste from Excel')} wide onClose={close}>
     {!reviewing ? <>
       <p>{ko ? 'Excel 셀을 붙여넣고 각 열을 원료 정보 항목에 연결하세요. 헤더가 없는 표도 사용할 수 있습니다.' : 'Paste Excel cells, then connect each column to a Material details field. Tables without headers are supported.'}</p>
-      <label className="palette-paste-field">{ko ? '스프레드시트 데이터' : 'Spreadsheet data'}<textarea autoFocus spellCheck={false} value={text} onChange={event => { setText(event.target.value); setCustomMapping(undefined); setChoices({}); setError(''); setPage(0) }} placeholder={'원료명\tCAS Number\nBergamot\t8007-75-8\nBenzoin Resinoid @50% in DPG\t9000-72-0'} /></label>
+      <label className="palette-paste-field">{ko ? '스프레드시트 데이터' : 'Spreadsheet data'}<textarea autoFocus spellCheck={false} value={text} onChange={event => { setText(event.target.value); setCustomMapping(undefined); setChoices({}); setError(''); setPage(0) }} placeholder={`${ko ? '원료명\tCAS 번호' : 'Material name\tCAS Number'}\nBergamot\t8007-75-8\nBenzoin Resinoid @50% in DPG\t9000-72-0`} /></label>
       <p className="palette-meta">{ko ? '최대 10,000개 원료 · 텍스트 1 MiB. 원료명 열은 필수입니다.' : 'Up to 10,000 materials · 1 MiB of text. Material Name is required.'}</p>
       {source.data && mapping && <>
         <label className="palette-paste-check"><input type="checkbox" checked={mapping.header} onChange={event => changeMapping({ ...mapping, header: event.target.checked })} />{ko ? '첫 행을 헤더로 사용' : 'First row is a header'}</label>
