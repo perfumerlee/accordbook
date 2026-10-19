@@ -25,10 +25,12 @@ describe('Palette paste mapping and approval', () => {
     expect(mapping.columns).toEqual(['unmapped', 'unmapped'])
     expect(() => reviewPalettePaste(rows, { header: true, columns: ['materialName', 'materialName'] }, [])).toThrow('only once')
   })
-  it('requires approval, then rechecks duplicates against the resulting material name', () => {
+  it('keeps the original by default and rechecks duplicates after explicit dilution approval', () => {
     const { rows, mapping } = preparePalettePaste('원료명\tCAS Number\nBenzoin Resinoid @50% in DPG\t9000-72-0')
     const palette = [createPaletteRecord({ materialName: 'Benzoin Resinoid' })]
-    expect(reviewPalettePaste(rows, mapping, palette).errors).toBe(1)
+    const unchanged = reviewPalettePaste(rows, mapping, palette)
+    expect(unchanged.errors).toBe(0)
+    expect(unchanged.rows[0].input).toEqual({ materialName: 'Benzoin Resinoid @50% in DPG', cas: '9000-72-0' })
     const kept = reviewPalettePaste(rows, mapping, palette, { 2: { mode: 'keep_original' } })
     expect(kept.rows[0].input?.materialName).toBe('Benzoin Resinoid @50% in DPG')
     expect(kept.rows[0].input?.dilution).toBeUndefined()

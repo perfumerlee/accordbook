@@ -75,11 +75,21 @@ export default function PalettePasteImportDialog({ language, records, repository
       {(source.error || review.error) && <p role="alert">{source.error || review.error}</p>}
     </> : <>
       <p>ADD NEW ONLY</p>
-      <p>{ko ? '전체 / 유효 / 중복 / 경고 / 오류' : 'Total / Valid / Duplicates / Warnings / Errors'}: {review.data?.totalRows} / {review.data?.validRows} / {review.data?.duplicates} / {review.data?.warnings} / {review.data?.errors}</p>
+      <div className="palette-paste-summary" aria-label={ko ? '가져오기 검토 요약' : 'Import review summary'}>
+        {([
+          [ko ? '전체' : 'Total', review.data?.totalRows ?? 0],
+          [ko ? '유효' : 'Valid', review.data?.validRows ?? 0],
+          [ko ? '중복' : 'Duplicates', review.data?.duplicates ?? 0],
+          [ko ? '경고' : 'Warnings', review.data?.warnings ?? 0],
+          [ko ? '오류' : 'Errors', review.data?.errors ?? 0],
+        ] as const).map(([label, count], index) => <div key={label} className={`palette-paste-summary-item${index === 4 && count > 0 ? ' has-errors' : ''}`}>
+          <span>{label}</span><strong>{count}</strong>
+        </div>)}
+      </div>
       {!!review.data?.unsupportedColumns.length && <p>{ko ? '제외한 열' : 'Excluded columns'}: {review.data.unsupportedColumns.join(', ')}</p>}
-      <p className="palette-meta">{ko ? '중복은 건너뜁니다. 희석 제안은 적용 또는 원문 유지를 선택해 주세요. 열이나 원문을 바꾸면 희석 선택이 초기화됩니다.' : 'Duplicates are skipped. Apply or keep each dilution proposal. Changing source data or columns resets dilution choices.'}</p>
+      <p className="palette-meta">{ko ? '원료명 외 항목은 비어 있어도 추가할 수 있습니다. 희석 표기는 기본적으로 원문을 유지하며, 희석 적용을 선택한 경우에만 분리합니다. 중복은 건너뜁니다. 열이나 원문을 바꾸면 희석 선택이 초기화됩니다.' : 'Optional fields may be left blank. Dilution notation is kept in the original name unless you choose Apply Dilution. Duplicates are skipped. Changing source data or columns resets dilution choices.'}</p>
       <div className="palette-preview-rows">{review.data?.rows.slice(page * 50, (page + 1) * 50).map(row => {
-        const choice = choices[row.rowNumber], proposal = row.recognition.status === 'proposed' ? row.recognition : undefined
+        const choice = choices[row.rowNumber] ?? { mode: 'keep_original' as const }, proposal = row.recognition.status === 'proposed' ? row.recognition : undefined
         const displayed = row.input ?? row.original
         return <article key={row.rowNumber} className="palette-paste-review-row">
           <strong>{row.rowNumber}: {displayed.materialName} — {row.status}</strong>

@@ -49,7 +49,7 @@ const fs = require('node:fs');
       await dialog.getByRole('button', { name: 'Review pasted rows', exact: true }).click();
       const review = () => page.getByRole('dialog', { name: 'Palette import review', exact: true });
       const apply = () => review().getByRole('button', { name: 'Apply new materials', exact: true });
-      assert(await apply().isDisabled()); assert.equal((await list()).length, 0);
+      assert(await apply().isEnabled()); assert.equal((await list()).length, 0);
       await review().locator('.palette-paste-review-row').filter({ hasText: 'Benzoin Resinoid' }).getByRole('button', { name: 'Apply Dilution', exact: true }).click();
       const coumarin = review().locator('.palette-paste-review-row').filter({ hasText: 'Coumarin' });
       await coumarin.getByRole('button', { name: 'Apply Dilution', exact: true }).click();

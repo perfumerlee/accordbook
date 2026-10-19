@@ -56,9 +56,8 @@ export function reviewPalettePaste(rows: string[][], mapping: PalettePasteMappin
     const conflict = recognition.status === 'proposed' && ((!!percent && original.dilution?.percent !== recognition.proposedPercent) || (!!solvent && solvent !== recognition.proposedSolvent))
     const result: PalettePasteRow = { rowNumber, original, recognition, conflict, status: 'READY', duplicate: false, messages: [] }
     try {
-      const choice = choices[rowNumber]
+      const choice = choices[rowNumber] ?? { mode: 'keep_original' as const }
       const decision = validateFormulaPasteDilutionChoice(recognition, choice)
-      if (decision.status === 'pending') throw Error('Choose Apply Dilution or Keep Original / 희석 적용 또는 원문 유지를 선택해 주세요.')
       if (decision.status === 'invalid') throw Error('Complete the material, dilution percentage and solvent / 원료명·희석 비율·용매를 확인해 주세요.')
       const candidate = decision.status === 'approved' ? { ...original, materialName: decision.material, dilution: { percent: decision.dilution.percent, solvent: decision.dilution.solvent } } : original
       const input = validatePaletteInput(candidate)
