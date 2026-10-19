@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import type { MaterialPaletteRecord } from '../models/materialPalette'
 import type { MaterialPaletteRepository } from '../storage/materialPaletteRepository'
 import { PALETTE_FIELDS, preparePalettePaste, reviewPalettePaste, type PaletteColumn, type PalettePasteMapping, type PalettePasteChoices } from '../services/palettePasteImport'
-import type { FormulaPasteDilutionReviewChoice } from '../services/formulaPasteDilution'
+import { recognizeFormulaPasteDilution, type FormulaPasteDilutionReviewChoice } from '../services/formulaPasteDilution'
 import PaletteDialog from './PaletteDialog'
 
 const labels = {
@@ -23,6 +23,11 @@ export default function PalettePasteImportDialog({ language, records, repository
     catch (failure) { return { error: failure instanceof Error ? failure.message : 'Invalid data' } }
   }, [text])
   const mapping = customMapping ?? source.data?.mapping
+  const dilutionCount = useMemo(() => {
+    const column = mapping?.columns.indexOf('materialName') ?? -1
+    if (!source.data || !mapping || column < 0) return 0
+    return source.data.rows.slice(mapping.header ? 1 : 0).filter(row => recognizeFormulaPasteDilution(row[column] ?? '').status === 'proposed').length
+  }, [source, mapping])
   const review = useMemo(() => {
     if (!source.data || !mapping) return { error: '' }
     try { return { data: reviewPalettePaste(source.data.rows, mapping, currentRecords, choices), error: '' } }
@@ -57,13 +62,15 @@ export default function PalettePasteImportDialog({ language, records, repository
         <label className="palette-paste-check"><input type="checkbox" checked={mapping.header} onChange={event => changeMapping({ ...mapping, header: event.target.checked })} />{ko ? '첫 행을 헤더로 사용' : 'First row is a header'}</label>
         <p className="palette-meta">{ko ? '자동으로 연결된 항목도 확인해 주세요. 불필요한 열은 제외를 선택하세요.' : 'Check the suggested fields. Choose Exclude for columns you do not want to import.'}</p>
         <div className="palette-paste-mapping">{mapping.columns.map((target, column) => <label key={column}>
-          <strong>{ko ? `${column + 1}열` : `Column ${column + 1}`}{mapping.header && ` · ${source.data!.rows[0][column] || '—'}`}</strong>
+          <strong>{ko ? `${column + 1}열` : `Column ${column + 1}`} → {target === 'unmapped' ? (ko ? '항목 선택' : 'Select field') : target === 'ignore' ? (ko ? '제외' : 'Excluded') : fields[target]}</strong>
+          {mapping.header && <span className="palette-meta">{ko ? '원본 헤더' : 'Source header'}: {source.data!.rows[0][column] || '—'}</span>}
           <span className="palette-meta">{source.data!.rows.slice(mapping.header ? 1 : 0, mapping.header ? 4 : 3).map(row => row[column] || '—').join(' · ')}</span>
           <select aria-label={ko ? `${column + 1}열 연결` : `Map column ${column + 1}`} value={target} onChange={event => changeMapping({ ...mapping, columns: mapping.columns.map((value, index) => index === column ? event.target.value as PaletteColumn : value) })}>
             <option value="unmapped">{ko ? '항목 선택' : 'Select field'}</option><option value="ignore">{ko ? '제외' : 'Exclude'}</option>
             {PALETTE_FIELDS.map(field => <option key={field} value={field}>{fields[field]}{field === 'materialName' ? ' *' : ''}</option>)}
           </select>
         </label>)}</div>
+        {dilutionCount > 0 && <p className="palette-paste-detection" role="status">{ko ? `희석 표기 ${dilutionCount}개 감지 — 다음 검토 단계에서 원료명·희석률·용매로 분리할지 선택하세요.` : `${dilutionCount} dilution notation${dilutionCount === 1 ? '' : 's'} detected — in the next review step, choose whether to separate the material name, dilution percentage and solvent.`}</p>}
       </>}
       {(source.error || review.error) && <p role="alert">{source.error || review.error}</p>}
     </> : <>
@@ -81,8 +88,18 @@ export default function PalettePasteImportDialog({ language, records, repository
             return <div key={field}><dt>{fields[field]}</dt><dd>{value === undefined || value === '' ? '—' : String(value)}</dd></div>
           })}</dl>
           {proposal && <section className="palette-paste-dilution">
-            <p>{ko ? '원문' : 'Original'}: {row.original.materialName}</p>
-            <p>{ko ? '희석 제안' : 'Dilution proposal'}: {proposal.proposedMaterial} · {proposal.proposedPercent}% · {proposal.proposedSolvent || (ko ? '용매 입력 필요' : 'Solvent required')}</p>
+            <div className="palette-paste-comparison">
+              <div><strong>{ko ? '변경 전' : 'Before'}</strong><dl>
+                <dt>{fields.materialName}</dt><dd>{row.original.materialName}</dd>
+                <dt>{fields.percent}</dt><dd>{row.original.dilution?.percent ?? '—'}</dd>
+                <dt>{fields.solvent}</dt><dd>{row.original.dilution?.solvent || '—'}</dd>
+              </dl></div>
+              <div><strong>{choice?.mode === 'keep_original' ? (ko ? '원문 유지 선택' : 'Keep Original selected') : choice?.mode === 'apply' ? (ko ? '적용할 값' : 'Values to apply') : (ko ? '희석 적용 시' : 'If dilution is applied')}</strong><dl>
+                <dt>{fields.materialName}</dt><dd>{choice?.mode === 'keep_original' ? row.original.materialName : choice?.mode === 'apply' ? choice.material : proposal.proposedMaterial}</dd>
+                <dt>{fields.percent}</dt><dd>{choice?.mode === 'keep_original' ? row.original.dilution?.percent ?? '—' : choice?.mode === 'apply' ? choice.percentInput || '—' : proposal.proposedPercent}</dd>
+                <dt>{fields.solvent}</dt><dd>{choice?.mode === 'keep_original' ? row.original.dilution?.solvent || '—' : (choice?.mode === 'apply' ? choice.solventInput : proposal.proposedSolvent) || (ko ? '용매 입력 필요' : 'Solvent required')}</dd>
+              </dl></div>
+            </div>
             {row.conflict && <p className="palette-warning">{ko ? `열의 희석 정보(${row.original.dilution?.percent ?? '—'}% / ${row.original.dilution?.solvent || '—'})와 다릅니다. 희석 적용 시 아래 입력값으로 교체합니다. 원문 유지는 열의 값을 사용합니다.` : `The columns contain different dilution values (${row.original.dilution?.percent ?? '—'}% / ${row.original.dilution?.solvent || '—'}). Apply replaces them with the fields below; Keep Original uses the column values.`}</p>}
             <div className="palette-actions"><button className="btn" disabled={busy} aria-pressed={choice?.mode === 'apply'} onClick={() => changeChoice(row.rowNumber, { mode: 'apply', material: proposal.proposedMaterial, percentInput: String(proposal.proposedPercent), solventInput: proposal.proposedSolvent ?? '' })}>{ko ? '희석 적용' : 'Apply Dilution'}</button><button className="btn" disabled={busy} aria-pressed={choice?.mode === 'keep_original'} onClick={() => changeChoice(row.rowNumber, { mode: 'keep_original' })}>{ko ? '원문 유지' : 'Keep Original'}</button></div>
             {choice?.mode === 'apply' && <div className="palette-paste-mapping">

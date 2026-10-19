@@ -54,3 +54,5 @@ html[lang="ko"] .material-status-count{font-family:"Noto Serif KR","Nanum Myeong
 .material-status-row .palette-coverage-divider{padding-inline:3px}
 .material-status-row .palette-coverage-chevron{flex:none;color:inherit}
 html[lang="ko"] .material-status-row .palette-coverage{font-family:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","Times New Roman",serif}
+
+.palette-paste-detection{padding:10px 12px;border-left:2px solid #b9a98b;background:rgba(139,105,66,.05);font-size:13px}.palette-paste-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.palette-paste-comparison>div{min-width:0;padding:10px;background:rgba(255,250,240,.6);border:1px solid #d8c7aa;border-radius:4px}.palette-paste-comparison dl{margin:8px 0 0}.palette-paste-comparison dt{font-size:12px;color:#796b5e}.palette-paste-comparison dd{margin:0 0 8px;overflow-wrap:anywhere;white-space:pre-wrap}@media(max-width:600px){.palette-paste-comparison{grid-template-columns:1fr}}
