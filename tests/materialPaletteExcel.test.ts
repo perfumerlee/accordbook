@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import ExcelJS from 'exceljs'
-import { PALETTE_FILENAME, PALETTE_SAMPLE_FILENAME, PALETTE_HEADERS, PALETTE_SAMPLE, PALETTE_SHEET, readPaletteExcel, writePaletteExcel } from '../src/services/materialPaletteExcel'
+import { PALETTE_FILENAME, PALETTE_SAMPLE_FILENAME, PALETTE_HEADERS, PALETTE_SAMPLE, PALETTE_SHEET, readPaletteExcel, readPalettePaste, writePaletteExcel } from '../src/services/materialPaletteExcel'
 import { createPaletteRecord } from '../src/services/materialPalette'
 async function workbook(headers: unknown[] = [...PALETTE_HEADERS], row: unknown[] = ['A'], name = PALETTE_SHEET) { const book = new ExcelJS.Workbook(); const sheet = book.addWorksheet(name); sheet.addRow(headers); sheet.addRow(row); return new Uint8Array(await book.xlsx.writeBuffer()).buffer }
 describe('Palette XLSX', () => {
@@ -30,5 +30,25 @@ describe('Palette XLSX', () => {
   it('rejects computed Formula cells and ignores empty rows', async () => {
     const preview = await readPaletteExcel(await workbook(undefined, [{ formula: '1+1', result: 'A' }]), []); expect(preview.errors).toBe(1)
     const blank = await readPaletteExcel(await workbook(undefined, []), []); expect(blank.totalRows).toBe(0)
+  })
+})
+
+describe('Material Palette spreadsheet paste', () => {
+  it('parses clipboard TSV with all supported fields and reuses XLSX duplicate validation', async () => {
+    const text = [
+      [...PALETTE_HEADERS].join('\t'),
+      ['Bergamot FCF', 'Bergamot', '8007-75-8', '10', 'DPG', 'line one\nline two'].map(value => `"${value.replaceAll('"', '""')}"`).join('\t'),
+      ['Hedione', '', '', '', '', ''].join('\t'),
+    ].join('\r\n')
+    const preview = await readPalettePaste(text, [createPaletteRecord({ materialName: 'hedione' })])
+    expect(preview.totalRows).toBe(2)
+    expect(preview.duplicates).toBe(1)
+    expect(preview.rows[0].input).toEqual({ materialName: 'Bergamot FCF', alias: 'Bergamot', cas: '8007-75-8', dilution: { percent: 10, solvent: 'DPG' }, notes: 'line one\nline two' })
+    expect(preview.rows[1].duplicate).toBe(true)
+  })
+  it('requires the Material Name header and rejects malformed or oversized clipboard text', async () => {
+    await expect(readPalettePaste('Name\tParts\nA\t1', [])).rejects.toThrow('Material Name')
+    await expect(readPalettePaste('Material Name\tNotes\n"A\tbroken', [])).rejects.toThrow('Unclosed quoted cell')
+    await expect(readPalettePaste('x'.repeat(1024 * 1024 + 1), [])).rejects.toThrow('1 MiB')
   })
 })
