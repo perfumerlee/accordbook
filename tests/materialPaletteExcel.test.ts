@@ -46,8 +46,8 @@ describe('Material Palette spreadsheet paste', () => {
     expect(preview.rows[0].input).toEqual({ materialName: 'Bergamot FCF', alias: 'Bergamot', cas: '8007-75-8', dilution: { percent: 10, solvent: 'DPG' }, notes: 'line one\nline two' })
     expect(preview.rows[1].duplicate).toBe(true)
   })
-  it('requires the Material Name header and rejects malformed or oversized clipboard text', async () => {
-    await expect(readPalettePaste('Name\tParts\nA\t1', [])).rejects.toThrow('Material Name')
+  it('requires manual mapping for unknown headers and rejects malformed or oversized clipboard text', async () => {
+    await expect(readPalettePaste('Name\tParts\nA\t1', [])).rejects.toThrow('Map or exclude')
     await expect(readPalettePaste('Material Name\tNotes\n"A\tbroken', [])).rejects.toThrow('Unclosed quoted cell')
     await expect(readPalettePaste('x'.repeat(1024 * 1024 + 1), [])).rejects.toThrow('1 MiB')
   })
