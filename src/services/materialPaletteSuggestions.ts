@@ -2,6 +2,22 @@ import type { MaterialPaletteRecord } from '../models/materialPalette'
 import { normalizeMaterialName } from './materialIdentity'
 import { filterMaterialSuggestions } from './materialMemory'
 
+export type PaletteCasLookup =
+  | { status: 'matched'; cas: string }
+  | { status: 'ambiguous'; candidates: MaterialPaletteRecord[] }
+  | { status: 'none' }
+
+/** Exact material-name matches take priority over aliases; ambiguous identities are never auto-filled. */
+export function lookupPaletteCas(palette: readonly MaterialPaletteRecord[], query: string): PaletteCasLookup {
+  const key = normalizeMaterialName(query)
+  if (!key) return { status: 'none' }
+  const exact = palette.filter(item => normalizeMaterialName(item.materialName) === key)
+  const matches = exact.length ? exact : palette.filter(item => normalizeMaterialName(item.alias ?? '') === key)
+  if (matches.length > 1) return { status: 'ambiguous', candidates: [...matches] }
+  const cas = matches[0]?.cas?.trim()
+  return cas ? { status: 'matched', cas } : { status: 'none' }
+}
+
 export function filterPaletteMaterialSuggestions(palette: readonly MaterialPaletteRecord[], memory: readonly string[], query: string, limit = 5): string[] {
   const key = normalizeMaterialName(query)
   if (!key || limit <= 0) return []
