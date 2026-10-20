@@ -1,4 +1,5 @@
 import type { FormulaDilution } from '../models/formula'
+import { findSolventMatch } from './solventDictionary'
 
 export type DilutionRecognitionIssueCode =
   | 'DILUTION_AMBIGUOUS_NOTATION'
@@ -31,6 +32,7 @@ export type DilutionReviewValidation =
   | { status: 'approved'; material: string; dilution: FormulaDilution }
 
 const supportedSuffix = /^(.+?)\s+(\()?\s*@?\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|NaN|Infinity)\s*%\s*(?:in\s+(.+?))?\s*(\))?$/i
+const shorthandSolventSuffix = /^(.+?)\s+(\()?\s*@?\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|NaN|Infinity)\s*%\s+(.+?)\s*(\))?$/i
 const percentageToken = /(?:\d+(?:\.\d*)?|\.\d+)\s*[%％]/g
 
 /** Recognizes only a supported, terminal percentage suffix. It never changes the source name. */
@@ -45,7 +47,10 @@ export function recognizeFormulaPasteDilution(material: string): DilutionRecogni
     return { status: 'ambiguous', originalMaterial: source, issueCode: 'DILUTION_AMBIGUOUS_NOTATION' }
   }
 
-  const match = value.match(supportedSuffix)
+  const supportedMatch = value.match(supportedSuffix)
+  const shorthandMatch = supportedMatch ? null : value.match(shorthandSolventSuffix)
+  const shorthandSolvent = shorthandMatch?.[4]?.trim()
+  const match = supportedMatch ?? (shorthandSolvent && ['exact', 'alias'].includes(findSolventMatch(shorthandSolvent).status) ? shorthandMatch : null)
   if (match) {
     const [, rawMaterial, openingParenthesis, rawPercent, rawSolvent, closingParenthesis] = match
     if (Boolean(openingParenthesis) !== Boolean(closingParenthesis)) {
