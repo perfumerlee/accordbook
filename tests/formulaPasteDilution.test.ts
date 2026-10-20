@@ -14,6 +14,8 @@ describe('Formula paste dilution recognition', () => {
     ['Ambroxan 10% in DPG', 'Ambroxan', 10, 'DPG'],
     ['Ambroxan (10% in DPG)', 'Ambroxan', 10, 'DPG'],
     ['Ambroxan 10% in Dipropylene Glycol', 'Ambroxan', 10, 'Dipropylene Glycol'],
+    ['Ambroxan 10% DPG', 'Ambroxan', 10, 'DPG'],
+    ['Galaxolide 50% IPM', 'Galaxolide', 50, 'IPM'],
     ['Coumarin @10% in ALC', 'Coumarin', 10, 'ALC'],
     ['Coumarin @1% in DPG', 'Coumarin', 1, 'DPG'],
     ['Coumarin @0.1% in ALC', 'Coumarin', 0.1, 'ALC'],
@@ -32,7 +34,7 @@ describe('Formula paste dilution recognition', () => {
   })
 
   it.each([
-    'Ambroxan 10% DPG', 'Ambroxan 10% Solution', 'Ambroxan 10% / 20%',
+    'Ambroxan 10% Solution', 'Ambroxan 10% / 20%',
     'Coumarin @@10% in ALC', 'Coumarin @10%% in ALC', 'Coumarin @10% / ALC',
     'Ambroxan 10 percent', 'Ambroxan 10％', 'Ambroxan 10% Accord',
   ])('preserves ambiguous source name %s', source => {
